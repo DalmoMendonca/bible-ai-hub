@@ -1,0 +1,135 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Teaching Tools | Bible AI Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+  <script src="../../../assets/sw-cleanup.js"></script>
+  <link rel="stylesheet" href="../../../assets/styles.css" />
+</head>
+<body>
+  <div class="site-wrap">
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="../../">Bible AI Hub</a>
+      </div>
+    </header>
+
+    <main class="main">
+      <div class="container">
+        <section class="panel">
+          <div class="hero compact">
+            <div class="hero-icon-wrap" aria-hidden="true">
+              <svg class="hero-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 0 0-.491 6.347A48.627 48.627 0 0 1 12 20.904a48.627 48.627 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.57 50.57 0 0 0-2.658-.813A59.905 59.905 0 0 1 12 3.493a59.902 59.902 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342" />
+              </svg>
+            </div>
+            <h1>Teaching Tools</h1>
+            <p>AI-powered tools for creating engaging Bible lessons</p>
+          </div>
+
+          <div class="content">
+            <h2 class="title">Create Engaging Bible Lessons</h2>
+            <p class="lead">Whether you teach Sunday school, lead a small group, or facilitate Bible studies, our AI teaching tools will help you create lessons that engage learners of all ages and backgrounds with Scripture's life-changing truths.</p>
+
+            <div class="teaching-feature-grid">
+              <article class="teaching-feature-card">
+                <h3>Lesson Plans</h3>
+                <p>Generate complete lesson plans with objectives and discussion questions.</p>
+              </article>
+              <article class="teaching-feature-card">
+                <h3>Age-Appropriate Content</h3>
+                <p>Adapt biblical content for children, youth, or adults with appropriate language.</p>
+              </article>
+              <article class="teaching-feature-card">
+                <h3>Discussion Questions</h3>
+                <p>Create thought-provoking questions that spark meaningful conversation.</p>
+              </article>
+              <article class="teaching-feature-card">
+                <h3>Illustration</h3>
+                <p>Find relevant stories, analogies, and examples that bring biblical truths to life.</p>
+              </article>
+              <article class="teaching-feature-card">
+                <h3>Application</h3>
+                <p>Develop practical takeaways that help learners apply Scripture to daily life.</p>
+              </article>
+              <article class="teaching-feature-card">
+                <h3>Visuals</h3>
+                <p>Get ideas for visual aids, diagrams, and presentation materials to enhance learning.</p>
+              </article>
+            </div>
+
+            <div class="card">
+              <form id="teachForm" class="form-grid">
+                <div class="field">
+                  <label for="teachPassage">Passage or Topic</label>
+                  <input id="teachPassage" class="input" value="Psalm 23" />
+                </div>
+                <div class="field">
+                  <label for="teachAudience">Audience</label>
+                  <select id="teachAudience" class="select">
+                    <option>Kids (7-11)</option>
+                    <option>Youth (12-18)</option>
+                    <option>Adults</option>
+                    <option>Mixed ages</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="teachSetting">Teaching Setting</label>
+                  <select id="teachSetting" class="select">
+                    <option>Sunday School</option>
+                    <option>Small Group</option>
+                    <option>Classroom</option>
+                    <option>Home Discipleship</option>
+                    <option>Midweek Bible Study</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="teachGroupSize">Group Size</label>
+                  <input id="teachGroupSize" class="input" type="number" min="1" max="300" value="12" />
+                </div>
+                <div class="field">
+                  <label for="teachLength">Class Length (minutes)</label>
+                  <input id="teachLength" class="input" type="number" min="15" max="120" value="45" />
+                </div>
+                <div class="field">
+                  <label for="teachOutcome">Main Outcome</label>
+                  <input id="teachOutcome" class="input" placeholder="What should learners leave with?" />
+                </div>
+                <div class="field span-2">
+                  <label for="teachResources">Available Resources</label>
+                  <input id="teachResources" class="input" placeholder="e.g., whiteboard, projector, printed handouts, markers" />
+                </div>
+                <div class="field span-2">
+                  <label for="teachNotes">Extra Context (optional)</label>
+                  <textarea id="teachNotes" class="textarea" placeholder="Class maturity, current series, pastoral needs, challenges, or anything else."></textarea>
+                </div>
+                <div class="field span-2">
+                  <div class="btn-row">
+                    <button id="teachButton" type="submit" class="btn primary">Generate Full AI Teaching Kit</button>
+                    <button id="teachCopy" type="button" class="btn secondary hidden">Copy Kit</button>
+                    <button id="teachPrint" type="button" class="btn secondary hidden">Print Kit</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <div id="teachNotice" class="notice hidden"></div>
+            <div id="teachResult" class="result"></div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="micro-footer">
+      <p>Made with ❤️ | <a href="https://hiredalmo.com" target="_blank" rel="noopener noreferrer">hiredalmo.com</a></p>
+    </footer>
+  </div>
+
+  <script src="../../../assets/shared.js"></script>
+  <script src="../../../assets/apps/teaching-tools.js"></script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Build/log/temp artifacts
+*.log
+*.tmp
+*.bak
+tmp/
+dist/
+build/
+ai/videos/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local Netlify folder
+.netlify/
+
+# Local reference captures
+_tmp_ref_*.html
