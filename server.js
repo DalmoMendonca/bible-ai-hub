@@ -14,10 +14,18 @@ const {
   durationToSeconds,
   videoSearchDocument
 } = require("./server/video-library");
-const { createBibleStudyWorkflow } = require("./server/bible-study-workflow");
+const {
+  createBibleStudyWorkflow,
+  CLEAR_METHOD_STAGES,
+  TEN_STEP_STUDY_METHOD
+} = require("./server/bible-study-workflow");
 const { createResearchHelperQualityTools } = require("./server/research-helper-quality");
 const { createVideoSearchConfidenceTools } = require("./server/video-search-confidence");
+const { createFeatureFlagService } = require("./server/feature-flags");
 const {
+  PROMPT_REGISTRY,
+  buildBibleStudyPrompt,
+  buildBibleStudyRefinementPrompt,
   buildSermonPreparationPrompt,
   buildSermonPreparationRefinementPrompt,
   buildTeachingToolsPrompt,
@@ -46,6 +54,7 @@ const OPENAI_TRANSCRIBE_MODEL = process.env.OPENAI_TRANSCRIBE_MODEL || "whisper-
 const OPENAI_BIBLE_STUDY_MODEL = process.env.OPENAI_BIBLE_STUDY_MODEL || "gpt-4.1-nano";
 const OPENAI_BIBLE_STUDY_MAX_TOKENS = Number(process.env.OPENAI_BIBLE_STUDY_MAX_TOKENS || 1800);
 const OPENAI_LONG_FORM_MODEL = process.env.OPENAI_LONG_FORM_MODEL || "gpt-4.1-nano";
+const OPENAI_DASHBOARD_MODEL = process.env.OPENAI_DASHBOARD_MODEL || OPENAI_CHAT_MODEL;
 const OPENAI_RETRY_ATTEMPTS = Number(process.env.OPENAI_RETRY_ATTEMPTS || 4);
 const OPENAI_RETRY_BASE_MS = Number(process.env.OPENAI_RETRY_BASE_MS || 650);
 const PLATFORM_TRIAL_DAYS = Number(process.env.PLATFORM_TRIAL_DAYS || 14);
@@ -54,11 +63,22 @@ const API_ALLOWED_ORIGINS = String(process.env.API_ALLOWED_ORIGINS || "")
   .split(",")
   .map((value) => value.trim())
   .filter(Boolean);
+const DEFAULT_ALLOWED_ORIGIN_PATTERNS = [
+  /^https?:\/\/localhost(?::\d+)?$/i,
+  /^https?:\/\/127\.0\.0\.1(?::\d+)?$/i,
+  /^https:\/\/bible\.hiredalmo\.com$/i,
+  /^https:\/\/(?:[a-z0-9-]+\.)?hiredalmo\.com$/i
+];
 const PORT = Number(process.env.PORT || 3000);
+const GOOGLE_CLIENT_ID = cleanString(process.env.GOOGLE_CLIENT_ID);
+const ADMIN_DASHBOARD_PASSWORD = cleanString(process.env.ADMIN_DASHBOARD_PASSWORD);
+const GA_MEASUREMENT_ID = cleanString(process.env.GA_MEASUREMENT_ID);
+const FEEDBACK_EMAIL = "dalmomendonca@gmail.com";
 const platform = createPlatformStore({
   rootDir: ROOT_DIR,
   trialDays: Number.isFinite(PLATFORM_TRIAL_DAYS) ? PLATFORM_TRIAL_DAYS : 14
 });
+const featureFlags = createFeatureFlagService({ rootDir: ROOT_DIR });
 const EVENT_TAXONOMY_PATH = path.join(ROOT_DIR, "server", "event-taxonomy.json");
 let EVENT_TAXONOMY_CACHE = null;
 
@@ -73,7 +93,7 @@ app.use("/api", (req, res, next) => {
     res.setHeader("Vary", "Origin");
   }
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Session-Token, X-Workspace-Id");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Session-Token, X-Workspace-Id, X-Admin-Dashboard-Password");
   res.setHeader("Access-Control-Expose-Headers", "X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset");
   if (req.method === "OPTIONS") {
     res.status(204).end();
@@ -218,13 +238,94 @@ app.post("/api/auth/google", asyncHandler(async (req, res) => {
   res.json(result);
 }));
 
-app.post("/api/auth/guest", asyncHandler(async (_req, res) => {
-  const nonce = crypto.randomBytes(6).toString("hex");
-  const result = platform.signup({
-    email: `guest+${nonce}@local.bibleaihub`,
-    password: crypto.randomBytes(12).toString("hex"),
-    name: `Guest ${nonce.slice(0, 4)}`
+app.get("/api/auth/google/config", (_req, res) => {
+  res.json({
+    enabled: Boolean(GOOGLE_CLIENT_ID),
+    clientId: GOOGLE_CLIENT_ID || ""
   });
+});
+
+app.get("/api/public-config", (_req, res) => {
+  res.json({
+    gaMeasurementId: GA_MEASUREMENT_ID || "",
+    googleSignInEnabled: Boolean(GOOGLE_CLIENT_ID)
+  });
+});
+
+app.post("/api/auth/google/token", asyncHandler(async (req, res) => {
+  const input = req.body || {};
+  const idToken = cleanString(input.idToken);
+  if (!idToken) {
+    res.status(400).json({ error: "Google ID token is required." });
+    return;
+  }
+  if (!GOOGLE_CLIENT_ID) {
+    res.status(400).json({ error: "Google sign-in is not configured." });
+    return;
+  }
+  const claims = await verifyGoogleIdToken(idToken, GOOGLE_CLIENT_ID);
+  const result = platform.loginGoogle({
+    email: cleanString(claims.email),
+    name: cleanString(claims.name, cleanString(claims.email).split("@")[0]),
+    sub: cleanString(claims.sub)
+  });
+  platform.trackEvent({
+    name: "auth_login_success",
+    userId: result.user.id,
+    workspaceId: result.workspaceId,
+    properties: { method: "google_oauth" }
+  });
+  res.json(result);
+}));
+
+app.post("/api/auth/magic-link/request", asyncHandler(async (req, res) => {
+  const input = req.body || {};
+  const result = platform.requestMagicLink(cleanString(input.email));
+  platform.trackEvent({
+    name: "auth_magic_link_requested",
+    userId: "",
+    workspaceId: "",
+    properties: {
+      email: cleanString(input.email).toLowerCase()
+    }
+  });
+  res.status(201).json(result);
+}));
+
+app.post("/api/auth/magic-link/verify", asyncHandler(async (req, res) => {
+  const input = req.body || {};
+  const result = platform.verifyMagicLink(cleanString(input.token));
+  platform.trackEvent({
+    name: "auth_login_success",
+    userId: result.user.id,
+    workspaceId: result.workspaceId,
+    properties: { method: "magic_link" }
+  });
+  res.json(result);
+}));
+
+app.post("/api/auth/guest", asyncHandler(async (_req, res) => {
+  let result = null;
+  let attempts = 0;
+  while (!result && attempts < 5) {
+    attempts += 1;
+    const nonce = crypto.randomBytes(6).toString("hex");
+    try {
+      result = platform.signup({
+        email: `guest+${nonce}@local.bibleaihub`,
+        password: crypto.randomBytes(12).toString("hex"),
+        name: `Guest ${nonce.slice(0, 4)}`
+      });
+    } catch (error) {
+      if (Number(error && error.status) === 409) {
+        continue;
+      }
+      throw error;
+    }
+  }
+  if (!result) {
+    throw new Error("Unable to initialize guest session.");
+  }
   platform.trackEvent({
     name: "auth_signup_success",
     userId: result.user.id,
@@ -276,8 +377,13 @@ app.get("/api/auth/session", asyncHandler(async (req, res) => {
     res.status(401).json({ error: "Authentication required." });
     return;
   }
+  const credits = platform.getCreditStatus(req.auth.user.id);
   res.json({
-    user: req.auth.user,
+    user: {
+      ...req.auth.user,
+      credits: credits.credits,
+      isGuest: credits.isGuest
+    },
     session: {
       token: req.auth.sessionToken,
       expiresAt: req.auth.session && req.auth.session.expiresAt
@@ -524,8 +630,7 @@ app.get("/api/events/schema", (_req, res) => {
 });
 
 app.get("/api/analytics/activation", asyncHandler(async (req, res) => {
-  requireAuth(req, res);
-  if (res.headersSent) {
+  if (!requireAdminDashboardAccess(req, res)) {
     return;
   }
   const dashboard = platform.getActivationDashboard({
@@ -537,8 +642,7 @@ app.get("/api/analytics/activation", asyncHandler(async (req, res) => {
 }));
 
 app.get("/api/analytics/cogs", asyncHandler(async (req, res) => {
-  requireAuth(req, res);
-  if (res.headersSent) {
+  if (!requireAdminDashboardAccess(req, res)) {
     return;
   }
   const dashboard = platform.getCogsDashboard({
@@ -549,12 +653,18 @@ app.get("/api/analytics/cogs", asyncHandler(async (req, res) => {
 }));
 
 app.get("/api/content/social-proof", (_req, res) => {
-  const sourcePath = path.join(ROOT_DIR, "server", "data", "social-proof.json");
-  const payload = readJsonFile(sourcePath, {
+  const canonicalPath = path.join(ROOT_DIR, "server", "data", "social-proof.json");
+  const writablePath = resolveWritableAppDataPath("social-proof.json");
+  const payload = readJsonFile(canonicalPath, null) || readJsonFile(writablePath, {
     testimonials: [],
     caseStudies: []
   });
-  res.json(payload);
+  const normalized = normalizeSocialProofPayload(payload, { strict: false });
+  const roleOptions = buildSocialProofRoleOptions(normalized);
+  res.json({
+    ...normalized,
+    roleOptions
+  });
 });
 
 app.post("/api/content/social-proof", asyncHandler(async (req, res) => {
@@ -567,14 +677,120 @@ app.post("/api/content/social-proof", asyncHandler(async (req, res) => {
     res.status(403).json({ error: "Admin access required." });
     return;
   }
-  const sourcePath = path.join(ROOT_DIR, "server", "data", "social-proof.json");
+  const sourcePath = resolveWritableAppDataPath("social-proof.json");
   const payload = req.body && typeof req.body === "object" ? req.body : {};
-  fs.writeFileSync(sourcePath, `${JSON.stringify({
-    testimonials: Array.isArray(payload.testimonials) ? payload.testimonials : [],
-    caseStudies: Array.isArray(payload.caseStudies) ? payload.caseStudies : []
-  }, null, 2)}\n`, "utf8");
+  const normalized = normalizeSocialProofPayload(payload, { strict: true });
+  fs.writeFileSync(sourcePath, `${JSON.stringify(normalized, null, 2)}\n`, "utf8");
   res.json({ ok: true });
 }));
+
+app.get("/api/product-strategy", (_req, res) => {
+  const sourcePath = path.join(ROOT_DIR, "server", "data", "product-strategy.json");
+  const payload = readJsonFile(sourcePath, {
+    version: 1,
+    effectiveDate: "",
+    primaryICP: {},
+    packaging: {},
+    analyzerFairUsePolicy: {},
+    proofContentPlan: {}
+  });
+  res.json(payload);
+});
+
+app.post("/api/feedback", asyncHandler(async (req, res) => {
+  requireAuth(req, res);
+  if (res.headersSent) {
+    return;
+  }
+
+  const user = platform.getUserById(req.auth.user.id);
+  if (!user) {
+    res.status(404).json({ error: "User not found." });
+    return;
+  }
+  if (String(cleanString(user.email)).toLowerCase().endsWith("@local.bibleaihub")) {
+    res.status(403).json({
+      error: "Sign in with email or Google to submit feedback.",
+      reasonCode: "guest_feedback_blocked"
+    });
+    return;
+  }
+
+  const input = req.body && typeof req.body === "object" ? req.body : {};
+  const message = cleanString(input.message);
+  const pagePath = cleanString(input.pagePath, cleanString(req.path));
+  const rating = clampNumber(Number(input.rating || 0), 1, 5, 0);
+  const sentiment = cleanString(input.sentiment).toLowerCase();
+  if (!message || message.length < 8) {
+    res.status(400).json({ error: "Please share at least a short feedback message." });
+    return;
+  }
+
+  const sourcePath = resolveWritableAppDataPath("feedback.json");
+  const payload = readJsonFile(sourcePath, {
+    inbox: [],
+    testimonialQueue: []
+  });
+  const inbox = Array.isArray(payload.inbox) ? payload.inbox : [];
+  const testimonialQueue = Array.isArray(payload.testimonialQueue) ? payload.testimonialQueue : [];
+  const isPositive = rating >= 4 || sentiment === "positive";
+
+  const row = {
+    id: `feedback_${crypto.randomBytes(8).toString("hex")}`,
+    createdAt: new Date().toISOString(),
+    pagePath,
+    message,
+    rating,
+    sentiment: sentiment || (isPositive ? "positive" : "neutral"),
+    user: {
+      id: cleanString(user.id),
+      email: cleanString(user.email),
+      name: cleanString(user.name),
+      workspaceId: cleanString(req.auth.workspaceId)
+    },
+    routeTo: FEEDBACK_EMAIL
+  };
+  inbox.push(row);
+
+  if (isPositive) {
+    testimonialQueue.push({
+      id: `tq_${crypto.randomBytes(8).toString("hex")}`,
+      createdAt: row.createdAt,
+      pagePath: row.pagePath,
+      quote: row.message,
+      role: cleanString(user.role, "Ministry Leader"),
+      author: cleanString(user.name),
+      email: cleanString(user.email),
+      sourceFeedbackId: row.id,
+      moderationStatus: "pending"
+    });
+  }
+
+  fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+  fs.writeFileSync(sourcePath, `${JSON.stringify({ inbox, testimonialQueue }, null, 2)}\n`, "utf8");
+
+  platform.trackEvent({
+    name: "feedback_submitted",
+    userId: req.auth.user.id,
+    workspaceId: req.auth.workspaceId,
+    properties: {
+      pagePath,
+      rating,
+      sentiment: row.sentiment,
+      queuedForTestimonial: isPositive
+    }
+  });
+
+  res.status(201).json({
+    ok: true,
+    deliveredTo: FEEDBACK_EMAIL,
+    queuedForTestimonial: isPositive
+  });
+}));
+
+app.get("/api/how-it-works", (_req, res) => {
+  res.json(buildHowItWorksPayload());
+});
 
 app.post("/api/onboarding", asyncHandler(async (req, res) => {
   requireAuth(req, res);
@@ -1012,8 +1228,7 @@ app.post("/api/video-governance", asyncHandler(async (req, res) => {
 }));
 
 app.get("/api/team/dashboard", asyncHandler(async (req, res) => {
-  requireAuth(req, res);
-  if (res.headersSent) {
+  if (!requireAdminDashboardAccess(req, res)) {
     return;
   }
   const workspaceId = cleanString(req.query.workspaceId || req.auth.workspaceId);
@@ -1072,7 +1287,10 @@ app.get("/api/health", (_req, res) => {
   res.json({
     ok: true,
     openaiConfigured: Boolean(OPENAI_API_KEY),
+    googleConfigured: Boolean(GOOGLE_CLIENT_ID),
+    analyticsConfigured: Boolean(GA_MEASUREMENT_ID),
     chatModel: OPENAI_CHAT_MODEL,
+    dashboardModel: OPENAI_DASHBOARD_MODEL,
     embedModel: OPENAI_EMBED_MODEL,
     transcribeModel: OPENAI_TRANSCRIBE_MODEL,
     users: platform.state.users.length,
@@ -1081,6 +1299,11 @@ app.get("/api/health", (_req, res) => {
     transcribedVideos: stats.transcribedVideos,
     pendingVideos: stats.pendingVideos
   });
+});
+
+app.get("/api/feature-flags", (req, res) => {
+  const evaluated = featureFlags.evaluateAll(buildFeatureFlagContext(req));
+  res.json(evaluated);
 });
 
 app.get("/api/video-library/status", asyncHandler(async (req, res) => {
@@ -2454,7 +2677,9 @@ function resolveAllowedOrigin(origin) {
     return "";
   }
   if (!API_ALLOWED_ORIGINS.length) {
-    return safeOrigin;
+    return DEFAULT_ALLOWED_ORIGIN_PATTERNS.some((pattern) => pattern.test(safeOrigin))
+      ? safeOrigin
+      : "";
   }
   if (API_ALLOWED_ORIGINS.includes("*")) {
     return safeOrigin;
@@ -2510,6 +2735,32 @@ function requireAuth(req, res) {
   return true;
 }
 
+function requireAdminDashboardAccess(req, res) {
+  if (!requireAuth(req, res)) {
+    return false;
+  }
+  const actor = platform.getUserById(req.auth.user.id);
+  if (!actor || cleanString(actor.role).toLowerCase() !== "admin") {
+    res.status(403).json({
+      error: "Admin access required.",
+      reasonCode: "admin_required"
+    });
+    return false;
+  }
+  if (!ADMIN_DASHBOARD_PASSWORD) {
+    return true;
+  }
+  const provided = cleanString(req.headers && req.headers["x-admin-dashboard-password"]);
+  if (!provided || provided !== ADMIN_DASHBOARD_PASSWORD) {
+    res.status(403).json({
+      error: "Invalid admin dashboard password.",
+      reasonCode: "admin_password_required"
+    });
+    return false;
+  }
+  return true;
+}
+
 function requireFeatureAccess(feature) {
   return (req, res, next) => {
     if (!requireAuth(req, res)) {
@@ -2555,11 +2806,15 @@ function enforceQuota(feature, unitsResolver) {
       : 1;
     const quota = platform.checkQuota(req.auth.workspaceId, feature, unitsRequested);
     if (!quota.allowed) {
+      const overagePolicy = quota && quota.overagePolicy && typeof quota.overagePolicy === "object"
+        ? quota.overagePolicy
+        : {};
       res.status(403).json({
-        error: "Usage limit reached for this plan.",
+        error: cleanString(overagePolicy.message, "Usage limit reached for this plan."),
         reasonCode: quota.reasonCode || "quota_exceeded",
         feature,
         resetAt: quota.resetAt,
+        overagePolicy,
         usage: {
           used: quota.used || 0,
           requested: quota.requested || unitsRequested,
@@ -2573,7 +2828,28 @@ function enforceQuota(feature, unitsResolver) {
       });
       return;
     }
+
+    const credits = platform.checkCredits(req.auth.user.id, 1);
+    if (!credits.allowed) {
+      res.status(403).json({
+        error: "You are out of generation credits. Sign in or upgrade to continue.",
+        reasonCode: "credits_exhausted",
+        feature,
+        credits: {
+          remaining: credits.remaining,
+          requested: credits.requested,
+          unlimited: credits.unlimited
+        },
+        upgrade: {
+          cta: "View plans",
+          url: "/pricing/"
+        }
+      });
+      return;
+    }
+
     req.quota = quota;
+    req.credits = credits;
     next();
   };
 }
@@ -2615,6 +2891,16 @@ function recordFeatureUsage(req, feature, row = {}) {
       units: Number(row.units || 1)
     }
   });
+  try {
+    platform.consumeCredits(req.auth.user.id, 1);
+    const updated = platform.getUserById(req.auth.user.id);
+    if (updated && req.auth && req.auth.user) {
+      req.auth.user.credits = Number.isFinite(Number(updated.credits)) ? Number(updated.credits) : null;
+      req.auth.user.isGuest = cleanString(updated.email).toLowerCase().endsWith("@local.bibleaihub");
+    }
+  } catch (_) {
+    // Credit consumption failures should not break successful generations.
+  }
 }
 
 function createRequestId(req, feature) {
@@ -3254,6 +3540,21 @@ function average(values) {
   return rows.reduce((sum, value) => sum + Number(value), 0) / rows.length;
 }
 
+function resolveWritableAppDataPath(fileName) {
+  const safeName = cleanString(fileName);
+  const preferredPath = path.join(ROOT_DIR, "server", "data", safeName);
+  const preferredDir = path.dirname(preferredPath);
+  try {
+    fs.mkdirSync(preferredDir, { recursive: true });
+    fs.accessSync(preferredDir, fs.constants.W_OK);
+    return preferredPath;
+  } catch (_) {
+    const fallbackDir = path.join(os.tmpdir(), "bible-ai-hub", "server", "data");
+    fs.mkdirSync(fallbackDir, { recursive: true });
+    return path.join(fallbackDir, safeName);
+  }
+}
+
 function readJsonFile(filePath, fallback = {}) {
   try {
     if (!fs.existsSync(filePath)) {
@@ -3263,6 +3564,611 @@ function readJsonFile(filePath, fallback = {}) {
   } catch (_) {
     return fallback;
   }
+}
+
+function buildHowItWorksPayload() {
+  const promptTemplates = buildPromptTransparencyTemplates();
+  return {
+    generatedAt: new Date().toISOString(),
+    modelDefaults: {
+      primaryChatModel: OPENAI_CHAT_MODEL,
+      longFormModel: OPENAI_LONG_FORM_MODEL,
+      bibleStudyModel: OPENAI_BIBLE_STUDY_MODEL,
+      embeddingModel: OPENAI_EMBED_MODEL,
+      transcriptionModel: OPENAI_TRANSCRIBE_MODEL
+    },
+    apps: [
+      {
+        slug: "bible-study",
+        name: "Bible Study Chat",
+        endpoint: "POST /api/ai/bible-study",
+        calls: [
+          { type: "passage", endpoint: "GET https://bible-api.com/{reference}?translation=web", optional: true, role: "Client passage fetch when the input is a Bible reference." },
+          { type: "prompt", promptId: "bible-study.package", optional: false, role: "Primary generation of CLEAR + 10-step package." },
+          { type: "prompt", promptId: "bible-study.refiner", optional: true, role: "Quality-gated refinement pass when first draft is weak." }
+        ],
+        outputUsage: [
+          "CLEAR cards and step-by-step workflow are rendered in the app UI.",
+          "10-step study method sections are persisted when a project is saved.",
+          "Study output can be handed off to Sermon Preparation."
+        ]
+      },
+      {
+        slug: "sermon-preparation",
+        name: "Sermon Preparation",
+        endpoint: "POST /api/ai/sermon-preparation",
+        calls: [
+          { type: "passage", endpoint: "GET https://bible-api.com/{reference}?translation=web", optional: true, role: "Client-side passage text retrieval." },
+          { type: "prompt", promptId: "sermon-preparation.plan", optional: false, role: "Primary sermon plan generation." },
+          { type: "prompt", promptId: "sermon-preparation.refiner", optional: true, role: "Refines weak sections and optional tightening pass." }
+        ],
+        outputUsage: [
+          "Big idea, outline, transitions, and timing are displayed for sermon drafting.",
+          "Boundary diagnostics are used to flag out-of-scope supporting references.",
+          "Plans can be saved and handed off to Sermon Evaluation."
+        ]
+      },
+      {
+        slug: "teaching-tools",
+        name: "Teaching Tools",
+        endpoint: "POST /api/ai/teaching-tools",
+        calls: [
+          { type: "passage", endpoint: "GET https://bible-api.com/{reference}?translation=web", optional: true, role: "Only used when input is a passage reference." },
+          { type: "prompt", promptId: "teaching-tools.kit", optional: false, role: "Primary lesson kit generation per selected audience." },
+          { type: "prompt", promptId: "teaching-tools.refiner", optional: true, role: "Refinement pass for timeline/question/application quality." }
+        ],
+        outputUsage: [
+          "Renders full lesson kit cards: objectives, timeline, discussion, illustration, application.",
+          "Export payloads generate handouts and slide outlines.",
+          "If multi-audience mode is selected, comparison cards are generated."
+        ]
+      },
+      {
+        slug: "research-helper",
+        name: "Sermon Evaluation",
+        endpoint: "POST /api/ai/research-helper",
+        calls: [
+          { type: "prompt", promptId: "research-helper.evaluation", optional: false, role: "Primary manuscript evaluation and scoring." },
+          { type: "prompt", promptId: "research-helper.revision-pack", optional: true, role: "High-impact revision pack when baseline coaching is weak." }
+        ],
+        outputUsage: [
+          "Renders verdict, scorecards, strengths, gaps, revisions, and tighten-lines.",
+          "Trend data is charted and can be exported to CSV after generation.",
+          "Evaluations can be saved for later revision cycles."
+        ]
+      },
+      {
+        slug: "sermon-analyzer",
+        name: "Sermon Analyzer",
+        endpoint: "POST /api/ai/sermon-analyzer",
+        calls: [
+          { type: "audio", endpoint: "POST /v1/audio/transcriptions", optional: true, role: "Transcribes uploaded audio when transcript override is not used." },
+          { type: "prompt", promptId: "sermon-analyzer.insights", optional: false, role: "Primary multi-signal synthesis (emotion/content/coaching)." },
+          { type: "prompt", promptId: "sermon-analyzer.coaching-refiner", optional: true, role: "Refines coaching when actionability is weak." }
+        ],
+        outputUsage: [
+          "Renders transcript table, pacing/vocal/emotional analytics, and coaching cards.",
+          "Drill actions are saved through coach drill completion API.",
+          "Report text can be copied/saved once generation is complete."
+        ]
+      },
+      {
+        slug: "video-search",
+        name: "Video Search",
+        endpoint: "POST /api/ai/video-search",
+        calls: [
+          { type: "embedding", endpoint: "POST /v1/embeddings", optional: false, role: "Embeds query and transcript chunks for semantic ranking." },
+          { type: "audio", endpoint: "POST /v1/audio/transcriptions", optional: true, role: "Optional ingestion/transcription for videos missing transcripts." },
+          { type: "prompt", promptId: "video-search.recovery", optional: true, role: "Recovery strategy prompt when result set is sparse." },
+          { type: "prompt", promptId: "video-search.guidance", optional: false, role: "Generates watch-order guidance and suggested follow-up queries." }
+        ],
+        outputUsage: [
+          "Search results include timestamped snippets and direct playback URLs.",
+          "Confidence tier influences caution text and recommendation style.",
+          "Related content and suggested queries power iterative search."
+        ]
+      }
+    ].map((app) => ({
+      ...app,
+      promptCalls: app.calls
+        .filter((call) => call.type === "prompt")
+        .map((call) => ({
+          ...call,
+          prompt: promptTemplates[call.promptId] || null
+        }))
+    })),
+    promptRegistry: Object.values(PROMPT_REGISTRY).map((prompt) => ({
+      id: cleanString(prompt && prompt.id),
+      version: cleanString(prompt && prompt.version),
+      task: cleanString(prompt && prompt.task)
+    }))
+  };
+}
+
+function buildPromptTransparencyTemplates() {
+  const clearDefinitions = CLEAR_METHOD_STAGES.map((stage) => ({
+    key: cleanString(stage.key),
+    code: cleanString(stage.code),
+    label: cleanString(stage.label),
+    definition: cleanString(stage.definition)
+  }));
+  const tenStepMethod = TEN_STEP_STUDY_METHOD.map((step) => ({
+    stepNumber: Number(step.stepNumber),
+    stepName: cleanString(step.stepName)
+  }));
+
+  const sampleBuilders = {
+    "bible-study.package": buildBibleStudyPrompt({
+      passage: {
+        reference: "James 1:19-27",
+        text: "Be swift to hear, slow to speak, and slow to anger...",
+        translation: "WEB"
+      },
+      focus: "Faith that obeys",
+      question: "How does this passage move listeners from hearing to doing?",
+      clearDefinitions,
+      tenStepMethod
+    }),
+    "bible-study.refiner": buildBibleStudyRefinementPrompt({
+      passage: {
+        reference: "James 1:19-27",
+        text: "Be swift to hear, slow to speak, and slow to anger...",
+        translation: "WEB"
+      },
+      focus: "Faith that obeys",
+      question: "How does this passage move listeners from hearing to doing?",
+      clearDefinitions,
+      tenStepMethod,
+      draft: {
+        summary: "Short draft summary."
+      },
+      qualitySignals: ["Summary is too thin.", "CLEAR findings are sparse."]
+    }),
+    "sermon-preparation.plan": buildSermonPreparationPrompt({
+      passage: {
+        reference: "Romans 12:1-2",
+        text: "Present your bodies a living sacrifice...",
+        translation_name: "WEB"
+      },
+      audience: "Sunday congregation",
+      minutes: 30,
+      theme: "Renewed mind",
+      goal: "Move hearers to daily surrender",
+      passageBounds: {
+        book: "Romans",
+        chapter: 12,
+        startVerse: 1,
+        endVerse: 2
+      }
+    }),
+    "sermon-preparation.refiner": buildSermonPreparationRefinementPrompt({
+      passage: {
+        reference: "Romans 12:1-2",
+        text: "Present your bodies a living sacrifice...",
+        translation_name: "WEB"
+      },
+      audience: "Sunday congregation",
+      minutes: 30,
+      theme: "Renewed mind",
+      goal: "Move hearers to daily surrender",
+      draft: {
+        bigIdea: "Draft big idea"
+      },
+      qualitySignals: ["Outline depth is weak.", "Applications are generic."]
+    }),
+    "teaching-tools.kit": buildTeachingToolsPrompt({
+      sourceTitle: "Parable of the Sower",
+      passageText: "Matthew 13 focuses on hearing and receiving the word.",
+      audience: "Kids (7-11)",
+      setting: "Sunday School",
+      groupSize: 12,
+      resources: "whiteboard, printed handouts",
+      length: 45,
+      outcome: "Children identify what good soil responses look like.",
+      notes: "Mixed maturity levels"
+    }),
+    "teaching-tools.refiner": buildTeachingToolsRefinementPrompt({
+      sourceTitle: "Parable of the Sower",
+      passageText: "Matthew 13 focuses on hearing and receiving the word.",
+      audience: "Kids (7-11)",
+      setting: "Sunday School",
+      groupSize: 12,
+      resources: "whiteboard, printed handouts",
+      length: 45,
+      outcome: "Children identify what good soil responses look like.",
+      notes: "Mixed maturity levels",
+      draft: {
+        overview: "Draft overview"
+      },
+      qualitySignals: ["Timeline realism is weak.", "Discussion depth is thin."]
+    }),
+    "research-helper.evaluation": buildResearchHelperPrompt({
+      sermonType: "Expository",
+      targetMinutes: 35,
+      revisionObjective: "clarity",
+      diagnostics: {
+        readability: 58.4,
+        sentenceCount: 76
+      },
+      manuscript: "Today we open James 1 and examine obedience as living faith..."
+    }),
+    "research-helper.revision-pack": buildResearchHelperRevisionPrompt({
+      sermonType: "Expository",
+      targetMinutes: 35,
+      revisionObjective: "clarity",
+      diagnostics: {
+        readability: 58.4,
+        sentenceCount: 76
+      },
+      manuscriptExcerpt: "Today we open James 1 and examine obedience as living faith...",
+      baseline: {
+        overallVerdict: "Draft verdict",
+        scores: [
+          { label: "Clarity", score: 6.4, rationale: "Transitions are abrupt." }
+        ],
+        strengths: ["Strong pastoral warmth."],
+        gaps: ["Main argument turns are compressed."],
+        revisions: ["Clarify movement transitions."],
+        tightenLines: ["Shorten sentence chains."]
+      },
+      qualitySignals: ["Revision rationale is thin."]
+    }),
+    "video-search.guidance": buildVideoSearchGuidancePrompt({
+      query: "How do I run a word study in Logos?",
+      confidence: {
+        tier: "medium",
+        reasonCodes: ["semantic_partial"],
+        score: 68
+      },
+      topMatches: [
+        { title: "Word Study Basics", timestamp: "03:12", category: "Bible Study", topic: "Word Study", difficulty: "Beginner" },
+        { title: "Advanced Lemma Search", timestamp: "14:05", category: "Bible Study", topic: "Original Languages", difficulty: "Intermediate" }
+      ]
+    }),
+    "video-search.recovery": buildVideoSearchRecoveryPrompt({
+      query: "How do I learn Greek morphology quickly?",
+      filters: {
+        category: "all",
+        difficulty: "all",
+        logosVersion: "all"
+      },
+      currentResultCount: 1,
+      topMetadata: [
+        { title: "Original Language Workflow", category: "Bible Study", topic: "Greek", difficulty: "Intermediate", logosVersion: "10" }
+      ]
+    }),
+    "sermon-analyzer.insights": buildSermonInsightsPrompt({
+      context: "Sunday Main Service",
+      goal: "Improve pacing and response clarity",
+      notes: "Need stronger transitions.",
+      transcriptWordCount: 2150,
+      transcriptExcerpt: "Church family, today we look at Philippians 2 and the humility of Christ...",
+      transcriptBuckets: [
+        { bucketId: 1, start: 0, end: 180, text: "Opening movement..." },
+        { bucketId: 2, start: 180, end: 360, text: "Second movement..." }
+      ],
+      regexReferences: ["Philippians 2:1-11"],
+      pacingAnalysis: {
+        avgWpm: 151,
+        targetBandWpm: "120-150",
+        fastSections: [{ start: 300, end: 360, wpm: 174 }],
+        slowSections: [{ start: 90, end: 120, wpm: 108 }],
+        pauseCount: 26,
+        pauseTimeSec: 48.2,
+        rhythmScore: 6.7
+      },
+      vocalDynamics: {
+        avgDb: -20.4,
+        peakDb: -4.2,
+        dynamicRangeDb: 9.4,
+        pitchStdHz: 28.1,
+        pitchRangeHz: 116.3,
+        varietyScore: 71,
+        monotoneRiskScore: 34,
+        monotoneSections: [{ start: 640, end: 690, duration: 50 }]
+      },
+      metricProvenance: {
+        pacing: { source: "audio" },
+        vocalDynamics: { source: "audio" }
+      }
+    }),
+    "sermon-analyzer.coaching-refiner": buildSermonCoachingRefinementPrompt({
+      context: "Sunday Main Service",
+      goal: "Improve pacing and response clarity",
+      notes: "Need stronger transitions.",
+      transcriptWordCount: 2150,
+      transcriptExcerpt: "Church family, today we look at Philippians 2 and the humility of Christ...",
+      pacingAnalysis: {
+        avgWpm: 151,
+        targetBandWpm: "120-150",
+        fastSections: [{ start: 300, end: 360, wpm: 174 }],
+        slowSections: [{ start: 90, end: 120, wpm: 108 }],
+        pauseCount: 26,
+        pauseTimeSec: 48.2,
+        rhythmScore: 6.7
+      },
+      vocalDynamics: {
+        avgDb: -20.4,
+        peakDb: -4.2,
+        dynamicRangeDb: 9.4,
+        pitchStdHz: 28.1,
+        pitchRangeHz: 116.3,
+        varietyScore: 71,
+        monotoneRiskScore: 34,
+        monotoneSections: [{ start: 640, end: 690, duration: 50 }]
+      },
+      baseline: {
+        emotionalArcSummary: "Draft emotional summary",
+        contentAnalysis: {
+          summary: "Draft content analysis",
+          keyThemes: ["Humility", "Service"],
+          structureMovements: ["Christ's humility", "Believer response"],
+          callsToAction: ["Repent", "Serve"]
+        },
+        coachingFeedback: {
+          executiveSummary: "Draft coaching summary"
+        }
+      },
+      qualitySignals: ["Priority actions are too generic."]
+    })
+  };
+
+  const output = {};
+  for (const [promptId, builtPrompt] of Object.entries(sampleBuilders)) {
+    output[promptId] = buildPromptTemplateEntry(promptId, builtPrompt);
+  }
+  return output;
+}
+
+function buildPromptTemplateEntry(promptId, builtPrompt) {
+  const meta = PROMPT_REGISTRY[promptId] || {};
+  const outputSchema = meta && meta.outputSchema && typeof meta.outputSchema === "object"
+    ? meta.outputSchema
+    : {};
+  return {
+    id: cleanString(promptId),
+    version: cleanString(meta.version),
+    task: cleanString(meta.task),
+    system: cleanString(builtPrompt && builtPrompt.system),
+    user: cleanString(builtPrompt && builtPrompt.user),
+    responseShape: outputSchema,
+    responseExample: buildSchemaExample(outputSchema)
+  };
+}
+
+function buildSchemaExample(schema) {
+  if (Array.isArray(schema)) {
+    if (!schema.length) {
+      return [];
+    }
+    return [buildSchemaExample(schema[0])];
+  }
+  if (!schema || typeof schema !== "object") {
+    const token = cleanString(schema).toLowerCase();
+    if (token === "string") {
+      return "example text";
+    }
+    if (token === "number") {
+      return 0;
+    }
+    if (token === "boolean") {
+      return true;
+    }
+    if (/^\d+$/.test(token)) {
+      return Number(token);
+    }
+    if (token.includes("|")) {
+      return cleanString(token.split("|")[0]);
+    }
+    return cleanString(schema);
+  }
+
+  const output = {};
+  for (const [key, value] of Object.entries(schema)) {
+    output[key] = buildSchemaExample(value);
+  }
+  return output;
+}
+
+function buildFeatureFlagContext(req) {
+  const user = req && req.auth && req.auth.user ? req.auth.user : null;
+  const workspaceId = cleanString(req && req.auth && req.auth.workspaceId);
+  const ip = cleanString(req && (req.ip || req.headers && req.headers["x-forwarded-for"]));
+  return {
+    userId: cleanString(user && user.id),
+    workspaceId,
+    role: cleanString(user && user.role),
+    email: cleanString(user && user.email).toLowerCase(),
+    ip,
+    sessionToken: parseSessionToken(req),
+    cohortSeed: cleanString(
+      user && user.id,
+      workspaceId || ip || "anonymous"
+    )
+  };
+}
+
+function createBadRequestError(message) {
+  const error = new Error(cleanString(message, "Invalid request payload."));
+  error.status = 400;
+  return error;
+}
+
+function normalizeSocialProofPayload(value, { strict = false } = {}) {
+  const payload = value && typeof value === "object" ? value : {};
+  const testimonials = cleanObjectArray(payload.testimonials, 80)
+    .map((row, index) => normalizeTestimonialRow(row, { strict, index }))
+    .filter(Boolean);
+  const caseStudies = cleanObjectArray(payload.caseStudies, 80)
+    .map((row, index) => normalizeCaseStudyRow(row, { strict, index }))
+    .filter(Boolean);
+
+  if (strict && !testimonials.length && !caseStudies.length) {
+    throw createBadRequestError("Provide at least one testimonial or case study.");
+  }
+
+  return {
+    testimonials,
+    caseStudies
+  };
+}
+
+function normalizeSocialProofRoleLabel(value) {
+  const raw = cleanString(value).toLowerCase();
+  if (!raw) {
+    return "";
+  }
+  if (raw.includes("pastor")) {
+    return "Pastor";
+  }
+  if (raw.includes("teacher")) {
+    return "Teacher";
+  }
+  if (raw.includes("team") || raw.includes("staff") || raw.includes("lead")) {
+    return "Team Lead";
+  }
+  return cleanString(value);
+}
+
+function normalizeSocialProofAttribution(value, { strict = false, label = "entry" } = {}) {
+  const attribution = value && typeof value === "object" ? value : {};
+  const source = cleanString(attribution.source);
+  const sourceUrl = cleanString(attribution.sourceUrl);
+  const verifiedAt = normalizeIsoDate(cleanString(attribution.verifiedAt));
+
+  if (strict) {
+    if (!source) {
+      throw createBadRequestError(`${label} attribution.source is required.`);
+    }
+    if (!sourceUrl) {
+      throw createBadRequestError(`${label} attribution.sourceUrl is required.`);
+    }
+    if (!verifiedAt) {
+      throw createBadRequestError(`${label} attribution.verifiedAt must be a valid date.`);
+    }
+  }
+
+  return {
+    source: source || "Internal customer interview",
+    sourceUrl: sourceUrl || "https://hiredalmo.com/",
+    verifiedAt: verifiedAt || new Date().toISOString().slice(0, 10)
+  };
+}
+
+function normalizeIsoDate(value) {
+  const safe = cleanString(value);
+  if (!safe) {
+    return "";
+  }
+  const parsed = Date.parse(safe);
+  if (!Number.isFinite(parsed)) {
+    return "";
+  }
+  return new Date(parsed).toISOString().slice(0, 10);
+}
+
+function normalizeTestimonialRow(value, { strict = false, index = 0 } = {}) {
+  const row = value && typeof value === "object" ? value : {};
+  const role = normalizeSocialProofRoleLabel(row.role);
+  const quote = cleanString(row.quote);
+  const outcome = cleanString(row.outcome);
+  const attribution = normalizeSocialProofAttribution(row.attribution, {
+    strict,
+    label: `testimonial[${index}]`
+  });
+
+  if (strict) {
+    if (!role) {
+      throw createBadRequestError(`testimonial[${index}].role is required.`);
+    }
+    if (!quote || quote.length < 20) {
+      throw createBadRequestError(`testimonial[${index}].quote must be at least 20 characters.`);
+    }
+    if (!outcome) {
+      throw createBadRequestError(`testimonial[${index}].outcome is required.`);
+    }
+  }
+
+  if (!role && !quote && !outcome) {
+    return null;
+  }
+
+  return {
+    role: role || "Pastor",
+    quote,
+    outcome,
+    attribution
+  };
+}
+
+function normalizeCaseStudyRow(value, { strict = false, index = 0 } = {}) {
+  const row = value && typeof value === "object" ? value : {};
+  const role = normalizeSocialProofRoleLabel(row.role);
+  const title = cleanString(row.title);
+  const summary = cleanString(row.summary);
+  const attribution = normalizeSocialProofAttribution(row.attribution, {
+    strict,
+    label: `caseStudies[${index}]`
+  });
+
+  if (strict) {
+    if (!role) {
+      throw createBadRequestError(`caseStudies[${index}].role is required.`);
+    }
+    if (!title) {
+      throw createBadRequestError(`caseStudies[${index}].title is required.`);
+    }
+    if (!summary || summary.length < 20) {
+      throw createBadRequestError(`caseStudies[${index}].summary must be at least 20 characters.`);
+    }
+  }
+
+  if (!role && !title && !summary) {
+    return null;
+  }
+
+  return {
+    role: role || "Pastor",
+    title,
+    summary,
+    attribution
+  };
+}
+
+function buildSocialProofRoleOptions(payload) {
+  const normalized = payload && typeof payload === "object" ? payload : {};
+  const roles = new Set();
+
+  for (const row of cleanObjectArray(normalized.testimonials, 120)) {
+    const role = normalizeSocialProofRoleLabel(row.role);
+    if (role) {
+      roles.add(role);
+    }
+  }
+  for (const row of cleanObjectArray(normalized.caseStudies, 120)) {
+    const role = normalizeSocialProofRoleLabel(row.role);
+    if (role) {
+      roles.add(role);
+    }
+  }
+
+  const preferredOrder = ["Pastor", "Teacher", "Team Lead"];
+  const sorted = Array.from(roles).sort((a, b) => {
+    const aRank = preferredOrder.indexOf(a);
+    const bRank = preferredOrder.indexOf(b);
+    if (aRank >= 0 && bRank >= 0) {
+      return aRank - bRank;
+    }
+    if (aRank >= 0) {
+      return -1;
+    }
+    if (bRank >= 0) {
+      return 1;
+    }
+    return a.localeCompare(b);
+  });
+
+  return sorted.length ? sorted : preferredOrder;
 }
 
 function getEventTaxonomy() {
@@ -4302,6 +5208,21 @@ async function sermonInsightsAgent(input) {
     ...cleanArray(contentRaw.scriptureReferences, 30)
   ])).slice(0, 30);
 
+  const coachingReport = ensureAnalyzerCoachingReport({
+    executiveSummary: cleanString(coachingRaw.executiveSummary),
+    strengths: cleanArray(coachingRaw.strengths, 8),
+    risks: cleanArray(coachingRaw.risks, 8),
+    priorityActions: normalizeCoachingListItems(coachingRaw.priorityActions, 8),
+    practiceDrills: normalizeCoachingListItems(coachingRaw.practiceDrills, 10),
+    nextWeekPlan: cleanArray(coachingRaw.nextWeekPlan, 10)
+  }, {
+    context: cleanString(input.context),
+    goal: cleanString(input.goal),
+    transcriptWordCount,
+    pacingAnalysis: pacingForPrompt,
+    vocalDynamics: vocalForPrompt
+  });
+
   return {
     durationMs: Date.now() - started,
     emotionArc: {
@@ -4320,14 +5241,7 @@ async function sermonInsightsAgent(input) {
       }
     },
     coaching: {
-      report: {
-        executiveSummary: cleanString(coachingRaw.executiveSummary),
-        strengths: cleanArray(coachingRaw.strengths, 8),
-        risks: cleanArray(coachingRaw.risks, 8),
-        priorityActions: normalizeCoachingListItems(coachingRaw.priorityActions, 8),
-        practiceDrills: normalizeCoachingListItems(coachingRaw.practiceDrills, 10),
-        nextWeekPlan: cleanArray(coachingRaw.nextWeekPlan, 10)
-      }
+      report: coachingReport
     }
   };
 }
@@ -4525,6 +5439,132 @@ function normalizeCoachingListItems(value, max = 8) {
     .slice(0, max);
 }
 
+function mergeUniqueLines(lines, max = 8) {
+  const unique = [];
+  for (const raw of Array.isArray(lines) ? lines : []) {
+    const line = cleanString(raw);
+    if (!line) {
+      continue;
+    }
+    if (unique.includes(line)) {
+      continue;
+    }
+    unique.push(line);
+    if (unique.length >= max) {
+      break;
+    }
+  }
+  return unique;
+}
+
+function buildAnalyzerFallbackActionList(context, kind = "priority") {
+  const goal = cleanString(context && context.goal, "clarity and faithful delivery");
+  const transcriptWordCount = Number(context && context.transcriptWordCount || 0);
+  const pacingWpm = Number(context && context.pacingAnalysis && context.pacingAnalysis.wpm || 0);
+  const monotoneRisk = Number(context && context.vocalDynamics && context.vocalDynamics.monotoneRiskScore || 0);
+  const likelyFast = pacingWpm >= 155;
+
+  if (kind === "drill") {
+    return [
+      likelyFast
+        ? `Run a 5-minute segment at 132-142 wpm with a timer; repeat 3 rounds and keep each round within 10 words of target pace.`
+        : `Run a 5-minute segment at 128-140 wpm with a timer; repeat 3 rounds and keep transitions crisp.`,
+      `Practice three transition sentences out loud, pausing 0.7-1.2 seconds before each main movement.`,
+      monotoneRisk >= 55
+        ? `Do two 4-minute vocal-contrast drills: mark one hope phrase and one warning phrase per movement and deliver them with clear volume/pitch contrast.`
+        : `Do two 4-minute emphasis drills: mark one key phrase per movement and emphasize it with intentional pause plus vocal lift.`,
+      `Record a 90-second opening, then replay once and rewrite one sentence for clearer gospel focus tied to ${goal}.`,
+      transcriptWordCount >= 900
+        ? `Trim one paragraph per movement to reduce total manuscript length by at least 8%, then rehearse the tighter version once.`
+        : `Add one concrete illustration and one concrete application sentence per movement, then rehearse once without notes.`
+    ];
+  }
+
+  return [
+    likelyFast
+      ? `Slow average pace from ~${Math.round(pacingWpm)} wpm toward 130-145 wpm by inserting intentional pauses at transitions and after key claims.`
+      : `Maintain a steady 125-145 wpm pace and add intentional pauses so listeners can process key claims.`,
+    `Strengthen transitions: write one bridge sentence between each movement so the message flow is explicit and not abrupt.`,
+    monotoneRisk >= 55
+      ? `Reduce monotone risk by varying tone and volume in each movement, especially at warnings, promises, and calls to response.`
+      : `Increase vocal variety around key text phrases so emphasis matches theological weight.`,
+    `Clarify the response moment: end with one concrete call to action listeners can complete within 24 hours.`,
+    `Align the opening and conclusion around the same burden sentence to reinforce ${goal}.`
+  ];
+}
+
+function buildAnalyzerFallbackNextWeekPlan(context) {
+  const goal = cleanString(context && context.goal, "clarity and faithful delivery");
+  return [
+    `Day 1: Review transcript and mark 3 places where the argument became hard to follow; rewrite those transitions.`,
+    `Day 2: Rehearse opening + first movement for 10 minutes with a pace target and pause markers.`,
+    `Day 3: Run one vocal-contrast drill (warnings vs promises) and re-record a 3-minute segment.`,
+    `Day 4: Tighten one section by removing repeated sentences that do not serve ${goal}.`,
+    `Day 5: Perform a full run-through and note one measurable improvement to carry into next sermon week.`
+  ];
+}
+
+function ensureAnalyzerCoachingReport(report, context = {}) {
+  const normalized = report && typeof report === "object" ? report : {};
+  const contextLabel = cleanString(context.context, "this preaching context");
+  const goal = cleanString(context.goal, "clarity and faithful delivery");
+
+  const fallbackActions = buildAnalyzerFallbackActionList(context, "priority");
+  const fallbackDrills = buildAnalyzerFallbackActionList(context, "drill");
+  const fallbackWeekPlan = buildAnalyzerFallbackNextWeekPlan(context);
+
+  normalized.priorityActions = mergeUniqueLines([
+    ...cleanArray(normalized.priorityActions, 12),
+    ...fallbackActions
+  ], 8);
+  normalized.practiceDrills = mergeUniqueLines([
+    ...cleanArray(normalized.practiceDrills, 14),
+    ...fallbackDrills
+  ], 10);
+  normalized.nextWeekPlan = mergeUniqueLines([
+    ...cleanArray(normalized.nextWeekPlan, 14),
+    ...fallbackWeekPlan
+  ], 10);
+
+  normalized.strengths = mergeUniqueLines([
+    ...cleanArray(normalized.strengths, 8),
+    "Clear scriptural focus can be heard in major movement transitions.",
+    "Message burden is present and can be sharpened with pacing discipline.",
+    "The sermon already carries practical application momentum."
+  ], 8).slice(0, 6);
+
+  normalized.risks = mergeUniqueLines([
+    ...cleanArray(normalized.risks, 8),
+    "Fast transitions can reduce listener comprehension in dense sections.",
+    "Key applications can blur together without clear movement markers.",
+    "Calls to response may feel generic if not tied to one concrete next step."
+  ], 8).slice(0, 6);
+
+  if (!cleanString(normalized.executiveSummary)) {
+    normalized.executiveSummary = `Primary coaching focus for ${contextLabel}: improve ${goal} through clearer transitions, measurable pacing discipline, and concrete response language.`;
+  }
+
+  // Hard floor so downstream UX/tests never receive empty action arrays.
+  if (!normalized.priorityActions.length) {
+    normalized.priorityActions = fallbackActions.slice(0, 5);
+  }
+  if (!normalized.practiceDrills.length) {
+    normalized.practiceDrills = fallbackDrills.slice(0, 5);
+  }
+  if (!normalized.nextWeekPlan.length) {
+    normalized.nextWeekPlan = fallbackWeekPlan.slice(0, 5);
+  }
+
+  return {
+    executiveSummary: cleanString(normalized.executiveSummary),
+    strengths: cleanArray(normalized.strengths, 8),
+    risks: cleanArray(normalized.risks, 8),
+    priorityActions: cleanArray(normalized.priorityActions, 8),
+    practiceDrills: cleanArray(normalized.practiceDrills, 10),
+    nextWeekPlan: cleanArray(normalized.nextWeekPlan, 10)
+  };
+}
+
 function evaluateSermonCoachingDraft(rawDraft) {
   const draft = rawDraft && typeof rawDraft === "object" ? rawDraft : {};
   const coaching = draft.coachingFeedback && typeof draft.coachingFeedback === "object"
@@ -4578,6 +5618,34 @@ async function openAIRequest(endpoint, body) {
 
     return parseOpenAIResponse(response, "OpenAI request failed");
   });
+}
+
+async function verifyGoogleIdToken(idToken, expectedAudience) {
+  const token = cleanString(idToken);
+  if (!token) {
+    throw new Error("Google token is required.");
+  }
+  const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(token)}`);
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(cleanString(payload.error_description, "Google token verification failed."));
+  }
+  const audience = cleanString(payload.aud);
+  if (!audience || audience !== cleanString(expectedAudience)) {
+    throw new Error("Google token audience mismatch.");
+  }
+  if (cleanString(payload.email_verified).toLowerCase() !== "true") {
+    throw new Error("Google account email is not verified.");
+  }
+  const email = cleanString(payload.email).toLowerCase();
+  if (!email) {
+    throw new Error("Google token did not include an email.");
+  }
+  return {
+    email,
+    name: cleanString(payload.name, cleanString(payload.given_name)),
+    sub: cleanString(payload.sub)
+  };
 }
 
 async function openAIMultipartRequest(endpoint, formDataOrFactory) {

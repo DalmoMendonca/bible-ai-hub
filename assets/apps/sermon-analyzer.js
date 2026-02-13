@@ -27,6 +27,7 @@
   const result = $("#audioResult");
   const button = $("#audioButton");
   const copyButton = $("#audioCopy");
+  let saveButton = null;
 
   const chartsWrap = $("#chartsWrap");
   const pipelineStatus = $("#pipelineStatus");
@@ -41,6 +42,15 @@
   const MAX_SAFE_UPLOAD_BYTES = 5.5 * 1024 * 1024;
   const OPTIMIZED_SAMPLE_RATE = 8000;
   registerToolLifecycle("sermon-analyzer");
+
+  function setReportActionsVisible(isVisible) {
+    if (copyButton) {
+      copyButton.classList.toggle("hidden", !isVisible);
+    }
+    if (saveButton) {
+      saveButton.classList.toggle("hidden", !isVisible);
+    }
+  }
 
   function showNotice(message, type) {
     notice.className = `notice ${type || ""}`.trim();
@@ -937,6 +947,7 @@
     pipelineStatus.innerHTML = "";
     chartsWrap.classList.add("hidden");
     lastReportText = "";
+    setReportActionsVisible(false);
 
     const file = fileInput.files && fileInput.files[0];
     if (!file) {
@@ -984,12 +995,14 @@
       wireCoachDrillButtons();
       lastReportText = buildReportText(payload);
       lastPayload = payload;
+      setReportActionsVisible(true);
 
       showNotice(`Full sermon analyzer report generated.${escapeHtml(optimizationNote)}`, "ok");
       await trackEvent("generation_success", { tool: "sermon-analyzer" });
     } catch (error) {
       chartsWrap.classList.add("hidden");
       showNotice(`Sermon analysis failed: ${escapeHtml(error.message || "Unknown error")}`, "error");
+      setReportActionsVisible(false);
     } finally {
       setBusy(button, "", false);
     }
@@ -1023,7 +1036,7 @@
 
   const saveBtn = document.createElement("button");
   saveBtn.type = "button";
-  saveBtn.className = "btn secondary";
+  saveBtn.className = "btn secondary hidden";
   saveBtn.textContent = "Save Report";
   saveBtn.addEventListener("click", async () => {
     if (!lastPayload) {
@@ -1047,6 +1060,8 @@
   if (row) {
     row.appendChild(saveBtn);
   }
+  saveButton = saveBtn;
+  setReportActionsVisible(false);
 
   async function hydrateFromProject() {
     try {
@@ -1067,6 +1082,7 @@
       wireCoachDrillButtons();
       chartsWrap.classList.add("hidden");
       pipelineStatus.classList.add("hidden");
+      setReportActionsVisible(true);
     } catch (error) {
       showNotice(`Could not load project: ${escapeHtml(cleanString(error.message))}`, "error");
     }

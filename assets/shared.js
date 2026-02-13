@@ -31,8 +31,12 @@
   const STORAGE_KEYS = {
     token: "bah_session_token",
     user: "bah_user",
-    workspaceId: "bah_workspace_id"
+    workspaceId: "bah_workspace_id",
+    theme: "bah_theme"
   };
+  const THEME_DARK = "dark";
+  const THEME_LIGHT = "light";
+  const ADMIN_EMAIL = "dalmomendonca@gmail.com";
   const DEFAULT_ONBOARDING_QUESTIONS = [
     "What best describes your role right now?",
     "How often are you preparing sermons or lessons?",
@@ -44,7 +48,12 @@
     workspaceId: ""
   };
   let authReadyPromise = null;
+  let featureFlagsState = null;
+  let themeState = THEME_LIGHT;
+  let analyticsBootPromise = null;
+  let analyticsMeasurementId = "";
   disableLegacyServiceWorkers();
+  applyInitialTheme();
 
   function $(selector, root) {
     return (root || document).querySelector(selector);
@@ -201,6 +210,68 @@
     }
   }
 
+  function applyTheme(theme, persist) {
+    const safeTheme = cleanString(theme, THEME_LIGHT) === THEME_DARK ? THEME_DARK : THEME_LIGHT;
+    themeState = safeTheme;
+    const root = document.documentElement;
+    if (root) {
+      root.setAttribute("data-theme", safeTheme);
+    }
+    if (persist) {
+      try {
+        localStorage.setItem(STORAGE_KEYS.theme, safeTheme);
+      } catch (_) {
+        // ignore localStorage write failures
+      }
+    }
+    return safeTheme;
+  }
+
+  function readStoredTheme() {
+    try {
+      const raw = cleanString(localStorage.getItem(STORAGE_KEYS.theme), "");
+      if (raw === THEME_DARK || raw === THEME_LIGHT) {
+        return raw;
+      }
+    } catch (_) {
+      // ignore localStorage read failures
+    }
+    if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      return THEME_DARK;
+    }
+    return THEME_LIGHT;
+  }
+
+  function applyInitialTheme() {
+    applyTheme(readStoredTheme(), false);
+  }
+
+  function toggleTheme() {
+    const next = themeState === THEME_DARK ? THEME_LIGHT : THEME_DARK;
+    return applyTheme(next, true);
+  }
+
+  function isGuestUser(user) {
+    const email = cleanString(user && user.email).toLowerCase();
+    return Boolean(
+      user
+      && (user.isGuest || email.endsWith("@local.bibleaihub"))
+    );
+  }
+
+  function isAdminUser(user) {
+    const email = cleanString(user && user.email).toLowerCase();
+    return cleanString(user && user.role).toLowerCase() === "admin"
+      || email === ADMIN_EMAIL;
+  }
+
+  function currentCreditsLabel(user) {
+    const credits = user && Number.isFinite(Number(user.credits))
+      ? Number(user.credits)
+      : null;
+    return credits === null ? "Unlimited" : String(credits);
+  }
+
   function readStoredAuth() {
     try {
       const token = localStorage.getItem(STORAGE_KEYS.token) || "";
@@ -231,13 +302,18 @@
       }
       if (workspaceId) {
         localStorage.setItem(STORAGE_KEYS.workspaceId, workspaceId);
+      } else {
+        localStorage.removeItem(STORAGE_KEYS.workspaceId);
       }
       if (user) {
         localStorage.setItem(STORAGE_KEYS.user, JSON.stringify(user));
+      } else {
+        localStorage.removeItem(STORAGE_KEYS.user);
       }
     } catch (_) {
       // Ignore localStorage write failures.
     }
+    featureFlagsState = null;
   }
 
   function clearStoredAuth() {
@@ -249,6 +325,7 @@
     } catch (_) {
       // ignore
     }
+    featureFlagsState = null;
   }
 
   function authHeaders(extraHeaders) {
@@ -300,7 +377,8 @@
       body: JSON.stringify({})
     });
     if (!guestResponse.ok) {
-      throw new Error("Unable to initialize session.");
+      const guestErrorPayload = await guestResponse.json().catch(() => ({}));
+      throw new Error(cleanString(guestErrorPayload && guestErrorPayload.error, "Unable to initialize session."));
     }
     const guestData = await guestResponse.json().catch(() => ({}));
     storeAuth(guestData || {});
@@ -352,41 +430,123 @@
     return data;
   }
 
-  async function apiGet(url) {
-    return apiRequest(url, { method: "GET" });
+  async function apiGet(url, options = {}) {
+    return apiRequest(url, {
+      ...(options || {}),
+      method: "GET"
+    });
   }
 
-  async function apiPost(url, payload) {
+  async function apiPost(url, payload, options = {}) {
+    const requestOptions = options && typeof options === "object" ? options : {};
+    const extraHeaders = requestOptions.headers && typeof requestOptions.headers === "object"
+      ? requestOptions.headers
+      : {};
     return apiRequest(url, {
+      ...requestOptions,
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...extraHeaders
+      },
+      body: JSON.stringify(payload || {})
+    });
+  }
+
+  async function publicApiPost(url, payload) {
+    const response = await rawApiRequest(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify(payload || {})
     });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const message = data && data.error ? data.error : `Request failed (${response.status})`;
+      const error = new Error(message);
+      error.status = response.status;
+      error.payload = data;
+      throw error;
+    }
+    return data;
   }
 
-  async function apiPatch(url, payload) {
+  async function publicApiGet(url) {
+    const response = await rawApiRequest(url, {
+      method: "GET"
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const message = data && data.error ? data.error : `Request failed (${response.status})`;
+      const error = new Error(message);
+      error.status = response.status;
+      error.payload = data;
+      throw error;
+    }
+    return data;
+  }
+
+  async function apiPatch(url, payload, options = {}) {
+    const requestOptions = options && typeof options === "object" ? options : {};
+    const extraHeaders = requestOptions.headers && typeof requestOptions.headers === "object"
+      ? requestOptions.headers
+      : {};
     return apiRequest(url, {
+      ...requestOptions,
       method: "PATCH",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        ...extraHeaders
       },
       body: JSON.stringify(payload || {})
     });
   }
 
-  async function apiDelete(url) {
+  async function apiDelete(url, options = {}) {
     return apiRequest(url, {
+      ...(options || {}),
       method: "DELETE"
     });
   }
 
-  async function apiPostForm(url, formData) {
+  async function apiPostForm(url, formData, options = {}) {
     return apiRequest(url, {
+      ...(options && typeof options === "object" ? options : {}),
       method: "POST",
       body: formData
     });
+  }
+
+  async function getFeatureFlags(options = {}) {
+    const force = Boolean(options && options.force);
+    if (featureFlagsState && !force) {
+      return featureFlagsState;
+    }
+    const payload = await apiGet("/api/feature-flags");
+    featureFlagsState = payload && typeof payload === "object"
+      ? payload
+      : { flags: {} };
+    return featureFlagsState;
+  }
+
+  async function isFeatureEnabled(flagKey, fallback = false) {
+    const key = cleanString(flagKey);
+    if (!key) {
+      return Boolean(fallback);
+    }
+    try {
+      const payload = await getFeatureFlags();
+      const row = payload && payload.flags && typeof payload.flags === "object"
+        ? payload.flags[key]
+        : null;
+      if (row && typeof row.enabled === "boolean") {
+        return row.enabled;
+      }
+    } catch (_) {
+      // If feature-flag fetch fails, fall back to caller default.
+    }
+    return Boolean(fallback);
   }
 
   function splitSentences(text) {
@@ -547,7 +707,121 @@
       .slice(0, max);
   }
 
+  function normalizeAnalyticsEventName(name) {
+    return cleanString(name)
+      .toLowerCase()
+      .replace(/[^a-z0-9_]/g, "_")
+      .replace(/_{2,}/g, "_")
+      .replace(/^_+|_+$/g, "")
+      .slice(0, 40) || "event";
+  }
+
+  function normalizeAnalyticsValue(value) {
+    if (value === null || value === undefined) {
+      return "";
+    }
+    if (typeof value === "number" || typeof value === "boolean") {
+      return value;
+    }
+    return cleanString(value).slice(0, 120);
+  }
+
+  function normalizeAnalyticsParams(properties) {
+    const input = properties && typeof properties === "object" ? properties : {};
+    const output = {};
+    for (const [key, value] of Object.entries(input)) {
+      const safeKey = cleanString(key)
+        .toLowerCase()
+        .replace(/[^a-z0-9_]/g, "_")
+        .replace(/_{2,}/g, "_")
+        .replace(/^_+|_+$/g, "")
+        .slice(0, 40);
+      if (!safeKey) {
+        continue;
+      }
+      output[safeKey] = normalizeAnalyticsValue(value);
+    }
+    return output;
+  }
+
+  function getMetaAnalyticsId() {
+    const meta = document.querySelector('meta[name="bah-ga-id"]');
+    return cleanString(meta && meta.content);
+  }
+
+  function loadAnalyticsScript(measurementId) {
+    return new Promise((resolve, reject) => {
+      const existing = document.querySelector("script[data-bah-ga]");
+      if (existing) {
+        resolve();
+        return;
+      }
+      const script = document.createElement("script");
+      script.async = true;
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(measurementId)}`;
+      script.setAttribute("data-bah-ga", "1");
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error("Could not load Google Analytics script."));
+      document.head.appendChild(script);
+    });
+  }
+
+  async function bootAnalytics() {
+    if (analyticsBootPromise) {
+      return analyticsBootPromise;
+    }
+    analyticsBootPromise = (async () => {
+      let measurementId = getMetaAnalyticsId();
+      if (!measurementId) {
+        try {
+          const config = await publicApiGet("/api/public-config");
+          measurementId = cleanString(config && config.gaMeasurementId);
+        } catch (_) {
+          measurementId = "";
+        }
+      }
+      if (!measurementId) {
+        return;
+      }
+      await loadAnalyticsScript(measurementId);
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        window.dataLayer.push(arguments);
+      }
+      if (typeof window.gtag !== "function") {
+        window.gtag = gtag;
+      }
+      window.gtag("js", new Date());
+      window.gtag("config", measurementId, {
+        anonymize_ip: true,
+        transport_type: "beacon",
+        send_page_view: true
+      });
+      analyticsMeasurementId = measurementId;
+      const user = authState && authState.user ? authState.user : null;
+      window.gtag("set", "user_properties", {
+        role: cleanString(user && user.role, "guest"),
+        is_guest: isGuestUser(user),
+        workspace_id: cleanString(authState && authState.workspaceId)
+      });
+    })().catch(() => {
+      analyticsMeasurementId = "";
+    });
+    return analyticsBootPromise;
+  }
+
+  function trackAnalyticsEvent(name, properties) {
+    if (!analyticsMeasurementId || typeof window.gtag !== "function") {
+      return;
+    }
+    window.gtag("event", normalizeAnalyticsEventName(name), {
+      page_path: cleanString(window.location && window.location.pathname),
+      ...normalizeAnalyticsParams(properties)
+    });
+  }
+
   async function trackEvent(name, properties) {
+    trackAnalyticsEvent(name, properties);
     try {
       await apiPost("/api/events", {
         name,
@@ -646,9 +920,15 @@
 
   function headerShellHtml(state) {
     const userName = cleanString(state && state.user && state.user.name, "Guest");
+    const guest = isGuestUser(state && state.user);
+    const themeToggleLabel = themeState === THEME_DARK ? "Light" : "Dark";
+    const creditsLabel = currentCreditsLabel(state && state.user);
     return `
       <div class="bah-shell">
         <a class="header-link" href="/pricing/">Pricing</a>
+        <button type="button" class="header-link bah-theme-btn" data-bah-theme-toggle>${escapeHtml(themeToggleLabel)}</button>
+        <span class="bah-credit-chip">Credits: ${escapeHtml(creditsLabel)}</span>
+        ${guest ? `<button type="button" class="header-link bah-auth-btn" data-bah-auth-open>Sign In</button>` : `<button type="button" class="header-link bah-feedback-btn" data-bah-feedback-open>Feedback</button>`}
         <button type="button" class="header-link bah-projects-btn" data-bah-projects>Projects</button>
         <button type="button" class="header-link bah-notice-btn" data-bah-notices>Notices</button>
         <select class="select bah-workspace-select" data-bah-workspace></select>
@@ -1071,6 +1351,336 @@
     });
   }
 
+  let googleScriptPromise = null;
+
+  function loadGoogleIdentityScript() {
+    if (googleScriptPromise) {
+      return googleScriptPromise;
+    }
+    googleScriptPromise = new Promise((resolve, reject) => {
+      const existing = document.querySelector("script[data-bah-google-gsi]");
+      if (existing) {
+        if (window.google && window.google.accounts && window.google.accounts.id) {
+          resolve();
+        } else {
+          existing.addEventListener("load", () => resolve(), { once: true });
+          existing.addEventListener("error", () => reject(new Error("Could not load Google identity script.")), { once: true });
+        }
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.defer = true;
+      script.setAttribute("data-bah-google-gsi", "1");
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error("Could not load Google identity script."));
+      document.head.appendChild(script);
+    });
+    return googleScriptPromise;
+  }
+
+  function getAuthModal() {
+    const existing = document.querySelector("[data-bah-auth-modal]");
+    if (existing) {
+      return existing;
+    }
+    const modal = document.createElement("div");
+    modal.className = "bah-auth-modal hidden";
+    modal.setAttribute("data-bah-auth-modal", "1");
+    modal.innerHTML = `
+      <div class="bah-account-backdrop" data-bah-auth-close></div>
+      <section class="bah-account-panel" role="dialog" aria-modal="true" aria-label="Sign in">
+        <div class="bah-project-head">
+          <h3>Sign In</h3>
+          <button type="button" class="bah-project-close" data-bah-auth-close>Close</button>
+        </div>
+        <div class="form-grid">
+          <div class="field span-2">
+            <label for="bahMagicEmail">Email (magic link, no password)</label>
+            <input id="bahMagicEmail" class="input" type="email" placeholder="you@example.com" />
+          </div>
+          <div class="field span-2">
+            <div class="btn-row">
+              <button type="button" class="btn primary" data-bah-magic-request>Send Magic Link</button>
+            </div>
+            <p class="inline-hint" data-bah-magic-status></p>
+          </div>
+          <div class="field span-2">
+            <label for="bahMagicToken">Magic Link Token</label>
+            <input id="bahMagicToken" class="input" type="text" placeholder="Paste token from your email" />
+          </div>
+          <div class="field span-2">
+            <div class="btn-row">
+              <button type="button" class="btn secondary" data-bah-magic-verify>Verify Magic Link</button>
+            </div>
+          </div>
+          <div class="field span-2">
+            <h4 class="section-title" style="margin:0;">Or continue with Google</h4>
+            <div data-bah-google-mount></div>
+            <p class="inline-hint" data-bah-google-status></p>
+          </div>
+        </div>
+      </section>
+    `;
+    document.body.appendChild(modal);
+    return modal;
+  }
+
+  async function renderGoogleSignInButton(modal) {
+    const mount = modal.querySelector("[data-bah-google-mount]");
+    const status = modal.querySelector("[data-bah-google-status]");
+    if (!mount || !status) {
+      return;
+    }
+    mount.innerHTML = "";
+    status.textContent = "Loading Google sign-in...";
+    try {
+      const config = await publicApiGet("/api/auth/google/config");
+      if (!config || !config.enabled || !cleanString(config.clientId)) {
+        status.textContent = "Google sign-in is not configured yet.";
+        return;
+      }
+      await loadGoogleIdentityScript();
+      if (!(window.google && window.google.accounts && window.google.accounts.id)) {
+        status.textContent = "Google sign-in is unavailable in this browser.";
+        return;
+      }
+      window.google.accounts.id.initialize({
+        client_id: cleanString(config.clientId),
+        callback: async (response) => {
+          try {
+            const auth = await publicApiPost("/api/auth/google/token", {
+              idToken: cleanString(response && response.credential)
+            });
+            storeAuth(auth || {});
+            authReadyPromise = Promise.resolve(authState);
+            window.location.reload();
+          } catch (error) {
+            status.textContent = cleanString(error && error.message, "Google sign-in failed.");
+          }
+        }
+      });
+      window.google.accounts.id.renderButton(mount, {
+        theme: themeState === THEME_DARK ? "filled_black" : "outline",
+        size: "large",
+        text: "continue_with",
+        shape: "pill",
+        width: 260
+      });
+      status.textContent = "";
+    } catch (error) {
+      status.textContent = cleanString(error && error.message, "Could not initialize Google sign-in.");
+    }
+  }
+
+  async function openAuthModal() {
+    const modal = getAuthModal();
+    modal.classList.remove("hidden");
+
+    const close = () => modal.classList.add("hidden");
+    $all("[data-bah-auth-close]", modal).forEach((buttonEl) => {
+      buttonEl.onclick = close;
+    });
+
+    const emailInput = modal.querySelector("#bahMagicEmail");
+    const tokenInput = modal.querySelector("#bahMagicToken");
+    const requestBtn = modal.querySelector("[data-bah-magic-request]");
+    const verifyBtn = modal.querySelector("[data-bah-magic-verify]");
+    const statusEl = modal.querySelector("[data-bah-magic-status]");
+
+    if (emailInput && !cleanString(emailInput.value)) {
+      emailInput.value = "";
+      emailInput.focus();
+    }
+
+    if (requestBtn) {
+      requestBtn.onclick = async () => {
+        const email = cleanString(emailInput && emailInput.value).toLowerCase();
+        if (!email || !email.includes("@")) {
+          if (statusEl) statusEl.textContent = "Enter a valid email first.";
+          return;
+        }
+        try {
+          setBusy(requestBtn, "Sending...", true);
+          const response = await publicApiPost("/api/auth/magic-link/request", { email });
+          if (statusEl) {
+            statusEl.textContent = `Magic link issued for ${email}. Expires in ${Number(response.expiresInMinutes || 15)} minutes.`;
+          }
+          if (tokenInput && response && response.magicLinkToken) {
+            tokenInput.value = cleanString(response.magicLinkToken);
+          }
+        } catch (error) {
+          if (statusEl) {
+            statusEl.textContent = cleanString(error && error.message, "Could not send magic link.");
+          }
+        } finally {
+          setBusy(requestBtn, "", false);
+        }
+      };
+    }
+
+    if (verifyBtn) {
+      verifyBtn.onclick = async () => {
+        const token = cleanString(tokenInput && tokenInput.value);
+        if (!token) {
+          if (statusEl) statusEl.textContent = "Paste your token first.";
+          return;
+        }
+        try {
+          setBusy(verifyBtn, "Verifying...", true);
+          const auth = await publicApiPost("/api/auth/magic-link/verify", { token });
+          storeAuth(auth || {});
+          authReadyPromise = Promise.resolve(authState);
+          window.location.reload();
+        } catch (error) {
+          if (statusEl) {
+            statusEl.textContent = cleanString(error && error.message, "Magic link verification failed.");
+          }
+        } finally {
+          setBusy(verifyBtn, "", false);
+        }
+      };
+    }
+
+    await renderGoogleSignInButton(modal);
+  }
+
+  function getFeedbackModal() {
+    const existing = document.querySelector("[data-bah-feedback-modal]");
+    if (existing) {
+      return existing;
+    }
+    const modal = document.createElement("div");
+    modal.className = "bah-feedback-modal hidden";
+    modal.setAttribute("data-bah-feedback-modal", "1");
+    modal.innerHTML = `
+      <div class="bah-account-backdrop" data-bah-feedback-close></div>
+      <section class="bah-account-panel" role="dialog" aria-modal="true" aria-label="Share feedback">
+        <div class="bah-project-head">
+          <h3>Share Feedback</h3>
+          <button type="button" class="bah-project-close" data-bah-feedback-close>Close</button>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label for="bahFeedbackRating">How helpful was this page?</label>
+            <select id="bahFeedbackRating" class="select">
+              <option value="5">5 - Excellent</option>
+              <option value="4">4 - Good</option>
+              <option value="3">3 - Okay</option>
+              <option value="2">2 - Needs work</option>
+              <option value="1">1 - Poor</option>
+            </select>
+          </div>
+          <div class="field span-2">
+            <label for="bahFeedbackMessage">Feedback</label>
+            <textarea id="bahFeedbackMessage" class="textarea" placeholder="What worked, what broke, and what should be improved?"></textarea>
+          </div>
+          <div class="field span-2">
+            <div class="btn-row">
+              <button type="button" class="btn primary" data-bah-feedback-submit>Send Feedback</button>
+            </div>
+            <p class="inline-hint" data-bah-feedback-status></p>
+          </div>
+        </div>
+      </section>
+    `;
+    document.body.appendChild(modal);
+    return modal;
+  }
+
+  async function openFeedbackModal() {
+    if (isGuestUser(authState.user)) {
+      window.alert("Sign in with email or Google to submit feedback.");
+      await openAuthModal();
+      return;
+    }
+    const modal = getFeedbackModal();
+    modal.classList.remove("hidden");
+    const close = () => modal.classList.add("hidden");
+    $all("[data-bah-feedback-close]", modal).forEach((buttonEl) => {
+      buttonEl.onclick = close;
+    });
+    const submitBtn = modal.querySelector("[data-bah-feedback-submit]");
+    const messageInput = modal.querySelector("#bahFeedbackMessage");
+    const ratingInput = modal.querySelector("#bahFeedbackRating");
+    const statusEl = modal.querySelector("[data-bah-feedback-status]");
+
+    if (submitBtn) {
+      submitBtn.onclick = async () => {
+        const message = cleanString(messageInput && messageInput.value);
+        const rating = Number(ratingInput && ratingInput.value || 0);
+        if (!message || message.length < 8) {
+          if (statusEl) statusEl.textContent = "Please provide a bit more detail (at least a short sentence).";
+          return;
+        }
+        try {
+          setBusy(submitBtn, "Sending...", true);
+          await apiPost("/api/feedback", {
+            pagePath: window.location.pathname,
+            message,
+            rating,
+            sentiment: rating >= 4 ? "positive" : "neutral"
+          });
+          if (statusEl) {
+            statusEl.textContent = "Thank you. Your feedback was sent.";
+          }
+          if (messageInput) {
+            messageInput.value = "";
+          }
+        } catch (error) {
+          if (statusEl) {
+            statusEl.textContent = cleanString(error && error.message, "Could not send feedback right now.");
+          }
+        } finally {
+          setBusy(submitBtn, "", false);
+        }
+      };
+    }
+  }
+
+  function ensureFeedbackFab() {
+    const existing = document.querySelector("[data-bah-feedback-fab]");
+    if (existing) {
+      existing.classList.toggle("hidden", isGuestUser(authState.user));
+      return existing;
+    }
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "bah-feedback-fab";
+    button.setAttribute("data-bah-feedback-fab", "1");
+    button.textContent = "Feedback";
+    button.classList.toggle("hidden", isGuestUser(authState.user));
+    button.addEventListener("click", () => {
+      void openFeedbackModal();
+    });
+    document.body.appendChild(button);
+    return button;
+  }
+
+  function enforceIconSizing() {
+    const groups = [
+      { selector: ".hero-icon", size: 32 },
+      { selector: ".tool-card svg", size: 30 },
+      { selector: ".feature-head svg", size: 20 },
+      { selector: ".feature-icon", size: 20 }
+    ];
+    for (const group of groups) {
+      $all(group.selector).forEach((icon) => {
+        if (!icon || icon.tagName.toLowerCase() !== "svg") {
+          return;
+        }
+        icon.setAttribute("width", String(group.size));
+        icon.setAttribute("height", String(group.size));
+        icon.style.width = `${group.size}px`;
+        icon.style.height = `${group.size}px`;
+        icon.style.maxWidth = `${group.size}px`;
+        icon.style.maxHeight = `${group.size}px`;
+      });
+    }
+  }
+
   function getAccountModal() {
     const existing = document.querySelector("[data-bah-account-modal]");
     if (existing) {
@@ -1211,9 +1821,35 @@
     const workspaceSelect = $("[data-bah-workspace]", shell);
     await populateWorkspaceSelect(workspaceSelect);
 
+    const themeBtn = $("[data-bah-theme-toggle]", shell);
+    if (themeBtn) {
+      themeBtn.addEventListener("click", () => {
+        toggleTheme();
+        themeBtn.textContent = themeState === THEME_DARK ? "Light" : "Dark";
+      });
+    }
+
+    const authBtn = $("[data-bah-auth-open]", shell);
+    if (authBtn) {
+      authBtn.addEventListener("click", () => {
+        void openAuthModal();
+      });
+    }
+
+    const feedbackBtn = $("[data-bah-feedback-open]", shell);
+    if (feedbackBtn) {
+      feedbackBtn.addEventListener("click", () => {
+        void openFeedbackModal();
+      });
+    }
+
     const accountBtn = $("[data-bah-account]", shell);
     if (accountBtn) {
       accountBtn.addEventListener("click", () => {
+        if (isGuestUser(authState.user)) {
+          void openAuthModal();
+          return;
+        }
         void openAccountModal();
       });
     }
@@ -1231,6 +1867,9 @@
         void openProjectsDialog();
       });
     }
+
+    ensureFeedbackFab();
+    enforceIconSizing();
   }
 
   function registerToolLifecycle(toolSlug) {
@@ -1289,21 +1928,33 @@
   }
 
   readStoredAuth();
+  enforceIconSizing();
+  window.addEventListener("load", () => {
+    enforceIconSizing();
+  });
   void ensureAuthReady()
-    .then(() => Promise.all([
-      bootHeaderShell(),
-      trackEvent("landing_view", {
-        path: window.location.pathname
-      })
-    ]))
+    .then(async () => {
+      await bootAnalytics();
+      await bootHeaderShell();
+      await trackEvent("landing_view", {
+        path: window.location.pathname,
+        referrer: cleanString(document.referrer)
+      });
+    })
     .catch(() => {
       // App remains usable even if session bootstrap fails.
+      void bootAnalytics();
+      enforceIconSizing();
     });
 
   window.AIBible = {
     $, $all, escapeHtml, fetchBiblePassage, apiGet, apiPost, apiPatch, apiDelete, apiPostForm, splitSentences, tokenize, topKeywords,
     textMetrics, estimatePassiveVoice, findScriptureReferences, renderScore, clamp,
     summarizeKeywords, highlightTerms, createEl, setBusy, cleanString, cleanArray,
+    getFeatureFlags, isFeatureEnabled,
+    publicApiGet, publicApiPost,
+    toggleTheme, applyTheme,
+    openAuthModal, openFeedbackModal,
     ensureAuthReady, trackEvent, saveProject, getProject, updateProject, listProjects, deleteProject, appendProjectExport,
     createHandoff, getHandoff, createLearningPath, listLearningPaths, getLearningPath, updateLearningPath, deleteLearningPath, shareLearningPath,
     hydrateProjectFromQuery, getQueryParam,

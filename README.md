@@ -8,6 +8,10 @@ This project provides six production-ready Bible AI Hub apps with real OpenAI-po
 
 ```env
 OPENAI_API_KEY=your_key_here
+# Optional but recommended:
+GOOGLE_CLIENT_ID=your_google_oauth_client_id
+GA_MEASUREMENT_ID=G-XXXXXXXXXX
+ADMIN_DASHBOARD_PASSWORD=your_admin_dashboard_password
 ```
 
 2. Install deps:
@@ -60,6 +64,25 @@ Run a real file-upload sermon analyzer test:
 
 ```bash
 npm run sermon:test-file -- --runs 3 --file "ai/videos/your-sermon.mp3"
+```
+
+Run full syntax + SEO checks:
+
+```bash
+npm run test:syntax
+npm run test:seo
+```
+
+If metadata intentionally changed, refresh social-meta snapshots:
+
+```bash
+npm run test:seo:update-snapshot
+```
+
+Run non-functional regression suites (load, security, data-quality reconciliation):
+
+```bash
+npm run test:nonfunctional
 ```
 
 ## Prompt engineering workflow
@@ -165,6 +188,12 @@ Legacy links like `/ai/video-search/` still redirect to the new `/ai/apps/...` r
 - If source video files are not present in production, the app still serves indexed transcript search and uses `hostedUrl` playback links.
 - Sermon Analyzer combines local DSP metrics with AI coaching feedback.
 - Sermon Analyzer auto-optimizes oversized browser audio uploads (downsampled mono WAV) to stay within serverless payload limits.
+- Feature flags and staged rollout config live in `server/data/feature-flags.json`, evaluated by `server/feature-flags.js`.
+- Product strategy decisions are codified in `server/data/product-strategy.json`.
+- Production operations docs:
+  - `docs/ops-runbook.md`
+  - `docs/alert-thresholds.md`
+  - `docs/support-macros.md`
 
 
 

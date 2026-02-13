@@ -23,6 +23,8 @@
   const notice = $("#evalNotice");
   const result = $("#evalResult");
   const button = $("#evalButton");
+  let saveBtn = null;
+  let exportBtn = null;
   let lastGenerated = null;
   let activeProjectId = "";
   registerToolLifecycle("research-helper");
@@ -36,6 +38,15 @@
   function hideNotice() {
     notice.classList.add("hidden");
     notice.textContent = "";
+  }
+
+  function setActionButtonsVisible(isVisible) {
+    if (saveBtn) {
+      saveBtn.classList.toggle("hidden", !isVisible);
+    }
+    if (exportBtn) {
+      exportBtn.classList.toggle("hidden", !isVisible);
+    }
   }
 
   function countOccurrences(text, pattern) {
@@ -191,6 +202,7 @@
     event.preventDefault();
     hideNotice();
     result.innerHTML = "";
+    setActionButtonsVisible(false);
 
     const sermonType = $("#evalType").value;
     const targetMinutes = Number($("#evalTarget").value || 35);
@@ -219,18 +231,20 @@
         output: ai
       };
       result.innerHTML = renderAnalysis(diagnostics, ai);
+      setActionButtonsVisible(true);
       showNotice("AI sermon evaluation complete.", "ok");
       await trackEvent("generation_success", { tool: "research-helper" });
     } catch (error) {
       showNotice(`Could not evaluate sermon: ${escapeHtml(error.message || "Unknown error")}`, "error");
+      setActionButtonsVisible(false);
     } finally {
       setBusy(button, "", false);
     }
   });
 
-  const saveBtn = document.createElement("button");
+  saveBtn = document.createElement("button");
   saveBtn.type = "button";
-  saveBtn.className = "btn secondary";
+  saveBtn.className = "btn secondary hidden";
   saveBtn.textContent = "Save Evaluation";
   saveBtn.addEventListener("click", async () => {
     if (!lastGenerated) {
@@ -250,9 +264,9 @@
       showNotice(`Could not save evaluation: ${escapeHtml(error.message || "Unknown error")}`, "error");
     }
   });
-  const exportBtn = document.createElement("button");
+  exportBtn = document.createElement("button");
   exportBtn.type = "button";
-  exportBtn.className = "btn secondary";
+  exportBtn.className = "btn secondary hidden";
   exportBtn.textContent = "Export Trend CSV";
   exportBtn.addEventListener("click", async () => {
     if (!lastGenerated || !lastGenerated.output) {
@@ -295,6 +309,7 @@
     buttonRow.appendChild(saveBtn);
     buttonRow.appendChild(exportBtn);
   }
+  setActionButtonsVisible(false);
 
   async function hydrateFromHandoff() {
     const params = new URLSearchParams(window.location.search);
@@ -345,6 +360,7 @@
       if (payload.output && input.diagnostics) {
         lastGenerated = payload;
         result.innerHTML = renderAnalysis(input.diagnostics, payload.output);
+        setActionButtonsVisible(true);
       }
       showNotice("Loaded saved Sermon Evaluation project.", "ok");
     } catch (error) {

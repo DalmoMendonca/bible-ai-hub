@@ -3,30 +3,33 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Bible AI Hub Pricing | Ministry-Focused Plans</title>
-  <meta name="description" content="Compare Bible AI Hub plans for Bible study, sermon preparation, teaching tools, sermon evaluation, sermon analyzer, and team workflows." />
-  <meta property="og:title" content="Bible AI Hub Pricing" />
-  <meta property="og:description" content="Choose the plan that matches your ministry workflow and team size." />
+  <title>Bible AI Hub Pricing | Disciple, Pastor, Church</title>
+  <meta name="description" content="Simple Bible AI Hub pricing with three tiers: Disciple, Pastor, and Church." />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <meta name="author" content="Bible AI Hub" />
+  <meta name="theme-color" content="#0f5f9b" />
+  <link rel="canonical" href="https://bible.hiredalmo.com/pricing/" />
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
   <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Bible AI Hub" />
+  <meta property="og:title" content="Bible AI Hub Pricing | Disciple, Pastor, Church" />
+  <meta property="og:description" content="Clear three-tier pricing for Bible AI Hub ministry apps." />
   <meta property="og:url" content="https://bible.hiredalmo.com/pricing/" />
   <meta property="og:image" content="https://bible.hiredalmo.com/assets/social-share.png" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Bible AI Hub Pricing" />
-  <meta name="twitter:description" content="Transparent plan comparison for Bible AI Hub." />
+  <meta name="twitter:title" content="Bible AI Hub Pricing | Disciple, Pastor, Church" />
+  <meta name="twitter:description" content="Simple, ministry-friendly pricing for Bible AI Hub." />
   <meta name="twitter:image" content="https://bible.hiredalmo.com/assets/social-share.png" />
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "Product",
-      "name": "Bible AI Hub",
-      "description": "AI workflows for Bible study, preaching, and ministry teams.",
-      "brand": { "@type": "Brand", "name": "Bible AI Hub" },
-      "offers": {
-        "@type": "AggregateOffer",
-        "priceCurrency": "USD",
-        "lowPrice": "5",
-        "highPrice": "249"
-      }
+      "@type": "OfferCatalog",
+      "name": "Bible AI Hub Plans",
+      "itemListElement": [
+        { "@type": "Offer", "name": "Disciple", "price": "5", "priceCurrency": "USD" },
+        { "@type": "Offer", "name": "Pastor", "price": "25", "priceCurrency": "USD" },
+        { "@type": "Offer", "name": "Church", "price": "100", "priceCurrency": "USD" }
+      ]
     }
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -53,47 +56,58 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 10.5h18" />
               </svg>
             </div>
-            <h1>Pricing</h1>
-            <p>Choose the plan that fits your ministry workflow</p>
+            <h1>Simple Pricing</h1>
+            <p>Three clear plans for individuals, pastors, and church teams</p>
           </div>
 
           <div class="content">
-            <div id="pricingNotice" class="notice hidden"></div>
-            <div class="card">
-              <h3 class="section-title">Plan Recommender + ROI Snapshot</h3>
-              <div class="form-grid">
-                <div class="field">
-                  <label for="roiSermons">Sermons per month</label>
-                  <input id="roiSermons" class="input" type="number" min="0" max="60" value="4" />
-                </div>
-                <div class="field">
-                  <label for="roiLessons">Lessons per month</label>
-                  <input id="roiLessons" class="input" type="number" min="0" max="80" value="8" />
-                </div>
-                <div class="field">
-                  <label for="roiTeam">Team members</label>
-                  <input id="roiTeam" class="input" type="number" min="1" max="200" value="1" />
-                </div>
-                <div class="field">
-                  <label for="roiMinutes">Analyzer audio minutes / month</label>
-                  <input id="roiMinutes" class="input" type="number" min="0" max="2000" value="0" />
-                </div>
-                <div class="field span-2">
-                  <div class="btn-row">
-                    <button type="button" id="roiRun" class="btn primary">Recommend Plan</button>
-                  </div>
-                </div>
-              </div>
-              <div id="roiResult" class="inline-hint">Run the recommender to see a best-fit plan and time-value estimate.</div>
+            <div class="home-pricing-grid">
+              <article class="home-price-card">
+                <h4>Disciple</h4>
+                <p class="price">$5/mo</p>
+                <p>All tools except Sermon Analyzer, with lightweight monthly credits.</p>
+                <ul class="list">
+                  <li>Includes Bible Study, Sermon Prep, Teaching Tools, Sermon Evaluation, and Video Search</li>
+                  <li>10 monthly generation credits</li>
+                </ul>
+              </article>
+
+              <article class="home-price-card">
+                <h4>Pastor</h4>
+                <p class="price">$25/mo</p>
+                <p>Full access to every app, including Sermon Analyzer.</p>
+                <ul class="list">
+                  <li>All six apps included</li>
+                  <li>50 monthly generation credits</li>
+                </ul>
+              </article>
+
+              <article class="home-price-card">
+                <h4>Church</h4>
+                <p class="price">$100/mo + $5/seat</p>
+                <p>Team plan with scalable access and per-user credit allocation.</p>
+                <ul class="list">
+                  <li>All six apps included</li>
+                  <li>200 monthly credits per user</li>
+                  <li>$5/seat/month for each additional seat</li>
+                </ul>
+              </article>
             </div>
-            <div id="pricingGrid" class="tool-grid"></div>
-            <div class="card">
-              <h3 class="section-title">FAQ</h3>
-              <ul class="list">
-                <li>All plans include workspace/project history and lifecycle analytics.</li>
-                <li>Team plans include seat management, role permissions, and usage reporting.</li>
-                <li>Free plan includes video search with premium results visible but locked.</li>
-              </ul>
+
+            <div class="card seo-faq">
+              <h3 class="section-title">Pricing FAQ</h3>
+              <details>
+                <summary>Are there hidden fees?</summary>
+                <p>No. Monthly price and seat add-ons are explicit by plan.</p>
+              </details>
+              <details>
+                <summary>Which plan includes Sermon Analyzer?</summary>
+                <p>Pastor and Church include Sermon Analyzer. Disciple does not.</p>
+              </details>
+              <details>
+                <summary>What happens when credits run out?</summary>
+                <p>You can upgrade plans or wait for monthly credit reset.</p>
+              </details>
             </div>
           </div>
         </section>
@@ -106,112 +120,5 @@
   </div>
 
   <script src="/assets/shared.js"></script>
-  <script>
-    (function () {
-      const { $, apiGet, apiPost, cleanString, escapeHtml, trackEvent, ensureAuthReady } = window.AIBible;
-      const grid = $("#pricingGrid");
-      const notice = $("#pricingNotice");
-      const roiResult = $("#roiResult");
-      const roiRun = $("#roiRun");
-      const roiSermons = $("#roiSermons");
-      const roiLessons = $("#roiLessons");
-      const roiTeam = $("#roiTeam");
-      const roiMinutes = $("#roiMinutes");
-      let cachedPlans = [];
-
-      function showNotice(message, type) {
-        if (!notice) return;
-        notice.className = `notice ${type || ""}`.trim();
-        notice.innerHTML = message;
-        notice.classList.remove("hidden");
-      }
-
-      function renderPlanCard(plan) {
-        const price = Number(plan.priceUsdMonthly || 0);
-        const annual = price * 12;
-        return `
-          <article class="tool-card" style="text-align:left;">
-            <h3>${escapeHtml(cleanString(plan.name))}</h3>
-            <p class="muted">${price === 0 ? "Free" : `$${price}/mo`}</p>
-            <p class="inline-hint">${price === 0 ? "No annual commitment required." : `$${annual}/year equivalent`}</p>
-            <p class="inline-hint">Seats: ${Number(plan.seatLimit || 1)}</p>
-            <ul class="list">
-              ${Object.entries(plan.features || {})
-                .filter(([, enabled]) => enabled)
-                .map(([feature]) => `<li>${escapeHtml(feature)}</li>`)
-                .join("")}
-            </ul>
-            <div class="btn-row">
-              <button class="btn primary" type="button" data-plan-id="${escapeHtml(cleanString(plan.id))}">Choose ${escapeHtml(cleanString(plan.name))}</button>
-            </div>
-          </article>
-        `;
-      }
-
-      async function loadPlans() {
-        await ensureAuthReady();
-        const payload = await apiGet("/api/billing/plans");
-        const plans = Array.isArray(payload.plans) ? payload.plans : [];
-        cachedPlans = plans;
-        grid.innerHTML = plans.map((plan) => renderPlanCard(plan)).join("");
-        grid.querySelectorAll("[data-plan-id]").forEach((button) => {
-          button.addEventListener("click", async () => {
-            const planId = cleanString(button.getAttribute("data-plan-id"));
-            try {
-              const result = await apiPost("/api/billing/checkout", { planId, seats: 1 });
-              showNotice(`Plan activated: ${escapeHtml(planId)}.`, "ok");
-              await trackEvent("pricing_checkout_start", { planId });
-              if (result && result.checkoutUrl) {
-                window.location.href = result.checkoutUrl;
-              }
-            } catch (error) {
-              showNotice(`Checkout failed: ${escapeHtml(cleanString(error.message))}`, "error");
-            }
-          });
-        });
-      }
-
-      function runRecommendation() {
-        if (!cachedPlans.length) {
-          return;
-        }
-        const sermons = Number(roiSermons.value || 0);
-        const lessons = Number(roiLessons.value || 0);
-        const team = Math.max(1, Number(roiTeam.value || 1));
-        const minutes = Number(roiMinutes.value || 0);
-        const needsAnalyzer = minutes > 0;
-        const needsTeam = team > 1;
-        const heavyLoad = sermons >= 6 || lessons >= 10;
-
-        let recommended = cachedPlans.find((plan) => cleanString(plan.id) === "free");
-        if (needsTeam) {
-          recommended = cachedPlans.find((plan) => cleanString(plan.id) === (team > 5 ? "team-growth" : "bundle-pro")) || recommended;
-        } else if (needsAnalyzer && heavyLoad) {
-          recommended = cachedPlans.find((plan) => cleanString(plan.id) === "bundle-pro") || recommended;
-        } else if (needsAnalyzer) {
-          recommended = cachedPlans.find((plan) => cleanString(plan.id) === "sermon-analyzer-pro") || recommended;
-        } else if (lessons >= 8) {
-          recommended = cachedPlans.find((plan) => cleanString(plan.id) === "teaching-tools-unlimited") || recommended;
-        } else if (sermons >= 4) {
-          recommended = cachedPlans.find((plan) => cleanString(plan.id) === "sermon-preparation-pro") || recommended;
-        }
-
-        const price = Number(recommended && recommended.priceUsdMonthly || 0);
-        const estimatedHoursSaved = (sermons * 1.4) + (lessons * 0.8) + (minutes > 0 ? 1.5 : 0);
-        const estimatedValue = estimatedHoursSaved * 45;
-        roiResult.innerHTML = `
-          <strong>Recommended:</strong> ${escapeHtml(cleanString(recommended && recommended.name, "Free"))}
-          (${price === 0 ? "Free" : `$${price}/mo`})<br />
-          <strong>Estimated time saved:</strong> ${estimatedHoursSaved.toFixed(1)} hrs/mo<br />
-          <strong>Estimated value:</strong> $${estimatedValue.toFixed(0)}/mo at $45/hr equivalent
-        `;
-      }
-
-      if (roiRun) {
-        roiRun.addEventListener("click", runRecommendation);
-      }
-      void loadPlans();
-    })();
-  </script>
 </body>
 </html>

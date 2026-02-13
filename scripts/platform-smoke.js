@@ -6,6 +6,7 @@ const path = require("node:path");
 
 const PORT = Number(process.env.PLATFORM_SMOKE_PORT || 3299);
 const BASE_URL = `http://127.0.0.1:${PORT}`;
+const ADMIN_EMAIL = "dalmomendonca@gmail.com";
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -51,21 +52,24 @@ async function run() {
 
   try {
     await waitForHealth();
-    const signup = await fetchJson(`${BASE_URL}/api/auth/signup`, {
+    const auth = await fetchJson(`${BASE_URL}/api/auth/google`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email: `platform-smoke-${Date.now()}@example.com`,
-        password: "Password123!",
-        name: "Platform Smoke"
+        email: ADMIN_EMAIL,
+        name: "Platform Admin Smoke",
+        sub: `platform-smoke-${Date.now()}`
       })
     });
     const headers = {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${signup.sessionToken}`,
-      "X-Session-Token": signup.sessionToken,
-      "X-Workspace-Id": signup.workspaceId
+      Authorization: `Bearer ${auth.sessionToken}`,
+      "X-Session-Token": auth.sessionToken,
+      "X-Workspace-Id": auth.workspaceId
     };
+    if (process.env.ADMIN_DASHBOARD_PASSWORD) {
+      headers["X-Admin-Dashboard-Password"] = process.env.ADMIN_DASHBOARD_PASSWORD;
+    }
 
     await fetchJson(`${BASE_URL}/api/events`, {
       method: "POST",
@@ -80,12 +84,12 @@ async function run() {
       method: "POST",
       headers,
       body: JSON.stringify({
-        workspaceId: signup.workspaceId,
+        workspaceId: auth.workspaceId,
         planId: "bundle-pro",
         seats: 3
       })
     });
-    const entitlements = await fetchJson(`${BASE_URL}/api/entitlements?workspaceId=${encodeURIComponent(signup.workspaceId)}`, {
+    const entitlements = await fetchJson(`${BASE_URL}/api/entitlements?workspaceId=${encodeURIComponent(auth.workspaceId)}`, {
       headers
     });
     if (!entitlements.features || !entitlements.features["bible-study"]) {
@@ -96,7 +100,7 @@ async function run() {
       method: "POST",
       headers,
       body: JSON.stringify({
-        workspaceId: signup.workspaceId,
+        workspaceId: auth.workspaceId,
         tool: "bible-study",
         title: "Smoke Project",
         payload: { summary: "smoke" }
@@ -106,14 +110,14 @@ async function run() {
     if (!projectId) {
       throw new Error("Project creation failed.");
     }
-    await fetchJson(`${BASE_URL}/api/projects/${encodeURIComponent(projectId)}?workspaceId=${encodeURIComponent(signup.workspaceId)}`, {
+    await fetchJson(`${BASE_URL}/api/projects/${encodeURIComponent(projectId)}?workspaceId=${encodeURIComponent(auth.workspaceId)}`, {
       headers
     });
     await fetchJson(`${BASE_URL}/api/projects/${encodeURIComponent(projectId)}/exports`, {
       method: "POST",
       headers,
       body: JSON.stringify({
-        workspaceId: signup.workspaceId,
+        workspaceId: auth.workspaceId,
         exportType: "smoke-export",
         metadata: { source: "platform-smoke" }
       })
@@ -123,7 +127,7 @@ async function run() {
       method: "POST",
       headers,
       body: JSON.stringify({
-        workspaceId: signup.workspaceId,
+        workspaceId: auth.workspaceId,
         fromTool: "bible-study",
         toTool: "sermon-preparation",
         sourceProjectId: projectId,
@@ -138,7 +142,7 @@ async function run() {
       method: "POST",
       headers,
       body: JSON.stringify({
-        workspaceId: signup.workspaceId,
+        workspaceId: auth.workspaceId,
         title: "Smoke Path",
         items: [
           {
@@ -155,14 +159,14 @@ async function run() {
     if (!pathId) {
       throw new Error("Learning path creation failed.");
     }
-    await fetchJson(`${BASE_URL}/api/learning-paths/${encodeURIComponent(pathId)}?workspaceId=${encodeURIComponent(signup.workspaceId)}`, {
+    await fetchJson(`${BASE_URL}/api/learning-paths/${encodeURIComponent(pathId)}?workspaceId=${encodeURIComponent(auth.workspaceId)}`, {
       headers
     });
     await fetchJson(`${BASE_URL}/api/learning-paths/${encodeURIComponent(pathId)}`, {
       method: "PATCH",
       headers,
       body: JSON.stringify({
-        workspaceId: signup.workspaceId,
+        workspaceId: auth.workspaceId,
         title: "Smoke Path Updated"
       })
     });
@@ -170,17 +174,17 @@ async function run() {
       method: "POST",
       headers,
       body: JSON.stringify({
-        workspaceId: signup.workspaceId
+        workspaceId: auth.workspaceId
       })
     });
 
     await fetchJson(`${BASE_URL}/api/lifecycle/process`, { method: "POST" });
     await fetchJson(`${BASE_URL}/api/analytics/activation?segment=all`, { headers });
     await fetchJson(`${BASE_URL}/api/analytics/cogs`, { headers });
-    await fetchJson(`${BASE_URL}/api/usage/summary?workspaceId=${encodeURIComponent(signup.workspaceId)}`, { headers });
-    await fetchJson(`${BASE_URL}/api/usage/forecast?workspaceId=${encodeURIComponent(signup.workspaceId)}`, { headers });
-    await fetchJson(`${BASE_URL}/api/activity?workspaceId=${encodeURIComponent(signup.workspaceId)}&limit=20`, { headers });
-    await fetchJson(`${BASE_URL}/api/team/dashboard?workspaceId=${encodeURIComponent(signup.workspaceId)}`, { headers });
+    await fetchJson(`${BASE_URL}/api/usage/summary?workspaceId=${encodeURIComponent(auth.workspaceId)}`, { headers });
+    await fetchJson(`${BASE_URL}/api/usage/forecast?workspaceId=${encodeURIComponent(auth.workspaceId)}`, { headers });
+    await fetchJson(`${BASE_URL}/api/activity?workspaceId=${encodeURIComponent(auth.workspaceId)}&limit=20`, { headers });
+    await fetchJson(`${BASE_URL}/api/team/dashboard?workspaceId=${encodeURIComponent(auth.workspaceId)}`, { headers });
 
     console.log("Platform smoke test passed.");
   } finally {

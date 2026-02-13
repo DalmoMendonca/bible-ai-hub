@@ -44,6 +44,10 @@
                   </select>
                 </div>
                 <div class="field">
+                  <label for="dashPassword">Admin Dashboard Password</label>
+                  <input id="dashPassword" class="input" type="password" autocomplete="current-password" placeholder="Required when configured" />
+                </div>
+                <div class="field">
                   <label>&nbsp;</label>
                   <button id="dashRefresh" type="button" class="btn primary">Refresh Dashboard</button>
                 </div>
@@ -106,7 +110,9 @@
       const fromInput = document.getElementById("dashFrom");
       const toInput = document.getElementById("dashTo");
       const segmentInput = document.getElementById("dashSegment");
+      const passwordInput = document.getElementById("dashPassword");
       const refreshButton = document.getElementById("dashRefresh");
+      const DASH_PASSWORD_KEY = "bah_admin_dashboard_password";
 
       function percent(value) {
         return `${Number(value || 0).toFixed(2)}%`;
@@ -132,6 +138,37 @@
         toInput.value = iso(today);
       }
 
+      function readStoredPassword() {
+        try {
+          return cleanString(sessionStorage.getItem(DASH_PASSWORD_KEY));
+        } catch (_) {
+          return "";
+        }
+      }
+
+      function persistPassword(value) {
+        try {
+          const safe = cleanString(value);
+          if (safe) {
+            sessionStorage.setItem(DASH_PASSWORD_KEY, safe);
+          } else {
+            sessionStorage.removeItem(DASH_PASSWORD_KEY);
+          }
+        } catch (_) {
+          // Ignore storage failures.
+        }
+      }
+
+      function getAdminHeaders() {
+        const password = cleanString(passwordInput && passwordInput.value, readStoredPassword());
+        if (!password) {
+          return {};
+        }
+        return {
+          "X-Admin-Dashboard-Password": password
+        };
+      }
+
       async function load() {
         setBusy(refreshButton, "Refreshing...", true);
         const from = cleanString(fromInput.value);
@@ -139,7 +176,9 @@
         const segment = cleanString(segmentInput.value, "all");
 
         try {
-          const activation = await apiGet(`/api/analytics/activation?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&segment=${encodeURIComponent(segment)}`);
+          const activation = await apiGet(`/api/analytics/activation?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&segment=${encodeURIComponent(segment)}`, {
+            headers: getAdminHeaders()
+          });
           const funnel = activation && activation.funnel ? activation.funnel : {};
           const rates = activation && activation.conversionRates ? activation.conversionRates : {};
           activationMount.innerHTML = `
@@ -170,7 +209,9 @@
         }
 
         try {
-          const cogs = await apiGet(`/api/analytics/cogs?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`);
+          const cogs = await apiGet(`/api/analytics/cogs?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`, {
+            headers: getAdminHeaders()
+          });
           const rows = Array.isArray(cogs.features) ? cogs.features : [];
           const totals = cogs && cogs.totals ? cogs.totals : { runs: 0, units: 0, costUsd: 0 };
           cogsTotals.innerHTML = `
@@ -211,7 +252,9 @@
         }
 
         try {
-          const forecast = await apiGet("/api/usage/forecast");
+          const forecast = await apiGet("/api/usage/forecast", {
+            headers: getAdminHeaders()
+          });
           const rows = Array.isArray(forecast.forecast) ? forecast.forecast : [];
           forecastMount.innerHTML = rows.length
             ? `<ul class="list">${rows.map((row) => `
@@ -229,7 +272,9 @@
         }
 
         try {
-          const team = await apiGet("/api/team/dashboard");
+          const team = await apiGet("/api/team/dashboard", {
+            headers: getAdminHeaders()
+          });
           teamMount.innerHTML = `
             <div class="metric-grid">
               <div class="metric"><strong>${Number(team.workspace && team.workspace.memberCount || 0)}</strong><span>Members</span></div>
@@ -243,7 +288,9 @@
         }
 
         try {
-          const queue = await apiGet("/api/ai/sermon-analyzer/queue-status");
+          const queue = await apiGet("/api/ai/sermon-analyzer/queue-status", {
+            headers: getAdminHeaders()
+          });
           const jobs = Array.isArray(queue.jobs) ? queue.jobs : [];
           queueMount.innerHTML = `
             <p><strong>Queue depth:</strong> ${Number(queue.queueDepth || 0)} | <strong>Worker running:</strong> ${queue.workerRunning ? "Yes" : "No"}</p>
@@ -262,11 +309,13 @@
                 return;
               }
               buttonEl.disabled = true;
-              buttonEl.textContent = "Canceling...";
-              try {
-                await apiPost(`/api/ai/sermon-analyzer/jobs/${encodeURIComponent(jobId)}/cancel`, {});
-                buttonEl.textContent = "Canceled";
-                void load();
+                buttonEl.textContent = "Canceling...";
+                try {
+                  await apiPost(`/api/ai/sermon-analyzer/jobs/${encodeURIComponent(jobId)}/cancel`, {}, {
+                    headers: getAdminHeaders()
+                  });
+                  buttonEl.textContent = "Canceled";
+                  void load();
               } catch (error) {
                 buttonEl.disabled = false;
                 buttonEl.textContent = "Cancel";
@@ -279,7 +328,9 @@
         }
 
         try {
-          const activity = await apiGet("/api/activity?limit=80");
+          const activity = await apiGet("/api/activity?limit=80", {
+            headers: getAdminHeaders()
+          });
           const items = Array.isArray(activity.items) ? activity.items : [];
           activityMount.innerHTML = items.length
             ? `<ul class="list">${items.slice(0, 30).map((item) => `
@@ -298,7 +349,14 @@
       }
 
       setDefaultDateRange();
+      if (passwordInput) {
+        passwordInput.value = readStoredPassword();
+        passwordInput.addEventListener("input", () => {
+          persistPassword(passwordInput.value);
+        });
+      }
       refreshButton.addEventListener("click", () => {
+        persistPassword(passwordInput && passwordInput.value);
         void load();
       });
       void load();

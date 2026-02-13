@@ -9,6 +9,7 @@ const PORT = Number(process.env.CROSSFUNC_PORT || 3399);
 const BASE_URL = `http://127.0.0.1:${PORT}`;
 const SERVER_START_TIMEOUT_MS = 30_000;
 const REQUEST_TIMEOUT_MS = 180_000;
+const ADMIN_EMAIL = "dalmomendonca@gmail.com";
 
 const APP_SLUGS = [
   "bible-study",
@@ -148,12 +149,16 @@ function assertNotContains(text, needle, contextLabel) {
 }
 
 function authHeaders(auth) {
-  return {
+  const headers = {
     "Content-Type": "application/json",
     Authorization: `Bearer ${auth.sessionToken}`,
     "X-Session-Token": auth.sessionToken,
     "X-Workspace-Id": auth.workspaceId
   };
+  if (process.env.ADMIN_DASHBOARD_PASSWORD) {
+    headers["X-Admin-Dashboard-Password"] = process.env.ADMIN_DASHBOARD_PASSWORD;
+  }
+  return headers;
 }
 
 async function runStep(name, fn) {
@@ -268,6 +273,16 @@ async function run() {
     assert.ok(auth && auth.sessionToken, "Guest auth should return sessionToken.");
     assert.ok(auth.workspaceId, "Guest auth should return workspaceId.");
     const headers = authHeaders(auth);
+    const adminAuth = await runStep("Auth Admin Session", () => fetchJson(`${BASE_URL}/api/auth/google`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: ADMIN_EMAIL,
+        name: "Crossfunctional Admin",
+        sub: `crossfunctional-${Date.now()}`
+      })
+    }));
+    const adminHeaders = authHeaders(adminAuth);
 
     await runStep("Platform Crossflow APIs", async () => {
       const workspaceId = String(auth.workspaceId);
@@ -342,10 +357,13 @@ async function run() {
       await fetchJson(`${BASE_URL}/api/usage/summary?workspaceId=${encodeURIComponent(workspaceId)}`, { headers });
       await fetchJson(`${BASE_URL}/api/usage/forecast?workspaceId=${encodeURIComponent(workspaceId)}`, { headers });
       await fetchJson(`${BASE_URL}/api/activity?workspaceId=${encodeURIComponent(workspaceId)}&limit=10`, { headers });
-      await fetchJson(`${BASE_URL}/api/team/dashboard?workspaceId=${encodeURIComponent(workspaceId)}`, { headers });
-      await fetchJson(`${BASE_URL}/api/analytics/activation?segment=all`, { headers });
-      await fetchJson(`${BASE_URL}/api/analytics/cogs`, { headers });
+      await fetchJson(`${BASE_URL}/api/team/dashboard?workspaceId=${encodeURIComponent(adminAuth.workspaceId)}`, { headers: adminHeaders });
+      await fetchJson(`${BASE_URL}/api/analytics/activation?segment=all`, { headers: adminHeaders });
+      await fetchJson(`${BASE_URL}/api/analytics/cogs`, { headers: adminHeaders });
       await fetchJson(`${BASE_URL}/api/content/social-proof`, { headers });
+      const flags = await fetchJson(`${BASE_URL}/api/feature-flags`, { headers });
+      assert.ok(flags && flags.flags && typeof flags.flags === "object", "feature flags payload should include flags map");
+      assert.ok(flags.flags.social_proof_role_filters, "feature flags should include social_proof_role_filters");
       await fetchJson(`${BASE_URL}/api/video-library/status`, { headers });
     });
 

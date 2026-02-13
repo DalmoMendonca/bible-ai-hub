@@ -25,6 +25,7 @@
   const exportStudentButton = document.createElement("button");
   const exportParentButton = document.createElement("button");
   const exportSlidesButton = document.createElement("button");
+  let saveBtn = null;
   let lastGenerated = null;
   let activeProjectId = "";
   registerToolLifecycle("teaching-tools");
@@ -44,6 +45,9 @@
   function setExportButtonsVisible(isVisible) {
     copyButton.classList.toggle("hidden", !isVisible);
     printButton.classList.toggle("hidden", !isVisible);
+    if (saveBtn) {
+      saveBtn.classList.toggle("hidden", !isVisible);
+    }
     exportLeaderButton.classList.toggle("hidden", !isVisible);
     exportStudentButton.classList.toggle("hidden", !isVisible);
     exportParentButton.classList.toggle("hidden", !isVisible);
@@ -176,7 +180,7 @@
       <div class="card">
         <span class="kicker">Lesson Input</span>
         <h3 class="section-title">${escapeHtml(meta.sourceTitle)}</h3>
-        <p><strong>Audience:</strong> ${escapeHtml(meta.audience)} | <strong>Setting:</strong> ${escapeHtml(meta.setting)} | <strong>Group:</strong> ${escapeHtml(String(meta.groupSize))} | <strong>Length:</strong> ${escapeHtml(String(meta.length))} min</p>
+        <p><strong>Audience:</strong> ${escapeHtml(cleanString(meta.audienceLabel, meta.audience))} | <strong>Setting:</strong> ${escapeHtml(meta.setting)} | <strong>Group:</strong> ${escapeHtml(String(meta.groupSize))} | <strong>Length:</strong> ${escapeHtml(String(meta.length))} min</p>
         ${meta.resources ? `<p><strong>Resources:</strong> ${escapeHtml(meta.resources)}</p>` : ""}
         ${meta.passageText ? `<p>${escapeHtml(meta.passageText)}</p>` : ""}
       </div>
@@ -239,8 +243,7 @@
     setExportButtonsVisible(false);
 
     const rawPassage = $("#teachPassage").value.trim();
-    const audience = $("#teachAudience").value;
-    const selectedAudiences = Array.from(document.querySelectorAll("#teachAudienceKids, #teachAudienceYouth, #teachAudienceAdults"))
+    const selectedAudiences = Array.from(document.querySelectorAll("#teachAudienceKids, #teachAudienceYouth, #teachAudienceAdults, #teachAudienceMixed"))
       .filter((inputEl) => inputEl && inputEl.checked)
       .map((inputEl) => cleanString(inputEl.value))
       .filter(Boolean);
@@ -255,6 +258,11 @@
       showNotice("Enter a passage or topic.", "error");
       return;
     }
+    if (!selectedAudiences.length) {
+      showNotice("Select at least one audience before generating a kit.", "error");
+      return;
+    }
+    const primaryAudience = selectedAudiences[0];
 
     setBusy(button, "Building Kit...", true);
 
@@ -279,7 +287,7 @@
       const ai = await apiPost("/api/ai/teaching-tools", {
         sourceTitle,
         passageText,
-        audience,
+        audience: primaryAudience,
         audiences: selectedAudiences,
         setting,
         groupSize,
@@ -292,7 +300,7 @@
         input: {
           sourceTitle,
           passageText,
-          audience,
+          audience: primaryAudience,
           selectedAudiences,
           setting,
           groupSize,
@@ -304,7 +312,16 @@
         },
         output: ai
       };
-      result.innerHTML = renderPlan({ sourceTitle, passageText, audience, setting, groupSize, length, resources }, ai);
+      result.innerHTML = renderPlan({
+        sourceTitle,
+        passageText,
+        audience: primaryAudience,
+        audienceLabel: selectedAudiences.join(", "),
+        setting,
+        groupSize,
+        length,
+        resources
+      }, ai);
       if (ai && ai.multiAudience && Array.isArray(ai.comparisonSummary) && ai.comparisonSummary.length) {
         const comparisonCard = document.createElement("div");
         comparisonCard.className = "card";
@@ -450,9 +467,9 @@
     }
   });
 
-  const saveBtn = document.createElement("button");
+  saveBtn = document.createElement("button");
   saveBtn.type = "button";
-  saveBtn.className = "btn secondary";
+  saveBtn.className = "btn secondary hidden";
   saveBtn.textContent = "Save Kit";
   saveBtn.addEventListener("click", async () => {
     if (!lastGenerated) {
@@ -493,9 +510,6 @@
       if (input.sourceTitle) {
         $("#teachPassage").value = cleanString(input.sourceTitle);
       }
-      if (input.audience) {
-        $("#teachAudience").value = cleanString(input.audience);
-      }
       if (input.setting) {
         $("#teachSetting").value = cleanString(input.setting);
       }
@@ -519,9 +533,26 @@
         const kids = $("#teachAudienceKids");
         const youth = $("#teachAudienceYouth");
         const adults = $("#teachAudienceAdults");
+        const mixed = $("#teachAudienceMixed");
         if (kids) kids.checked = selected.has("Kids (7-11)");
         if (youth) youth.checked = selected.has("Youth (12-18)");
         if (adults) adults.checked = selected.has("Adults");
+        if (mixed) mixed.checked = selected.has("Mixed ages");
+      } else if (input.audience) {
+        const audienceValue = cleanString(input.audience);
+        const map = {
+          "Kids (7-11)": "#teachAudienceKids",
+          "Youth (12-18)": "#teachAudienceYouth",
+          "Adults": "#teachAudienceAdults",
+          "Mixed ages": "#teachAudienceMixed"
+        };
+        const target = map[audienceValue];
+        if (target) {
+          const inputEl = $(target);
+          if (inputEl) {
+            inputEl.checked = true;
+          }
+        }
       }
       if (payload.output && typeof payload.output === "object") {
         lastGenerated = payload;
@@ -529,6 +560,9 @@
           sourceTitle: cleanString(input.sourceTitle, cleanString(payload.output && payload.output.sourceTitle)),
           passageText: cleanString(input.passageText),
           audience: cleanString(input.audience),
+          audienceLabel: Array.isArray(input.selectedAudiences) && input.selectedAudiences.length
+            ? input.selectedAudiences.map((item) => cleanString(item)).filter(Boolean).join(", ")
+            : cleanString(input.audience),
           setting: cleanString(input.setting),
           groupSize: Number(input.groupSize || 0),
           length: Number(input.length || 0),
