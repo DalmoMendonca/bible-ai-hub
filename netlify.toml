@@ -30,18 +30,6 @@
   force = true
 
 [[redirects]]
-  from = "/ai/apps/:app/index.html"
-  to = "/ai/apps/:app/"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "/ai/apps/:app"
-  to = "/ai/apps/:app/"
-  status = 301
-  force = true
-
-[[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/api/api/:splat"
   status = 200
