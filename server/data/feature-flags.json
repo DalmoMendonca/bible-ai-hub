@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "updatedAt": "2026-02-13T00:00:00.000Z",
+  "internalDomains": [
+    "hiredalmo.com"
+  ],
+  "flags": [
+    {
+      "key": "social_proof_role_filters",
+      "description": "Show role-based filters for homepage social proof modules.",
+      "stage": "ga",
+      "rolloutPercent": 100,
+      "allowUsers": [],
+      "allowWorkspaces": []
+    },
+    {
+      "key": "advanced_dashboard_panels",
+      "description": "Enable expanded dashboard panels for staged UX rollout.",
+      "stage": "partial",
+      "rolloutPercent": 70,
+      "allowUsers": [],
+      "allowWorkspaces": []
+    },
+    {
+      "key": "prompt_ops_controls",
+      "description": "Enable advanced prompt operations controls for internal operators.",
+      "stage": "internal",
+      "rolloutPercent": 0,
+      "allowUsers": [],
+      "allowWorkspaces": []
+    }
+  ]
+}
+
