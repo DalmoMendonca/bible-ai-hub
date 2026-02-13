@@ -138,6 +138,7 @@
 
       <div class="card">
         <span class="kicker">AI Verdict</span>
+        <p><strong>Revision objective:</strong> ${escapeHtml(cleanString(ai.revisionObjective || "balanced"))}</p>
         <p>${escapeHtml(cleanString(ai.overallVerdict, "No verdict returned."))}</p>
       </div>
 
@@ -193,6 +194,7 @@
 
     const sermonType = $("#evalType").value;
     const targetMinutes = Number($("#evalTarget").value || 35);
+    const revisionObjective = $("#evalObjective").value || "balanced";
     const manuscript = $("#evalText").value.trim();
 
     if (!manuscript) {
@@ -207,12 +209,13 @@
       const ai = await apiPost("/api/ai/research-helper", {
         sermonType,
         targetMinutes,
+        revisionObjective,
         diagnostics,
         manuscript
       });
 
       lastGenerated = {
-        input: { sermonType, targetMinutes, manuscript, diagnostics },
+        input: { sermonType, targetMinutes, revisionObjective, manuscript, diagnostics },
         output: ai
       };
       result.innerHTML = renderAnalysis(diagnostics, ai);
@@ -329,6 +332,9 @@
       }
       if (Number.isFinite(Number(input.targetMinutes))) {
         $("#evalTarget").value = String(Number(input.targetMinutes));
+      }
+      if (input.revisionObjective) {
+        $("#evalObjective").value = cleanString(input.revisionObjective);
       }
       if (input.manuscript) {
         $("#evalText").value = cleanString(input.manuscript);

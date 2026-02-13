@@ -61,6 +61,21 @@ async function run() {
   const outcomes = [];
 
   try {
+    const authResponse = await fetch(`${baseUrl}/api/auth/guest`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({})
+    });
+    const authPayload = await authResponse.json().catch(() => ({}));
+    if (!authResponse.ok || !authPayload.sessionToken || !authPayload.workspaceId) {
+      throw new Error(`Unable to create guest auth session (${authResponse.status}).`);
+    }
+    const authHeaders = {
+      Authorization: `Bearer ${authPayload.sessionToken}`,
+      "X-Session-Token": authPayload.sessionToken,
+      "X-Workspace-Id": authPayload.workspaceId
+    };
+
     for (let i = 1; i <= runs; i += 1) {
       const started = Date.now();
       const form = new FormData();
@@ -73,6 +88,7 @@ async function run() {
 
       const response = await fetch(`${baseUrl}/api/ai/sermon-analyzer`, {
         method: "POST",
+        headers: authHeaders,
         body: form
       });
       const payload = await response.json().catch(() => ({}));
@@ -109,4 +125,3 @@ run().catch((error) => {
   console.error(`Sermon analyzer file test failed: ${error.message}`);
   process.exitCode = 1;
 });
-

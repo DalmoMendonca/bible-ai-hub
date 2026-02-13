@@ -44,6 +44,18 @@ npm run smoke:platform
 
 This script starts a temporary local server on port `3199`, validates each AI route, and exits with a non-zero code if any app contract fails.
 
+Run the user-feedback regression pack (targeted scenarios from QA findings):
+
+```bash
+npm run test:user-feedback
+```
+
+Run the crossfunctional system suite (pages, assets, platform + all tool APIs):
+
+```bash
+node scripts/crossfunctional-test.js
+```
+
 Run a real file-upload sermon analyzer test:
 
 ```bash
@@ -66,6 +78,14 @@ List active prompt IDs + versions:
 ```bash
 npm run prompts:list
 ```
+
+## Server architecture notes
+
+- `server.js` is the API composition root and route layer.
+- Prompt specs and versions live in `server/prompts/`.
+- Bible study orchestration and quality floor logic lives in `server/bible-study-workflow.js`.
+- Research helper output normalization/quality gates live in `server/research-helper-quality.js`.
+- Video-search confidence scoring and uncertainty behavior live in `server/video-search-confidence.js`.
 
 ## Video ingestion workflow (local-first)
 

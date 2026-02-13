@@ -10,6 +10,7 @@ const VIDEO_SEARCH_GUIDANCE_PROMPT = {
     "Given a user query and retrieved timestamped clips, provide concise next-step learning guidance.",
     "Prioritize practical navigation advice: what to watch first, why, and what to search next.",
     "Keep recommendations grounded in the retrieved matches. Do not invent specific video details.",
+    "If search confidence is low, explicitly state uncertainty and steer users toward safer refinement steps.",
     "Return strict JSON only."
   ],
   task: "Generate search guidance and practical follow-up query suggestions.",
@@ -27,7 +28,8 @@ const VIDEO_SEARCH_GUIDANCE_PROMPT = {
     suggestedQueryCount: "4-6",
     suggestionQuality: "Specific, searchable, and varied in scope.",
     tone: "clear, concise, warm, and practical",
-    integrityRule: "Do not claim clip content beyond provided topMatches metadata."
+    integrityRule: "Do not claim clip content beyond provided topMatches metadata.",
+    uncertaintyRule: "When confidence.tier is low, include a cautionary sentence before recommendations."
   }
 };
 

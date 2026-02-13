@@ -47,8 +47,8 @@ All production prompts live in `server/prompts/`.
 
 - Primary prompt: `research-helper.evaluation`
 - Optional second pass: `research-helper.revision-pack`
-- Runtime gate: revision pack triggers when manuscript report is shallow (thin verdict/scores/revisions/tightening lines).
-- Output target: high-impact editorial coaching plus tighter revision pack.
+- Runtime gate: revision pack triggers when manuscript report is shallow (thin verdict/scores/revisions/tightening lines) or revision rationale is weak.
+- Output target: high-impact editorial coaching with revision-objective alignment (`clarity`, `brevity`, `warmth`, `exegetical_precision`) and explicit "Why this helps this sermon" rationale per action.
 
 ### Video Search
 

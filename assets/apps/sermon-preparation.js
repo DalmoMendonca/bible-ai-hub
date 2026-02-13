@@ -55,12 +55,14 @@
     return rows
       .map((row, index) => {
         const refs = cleanArray(row.supportingReferences, 5);
+        const contextualRefs = cleanArray(row.contextualReferences, 5);
         return `
           <article class="result-item">
             <h3>${index + 1}. ${escapeHtml(cleanString(row.heading, "Main point"))}</h3>
             <p>${escapeHtml(cleanString(row.explanation))}</p>
             <p><strong>Application:</strong> ${escapeHtml(cleanString(row.application))}</p>
             ${refs.length ? `<p><strong>Support:</strong> ${refs.map((item) => escapeHtml(item)).join(", ")}</p>` : ""}
+            ${contextualRefs.length ? `<p class="inline-hint"><strong>Contextual (outside requested span):</strong> ${contextualRefs.map((item) => escapeHtml(item)).join(", ")}</p>` : ""}
           </article>
         `;
       })
@@ -111,6 +113,14 @@
         <span class="kicker">Outline</span>
         ${renderOutlineRows(ai.outline)}
       </div>
+
+      ${ai && ai.passageBoundary && ai.passageBoundary.enabled ? `
+        <div class="card">
+          <span class="kicker">Passage Boundary Diagnostics</span>
+          <p><strong>Requested range:</strong> ${escapeHtml(cleanString(ai.passageBoundary.reference))}</p>
+          ${(ai.passageBoundary.warnings || []).length ? `<ul class="list">${(ai.passageBoundary.warnings || []).map((line) => `<li>${escapeHtml(cleanString(line))}</li>`).join("")}</ul>` : `<p class="inline-hint">No boundary warnings detected.</p>`}
+        </div>
+      ` : ""}
 
       <div class="card">
         <span class="kicker">Transitions</span>

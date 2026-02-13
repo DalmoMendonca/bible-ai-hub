@@ -59,6 +59,31 @@
     return `${Number(value || 0).toFixed(1)}%`;
   }
 
+  function renderConfidence(confidence) {
+    const row = confidence && typeof confidence === "object" ? confidence : null;
+    if (!row) {
+      return "";
+    }
+    const tier = cleanString(row.tier, "medium").toLowerCase();
+    const tierLabel = tier === "high" ? "High" : tier === "low" ? "Low" : "Medium";
+    const diagnostics = row.diagnostics && typeof row.diagnostics === "object" ? row.diagnostics : {};
+    const reasonCodes = cleanArray(row.reasonCodes, 6);
+    return `
+      <div class="card">
+        <span class="kicker">Search Confidence</span>
+        <p><strong>${escapeHtml(tierLabel)}</strong> (${formatPercent(row.score || 0)})</p>
+        <p>${escapeHtml(cleanString(row.summary))}</p>
+        <p class="inline-hint">
+          Top score: ${formatPercent(diagnostics.topScore || 0)} |
+          Avg top-3: ${formatPercent(diagnostics.avgTop3Score || 0)} |
+          Query overlap: ${formatPercent(diagnostics.termOverlap || 0)} |
+          Transcript coverage: ${formatPercent(diagnostics.transcriptCoverage || 0)}
+        </p>
+        ${reasonCodes.length ? `<p class="inline-hint"><strong>Signals:</strong> ${reasonCodes.map((item) => escapeHtml(item)).join(", ")}</p>` : ""}
+      </div>
+    `;
+  }
+
   function renderStats(stats) {
     if (!stats) {
       libraryStats.innerHTML = "";
@@ -147,7 +172,7 @@
           <div class="tag-row">
             ${(item.tags || []).map((tag) => `<span class="tag">${escapeHtml(cleanString(tag))}</span>`).join("")}
           </div>
-          <p><strong>AI confidence:</strong> ${formatPercent(item.score)} ${cleanString(item.transcriptStatus) !== "ready" ? " | transcript pending" : ""}</p>
+          <p><strong>Match score:</strong> ${formatPercent(item.score)} ${cleanString(item.transcriptStatus) !== "ready" ? " | transcript pending" : ""}</p>
         </article>
       `;
     }).join("");
@@ -589,6 +614,7 @@
     result.innerHTML = `
       ${renderIngestion(payload.ingestion)}
       ${payload.personalization && payload.personalization.enabled ? `<div class="card"><span class="kicker">Personalized Recommendations Enabled</span><p class="inline-hint">Suggestions are influenced by your recent activity. You can disable this in the form.</p></div>` : ""}
+      ${renderConfidence(payload.confidence)}
       ${payload.guidance ? `<div class="card"><span class="kicker">AI Guidance</span><p>${escapeHtml(cleanString(payload.guidance))}</p></div>` : ""}
       ${rows.length ? `<div class="card"><span class="kicker">Learning Paths & Search Sessions</span><div class="btn-row"><button type="button" class="btn secondary" id="videoSavePath">Save Top Results as Path</button><button type="button" class="btn secondary" id="videoSaveSearchProject">${activeProjectId ? "Update Search Session" : "Save Search Session"}</button></div></div>` : ""}
       ${renderResults(rows, queryTerms)}
@@ -701,9 +727,12 @@
       const unavailable = payload.ingestion && Array.isArray(payload.ingestion.unavailable)
         ? payload.ingestion.unavailable.length
         : 0;
+      const confidence = payload.confidence && typeof payload.confidence === "object" ? payload.confidence : {};
+      const confidenceTier = cleanString(confidence.tier, rows.length ? "medium" : "low");
+      const noticeType = confidenceTier === "low" ? "error" : rows.length ? "ok" : "error";
       showNotice(
-        `Found ${rows.length} timestamped result${rows.length === 1 ? "" : "s"} for "${escapeHtml(query)}"${completed ? ` and transcribed ${completed} new video${completed === 1 ? "" : "s"}` : ""}${unavailable ? ` (${unavailable} source${unavailable === 1 ? "" : "s"} only available as hosted playback)` : ""}.`,
-        rows.length ? "ok" : "error"
+        `Found ${rows.length} timestamped result${rows.length === 1 ? "" : "s"} for "${escapeHtml(query)}"${completed ? ` and transcribed ${completed} new video${completed === 1 ? "" : "s"}` : ""}${unavailable ? ` (${unavailable} source${unavailable === 1 ? "" : "s"} only available as hosted playback)` : ""}. Confidence: ${escapeHtml(cleanString(confidenceTier))}.`,
+        noticeType
       );
       await trackEvent("generation_success", { tool: "video-search", resultCount: rows.length });
     } catch (error) {

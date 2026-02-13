@@ -7,8 +7,10 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
+    "test:all": "node scripts/crossfunctional-test.js && npm run smoke && npm run smoke:platform && npm run test:user-feedback",
     "smoke": "node scripts/smoke-test.js",
     "smoke:platform": "node scripts/platform-smoke.js",
+    "test:user-feedback": "node scripts/user-feedback-regression.js",
     "sermon:test-file": "node scripts/test-sermon-analyzer-file.js",
     "videos:ingest": "node scripts/ingest-video-library.js",
     "videos:hosted-urls": "node scripts/set-video-hosted-urls.js",

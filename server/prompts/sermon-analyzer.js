@@ -64,6 +64,7 @@ const SERMON_INSIGHTS_PROMPT = {
     strengthsCount: "4-8",
     risksCount: "4-8",
     priorityActionsCount: "5-8",
+    priorityActionFormat: "Each priority action must be a plain string line, not an object.",
     drillCount: "5-9",
     planCount: "5-9",
     evidenceRule: "Arc notes, risks, and actions should be anchored to transcript and metrics.",

@@ -55,6 +55,7 @@ const BIBLE_STUDY_PROMPT = {
     "Separate observation, interpretation, and application with clear boundaries.",
     "Use only what can be responsibly inferred from the supplied passage text and user focus.",
     "Never invent lexical, historical, or theological facts. If uncertain, phrase as a verification question.",
+    "Never emit placeholders (e.g., 'No AI findings were produced'). Every stage must contain passage-specific findings.",
     "Write clearly enough for non-specialists while retaining scholarly precision.",
     "Return strict JSON only."
   ],
@@ -83,7 +84,8 @@ const BIBLE_STUDY_PROMPT = {
     tone: "erudite, warm, clear, and practical",
     citationIntegrity: "Do not fabricate references, quotations, lexical data, or historical claims.",
     theologicalPosture: "Be faithful to the text, pastorally helpful, and explicit about uncertainty.",
-    clarityRule: "Prefer concrete verbs and short actionable lines over abstract commentary."
+    clarityRule: "Prefer concrete verbs and short actionable lines over abstract commentary.",
+    antiPlaceholderRule: "Do not output generic template text; anchor each stage to the supplied passage."
   }
 };
 

@@ -15,6 +15,8 @@ const {
   videoSearchDocument
 } = require("./server/video-library");
 const { createBibleStudyWorkflow } = require("./server/bible-study-workflow");
+const { createResearchHelperQualityTools } = require("./server/research-helper-quality");
+const { createVideoSearchConfidenceTools } = require("./server/video-search-confidence");
 const {
   buildSermonPreparationPrompt,
   buildSermonPreparationRefinementPrompt,
@@ -141,6 +143,29 @@ const bibleStudyWorkflow = createBibleStudyWorkflow({
   cleanString,
   cleanArray,
   cleanObjectArray
+});
+// Research Helper output quality rules live in a dedicated module so prompt-flow tuning
+// can evolve without expanding this API orchestration file further.
+const {
+  normalizeRevisionObjective,
+  normalizeResearchHelperGuidanceLines,
+  evaluateResearchHelperDraft
+} = createResearchHelperQualityTools({
+  cleanString,
+  cleanArray,
+  cleanObjectArray,
+  clampNumber
+});
+// Video-search confidence is calibrated in one place to keep API, prompt guidance,
+// and UI confidence badges aligned as thresholds are tuned.
+const {
+  assessVideoSearchConfidence,
+  shouldUseLowConfidenceGuidancePrefix,
+  buildLowConfidenceGuidancePrefix
+} = createVideoSearchConfidenceTools({
+  cleanString,
+  cleanArray,
+  tokenize
 });
 
 ensureVideoCatalog({ force: true, maxAgeMs: 0 });
@@ -1233,13 +1258,23 @@ app.post("/api/ai/sermon-preparation", requireOpenAIKey, requireFeatureAccess("s
   const styleDirective = buildStyleDirective(styleMode);
   const continuityDirective = buildSeriesContinuityDirective(seriesContext);
   const augmentedGoal = [goal, styleDirective, continuityDirective].filter(Boolean).join("\n");
+  const passageBounds = parsePrimaryPassageBounds(reference);
+  const passageBoundaryDiagnostics = {
+    enabled: Boolean(passageBounds),
+    reference,
+    warnings: [],
+    inScopeReferences: [],
+    outOfScopeReferences: [],
+    unknownFormatReferences: []
+  };
 
   const sermonPlanPrompt = buildSermonPreparationPrompt({
     passage: { reference, text },
     audience,
     minutes,
     theme,
-    goal: augmentedGoal
+    goal: augmentedGoal,
+    passageBounds: passageBounds || null
   });
   let ai = await chatJson({
     ...sermonPlanPrompt,
@@ -1271,13 +1306,45 @@ app.post("/api/ai/sermon-preparation", requireOpenAIKey, requireFeatureAccess("s
   }
 
   const outline = cleanObjectArray(ai.outline, 4)
-    .map((item) => ({
-      heading: cleanString(item.heading),
-      explanation: cleanString(item.explanation),
-      application: cleanString(item.application),
-      supportingReferences: cleanArray(item.supportingReferences, 4)
-    }))
+    .map((item) => {
+      const heading = cleanString(item.heading);
+      const referenceAudit = enforceSupportingReferenceBounds(
+        cleanArray(item.supportingReferences, 6),
+        passageBounds
+      );
+      for (const inScope of referenceAudit.inScope) {
+        passageBoundaryDiagnostics.inScopeReferences.push(inScope);
+      }
+      for (const outOfScope of referenceAudit.outOfScope) {
+        passageBoundaryDiagnostics.outOfScopeReferences.push({
+          reference: outOfScope.reference,
+          reason: outOfScope.reason,
+          heading
+        });
+      }
+      for (const unknown of referenceAudit.unknown) {
+        passageBoundaryDiagnostics.unknownFormatReferences.push({
+          reference: unknown.reference,
+          reason: unknown.reason,
+          heading
+        });
+      }
+      return {
+        heading,
+        explanation: cleanString(item.explanation),
+        application: cleanString(item.application),
+        supportingReferences: referenceAudit.inScope.slice(0, 4),
+        contextualReferences: referenceAudit.outOfScope.map((row) => row.reference).slice(0, 3)
+      };
+    })
     .filter((item) => item.heading || item.explanation || item.application);
+
+  if (passageBounds && passageBoundaryDiagnostics.outOfScopeReferences.length) {
+    passageBoundaryDiagnostics.warnings.push("Some supporting references were outside the requested passage span and moved to contextual notes.");
+  }
+  if (passageBounds && passageBoundaryDiagnostics.unknownFormatReferences.length) {
+    passageBoundaryDiagnostics.warnings.push("Some references could not be parsed for strict boundary checks; review them manually.");
+  }
 
   const timingPlan = cleanObjectArray(ai.timingPlan, 6)
     .map((item) => ({
@@ -1320,12 +1387,19 @@ app.post("/api/ai/sermon-preparation", requireOpenAIKey, requireFeatureAccess("s
         temperature: 0.18
       });
       const tightenedOutline = cleanObjectArray(tightened.outline, 4)
-        .map((item) => ({
-          heading: cleanString(item.heading),
-          explanation: cleanString(item.explanation),
-          application: cleanString(item.application),
-          supportingReferences: cleanArray(item.supportingReferences, 4)
-        }))
+        .map((item) => {
+          const referenceAudit = enforceSupportingReferenceBounds(
+            cleanArray(item.supportingReferences, 6),
+            passageBounds
+          );
+          return {
+            heading: cleanString(item.heading),
+            explanation: cleanString(item.explanation),
+            application: cleanString(item.application),
+            supportingReferences: referenceAudit.inScope.slice(0, 4),
+            contextualReferences: referenceAudit.outOfScope.map((row) => row.reference).slice(0, 3)
+          };
+        })
         .filter((item) => item.heading || item.explanation || item.application);
       if (tightenedOutline.length) {
         tighteningPass = {
@@ -1357,7 +1431,8 @@ app.post("/api/ai/sermon-preparation", requireOpenAIKey, requireFeatureAccess("s
     transitions: cleanArray(ai.transitions, 6),
     applications: cleanArray(ai.applications, 6),
     illustrations: cleanArray(ai.illustrations, 6),
-    timingPlan
+    timingPlan,
+    passageBoundary: passageBoundaryDiagnostics
   });
 }));
 
@@ -1539,6 +1614,7 @@ app.post("/api/ai/teaching-tools", requireOpenAIKey, requireFeatureAccess("teach
 app.post("/api/ai/research-helper", requireOpenAIKey, requireFeatureAccess("research-helper"), enforceQuota("research-helper"), asyncHandler(async (req, res) => {
   const input = req.body || {};
   const manuscript = cleanString(input.manuscript);
+  const revisionObjective = normalizeRevisionObjective(input.revisionObjective);
 
   if (!manuscript) {
     res.status(400).json({ error: "Sermon manuscript is required." });
@@ -1548,6 +1624,7 @@ app.post("/api/ai/research-helper", requireOpenAIKey, requireFeatureAccess("rese
   const researchPrompt = buildResearchHelperPrompt({
     sermonType: cleanString(input.sermonType, "Expository"),
     targetMinutes: clampNumber(Number(input.targetMinutes || 35), 8, 90, 35),
+    revisionObjective,
     diagnostics: input.diagnostics || {},
     manuscript
   });
@@ -1562,13 +1639,28 @@ app.post("/api/ai/research-helper", requireOpenAIKey, requireFeatureAccess("rese
       rationale: cleanString(row.rationale)
     }))
     .filter((row) => row.label);
-  const revisionQuality = evaluateResearchHelperDraft(ai, baselineScores);
+  const baselineRevisions = normalizeResearchHelperGuidanceLines(ai.revisions, {
+    objective: revisionObjective,
+    max: 14,
+    type: "revision"
+  });
+  const baselineTighten = normalizeResearchHelperGuidanceLines(ai.tightenLines, {
+    objective: revisionObjective,
+    max: 10,
+    type: "tighten"
+  });
+  const revisionQuality = evaluateResearchHelperDraft({
+    ...ai,
+    revisions: baselineRevisions,
+    tightenLines: baselineTighten
+  }, baselineScores, revisionObjective);
 
   if (revisionQuality.shouldRefine) {
     try {
       const revisionPrompt = buildResearchHelperRevisionPrompt({
         sermonType: cleanString(input.sermonType, "Expository"),
         targetMinutes: clampNumber(Number(input.targetMinutes || 35), 8, 90, 35),
+        revisionObjective,
         diagnostics: input.diagnostics || {},
         manuscriptExcerpt: manuscript.slice(0, 12000),
         baseline: {
@@ -1576,8 +1668,8 @@ app.post("/api/ai/research-helper", requireOpenAIKey, requireFeatureAccess("rese
           scores: baselineScores,
           strengths: cleanArray(ai.strengths, 8),
           gaps: cleanArray(ai.gaps, 9),
-          revisions: cleanArray(ai.revisions, 10),
-          tightenLines: cleanArray(ai.tightenLines, 7)
+          revisions: baselineRevisions.slice(0, 10),
+          tightenLines: baselineTighten.slice(0, 7)
         },
         qualitySignals: revisionQuality.signals
       });
@@ -1587,10 +1679,26 @@ app.post("/api/ai/research-helper", requireOpenAIKey, requireFeatureAccess("rese
         model: OPENAI_LONG_FORM_MODEL,
         maxTokens: 1200
       });
-      const improvedRevisions = cleanArray(revisionPack.revisions, 10);
-      const improvedTighten = cleanArray(revisionPack.tightenLines, 7);
-      const currentRevisions = cleanArray(ai.revisions, 10);
-      const currentTighten = cleanArray(ai.tightenLines, 7);
+      const improvedRevisions = normalizeResearchHelperGuidanceLines(revisionPack.revisions, {
+        objective: revisionObjective,
+        max: 10,
+        type: "revision"
+      });
+      const improvedTighten = normalizeResearchHelperGuidanceLines(revisionPack.tightenLines, {
+        objective: revisionObjective,
+        max: 7,
+        type: "tighten"
+      });
+      const currentRevisions = normalizeResearchHelperGuidanceLines(ai.revisions, {
+        objective: revisionObjective,
+        max: 10,
+        type: "revision"
+      });
+      const currentTighten = normalizeResearchHelperGuidanceLines(ai.tightenLines, {
+        objective: revisionObjective,
+        max: 7,
+        type: "tighten"
+      });
 
       if (improvedRevisions.length >= currentRevisions.length && improvedRevisions.length) {
         ai = { ...ai, revisions: improvedRevisions };
@@ -1615,6 +1723,16 @@ app.post("/api/ai/research-helper", requireOpenAIKey, requireFeatureAccess("rese
     .filter((row) => row.label);
   const trendPayload = buildEvaluationTrendPayload(req, scores, manuscript);
   const revisionDelta = trendPayload.delta;
+  const normalizedRevisions = normalizeResearchHelperGuidanceLines(ai.revisions, {
+    objective: revisionObjective,
+    max: 12,
+    type: "revision"
+  });
+  const normalizedTightenLines = normalizeResearchHelperGuidanceLines(ai.tightenLines, {
+    objective: revisionObjective,
+    max: 8,
+    type: "tighten"
+  });
 
   recordFeatureUsage(req, "research-helper", {
     unitType: "evaluation",
@@ -1634,8 +1752,9 @@ app.post("/api/ai/research-helper", requireOpenAIKey, requireFeatureAccess("rese
     scores,
     strengths: cleanArray(ai.strengths, 6),
     gaps: cleanArray(ai.gaps, 7),
-    revisions: cleanArray(ai.revisions, 8),
-    tightenLines: cleanArray(ai.tightenLines, 4),
+    revisionObjective,
+    revisions: normalizedRevisions.slice(0, 8),
+    tightenLines: normalizedTightenLines.slice(0, 4),
     trends: trendPayload.trends,
     revisionDelta
   });
@@ -2099,6 +2218,14 @@ app.post("/api/ai/video-search", requireOpenAIKey, requireFeatureAccess("video-s
   }
 
   const relatedContent = buildRelatedContent(sorted, topRows.map((row) => row.id), queryTerms);
+  const searchConfidence = assessVideoSearchConfidence({
+    query,
+    queryTerms,
+    results,
+    topRows,
+    stats: getVideoLibraryStats(),
+    semanticEnabled: chunkSemanticEnabled
+  });
 
   let guidanceText = "";
   let suggestedQueries = [];
@@ -2106,6 +2233,7 @@ app.post("/api/ai/video-search", requireOpenAIKey, requireFeatureAccess("video-s
   try {
     const guidancePrompt = buildVideoSearchGuidancePrompt({
       query,
+      confidence: searchConfidence,
       topMatches: results.slice(0, 6).map((row) => ({
         title: row.title,
         timestamp: row.timestamp,
@@ -2128,6 +2256,9 @@ app.post("/api/ai/video-search", requireOpenAIKey, requireFeatureAccess("video-s
 
   if (!guidanceText) {
     guidanceText = buildGuidanceFallback(query, results);
+  }
+  if (shouldUseLowConfidenceGuidancePrefix(searchConfidence)) {
+    guidanceText = buildLowConfidenceGuidancePrefix(searchConfidence, guidanceText);
   }
   if (!suggestedQueries.length) {
     suggestedQueries = buildSuggestedQueriesFallback(query, results);
@@ -2169,6 +2300,7 @@ app.post("/api/ai/video-search", requireOpenAIKey, requireFeatureAccess("video-s
     ingestion,
     filters: filterSet,
     rankingMode,
+    confidence: searchConfidence,
     results,
     relatedContent: mergedRelated,
     guidance: guidanceText,
@@ -2638,8 +2770,13 @@ async function generateSermonAnalyzerReport({ file, context, goal, notes, transc
     }
   }
 
-  const pacingAnalysis = computePacingAnalysis(transcript, localAnalysis);
-  const vocalDynamics = computeVocalDynamics(localAnalysis);
+  const metricProvenance = resolveAnalyzerMetricProvenance({
+    file,
+    transcript,
+    localAnalysis
+  });
+  const pacingAnalysis = computePacingAnalysis(transcript, localAnalysis, metricProvenance);
+  const vocalDynamics = computeVocalDynamics(localAnalysis, metricProvenance);
   const insights = await sermonInsightsAgent({
     context,
     goal,
@@ -2647,7 +2784,8 @@ async function generateSermonAnalyzerReport({ file, context, goal, notes, transc
     transcript,
     pacingAnalysis,
     vocalDynamics,
-    localAnalysis
+    localAnalysis,
+    metricProvenance
   });
   orchestration.push({
     agent: "insights_agent",
@@ -2662,7 +2800,8 @@ async function generateSermonAnalyzerReport({ file, context, goal, notes, transc
       durationSeconds: Number((transcript.durationSeconds || 0).toFixed(2)),
       transcriptionModel: OPENAI_TRANSCRIBE_MODEL,
       generatedAt: new Date().toISOString(),
-      totalPipelineMs: Date.now() - startedAt
+      totalPipelineMs: Date.now() - startedAt,
+      metricProvenance
     },
     orchestration,
     transcript: {
@@ -2726,17 +2865,26 @@ function attachBibleStudyEvidence(response, context = {}) {
       markdown: buildBibleStudyMarkdownExport({
         reference: primaryReference,
         profile,
-        payload: source
+        payload: {
+          ...source,
+          clear: withEvidence
+        }
       }),
       html: buildBibleStudyHtmlExport({
         reference: primaryReference,
         profile,
-        payload: source
+        payload: {
+          ...source,
+          clear: withEvidence
+        }
       }),
       docText: buildBibleStudyDocTextExport({
         reference: primaryReference,
         profile,
-        payload: source
+        payload: {
+          ...source,
+          clear: withEvidence
+        }
       }),
       generatedAt: new Date().toISOString()
     }
@@ -3000,9 +3148,9 @@ function enrichSermonAnalyzerReportWithCoaching(report, context) {
     },
     comparativeAnalytics: previous
       ? {
-        pacingDeltaWpm: Number((Number(pacing.averageWpm || 0) - Number(previous.pacingAnalysis && previous.pacingAnalysis.averageWpm || 0)).toFixed(2)),
+        pacingDeltaWpm: Number((Number(pacing.avgWpm || 0) - Number(previous.pacingAnalysis && previous.pacingAnalysis.avgWpm || 0)).toFixed(2)),
         vocalVarietyDelta: Number((Number(dynamics.varietyScore || 0) - Number(previous.vocalDynamics && previous.vocalDynamics.varietyScore || 0)).toFixed(2)),
-        clarityDelta: Number((Number((base.contentAnalysis && base.contentAnalysis.clarityScore) || 0) - Number((previous.contentAnalysis && previous.contentAnalysis.clarityScore) || 0)).toFixed(2))
+        clarityDelta: Number((Number((base.contentAnalysis && base.contentAnalysis.gospelClarityScore) || 0) - Number((previous.contentAnalysis && previous.contentAnalysis.gospelClarityScore) || 0)).toFixed(2))
       }
       : {
         pacingDeltaWpm: 0,
@@ -3013,12 +3161,13 @@ function enrichSermonAnalyzerReportWithCoaching(report, context) {
 }
 
 function buildCoachingDrills(pacing, dynamics) {
+  const avgWpm = Number(pacing && pacing.avgWpm || 120);
   return [
     {
       day: 1,
       focus: "Pacing discipline",
       target: "Run a 5-minute segment at target tempo with intentional pauses.",
-      metric: `Target WPM band around ${Math.max(100, Math.round(Number(pacing.averageWpm || 120) - 8))}-${Math.round(Number(pacing.averageWpm || 120) + 8)}`
+      metric: `Target WPM band around ${Math.max(100, Math.round(avgWpm - 8))}-${Math.round(avgWpm + 8)}`
     },
     {
       day: 2,
@@ -3723,7 +3872,142 @@ function detectScriptureReferences(text) {
   return Array.from(new Set(matches)).slice(0, 50);
 }
 
-function computePacingAnalysis(transcript, localAnalysis) {
+function normalizeBookKey(value) {
+  return cleanString(value)
+    .toLowerCase()
+    .replace(/\./g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function parsePrimaryPassageBounds(reference) {
+  const raw = cleanString(reference);
+  if (!raw) {
+    return null;
+  }
+
+  const match = raw.match(/^(.+?)\s+(\d{1,3})(?::(\d{1,3})(?:\s*-\s*(\d{1,3}))?)?$/i);
+  if (!match) {
+    return null;
+  }
+
+  const book = cleanString(match[1]);
+  const chapter = Number(match[2]);
+  const verseStart = Number(match[3] || 0);
+  const verseEnd = Number(match[4] || verseStart || 0);
+
+  if (!book || !Number.isFinite(chapter)) {
+    return null;
+  }
+
+  return {
+    book,
+    bookKey: normalizeBookKey(book),
+    chapter,
+    hasVerseRange: verseStart > 0,
+    verseStart: verseStart > 0 ? Math.min(verseStart, verseEnd || verseStart) : null,
+    verseEnd: verseStart > 0 ? Math.max(verseStart, verseEnd || verseStart) : null
+  };
+}
+
+function parseScriptureReferenceParts(reference) {
+  const raw = cleanString(reference);
+  const match = raw.match(/^(.+?)\s+(\d{1,3})(?::(\d{1,3})(?:\s*-\s*(\d{1,3}))?)?$/i);
+  if (!match) {
+    return null;
+  }
+
+  const book = cleanString(match[1]);
+  const chapter = Number(match[2]);
+  const verseStart = Number(match[3] || 0);
+  const verseEnd = Number(match[4] || verseStart || 0);
+
+  if (!book || !Number.isFinite(chapter)) {
+    return null;
+  }
+
+  return {
+    reference: raw,
+    book,
+    bookKey: normalizeBookKey(book),
+    chapter,
+    hasVerseRange: verseStart > 0,
+    verseStart: verseStart > 0 ? Math.min(verseStart, verseEnd || verseStart) : null,
+    verseEnd: verseStart > 0 ? Math.max(verseStart, verseEnd || verseStart) : null
+  };
+}
+
+function enforceSupportingReferenceBounds(references, passageBounds) {
+  const rows = cleanArray(references, 12);
+  if (!passageBounds) {
+    return {
+      inScope: rows,
+      outOfScope: [],
+      unknown: []
+    };
+  }
+
+  const inScope = [];
+  const outOfScope = [];
+  const unknown = [];
+
+  for (const reference of rows) {
+    const parsed = parseScriptureReferenceParts(reference);
+    if (!parsed) {
+      unknown.push({
+        reference,
+        reason: "Could not parse reference format."
+      });
+      inScope.push(reference);
+      continue;
+    }
+
+    if (parsed.bookKey !== passageBounds.bookKey) {
+      outOfScope.push({
+        reference,
+        reason: "Different biblical book than requested passage."
+      });
+      continue;
+    }
+    if (parsed.chapter !== passageBounds.chapter) {
+      outOfScope.push({
+        reference,
+        reason: "Different chapter than requested passage."
+      });
+      continue;
+    }
+    if (!passageBounds.hasVerseRange) {
+      inScope.push(reference);
+      continue;
+    }
+    if (!parsed.hasVerseRange) {
+      unknown.push({
+        reference,
+        reason: "Chapter-level reference provided; cannot confirm verse-range containment."
+      });
+      inScope.push(reference);
+      continue;
+    }
+
+    const overlap = !(parsed.verseEnd < passageBounds.verseStart || parsed.verseStart > passageBounds.verseEnd);
+    if (!overlap) {
+      outOfScope.push({
+        reference,
+        reason: `Outside requested verse span ${passageBounds.book} ${passageBounds.chapter}:${passageBounds.verseStart}-${passageBounds.verseEnd}.`
+      });
+      continue;
+    }
+    inScope.push(reference);
+  }
+
+  return {
+    inScope: Array.from(new Set(inScope)),
+    outOfScope,
+    unknown
+  };
+}
+
+function computePacingAnalysis(transcript, localAnalysis, metricProvenance) {
   const transcriptText = cleanString(transcript.text);
   const segments = cleanObjectArray(transcript.segments, 600);
   const durationSeconds = Math.max(Number(transcript.durationSeconds || 0), 1);
@@ -3755,6 +4039,8 @@ function computePacingAnalysis(transcript, localAnalysis) {
   const rhythmScore = Number((Math.max(0, Math.min(1, (paceCloseness * 0.7) + (pauseBalance * 0.3))) * 100).toFixed(1));
 
   return {
+    source: cleanString(metricProvenance && metricProvenance.pacing && metricProvenance.pacing.source, "transcript_estimate"),
+    sourceNote: cleanString(metricProvenance && metricProvenance.pacing && metricProvenance.pacing.note),
     avgWpm,
     targetBandWpm: "120-150",
     sectionWpm,
@@ -3766,7 +4052,7 @@ function computePacingAnalysis(transcript, localAnalysis) {
   };
 }
 
-function computeVocalDynamics(localAnalysis) {
+function computeVocalDynamics(localAnalysis, metricProvenance) {
   const acoustic = localAnalysis && typeof localAnalysis.acoustic === "object" ? localAnalysis.acoustic : {};
   const pitch = localAnalysis && typeof localAnalysis.pitch === "object" ? localAnalysis.pitch : {};
   const monotoneSections = cleanObjectArray(localAnalysis.monotoneSections, 40)
@@ -3776,6 +4062,34 @@ function computeVocalDynamics(localAnalysis) {
       duration: Number(section.duration || 0)
     }))
     .filter((section) => section.duration > 0);
+
+  const hasAcousticSignal = [acoustic.avgDb, acoustic.peakDb, acoustic.dynamicRangeDb, acoustic.volumeStdDb]
+    .some((value) => Number.isFinite(Number(value)) && Number(value) !== 0);
+  const hasPitchSignal = [pitch.meanHz, pitch.stdHz, pitch.rangeHz, pitch.varietyScore]
+    .some((value) => Number.isFinite(Number(value)) && Number(value) !== 0);
+  const hasVocalSignal = hasAcousticSignal || hasPitchSignal || monotoneSections.length > 0;
+  const source = cleanString(metricProvenance && metricProvenance.vocalDynamics && metricProvenance.vocalDynamics.source, "unavailable");
+  const sourceNote = cleanString(metricProvenance && metricProvenance.vocalDynamics && metricProvenance.vocalDynamics.note);
+
+  if (!hasVocalSignal) {
+    return {
+      source,
+      sourceNote,
+      avgDb: null,
+      peakDb: null,
+      silenceRatio: null,
+      dynamicRangeDb: null,
+      volumeStdDb: null,
+      pitchMeanHz: null,
+      pitchStdHz: null,
+      pitchRangeHz: null,
+      varietyScore: null,
+      volumeRangeScore: null,
+      pitchVariationScore: null,
+      monotoneRiskScore: null,
+      monotoneSections: []
+    };
+  }
 
   const dynamicRangeDb = Number(acoustic.dynamicRangeDb || 0);
   const pitchStdHz = Number(pitch.stdHz || 0);
@@ -3787,6 +4101,8 @@ function computeVocalDynamics(localAnalysis) {
   const monotoneRiskScore = Number((Math.max(0, Math.min(1, monotoneSections.length / 8)) * 100).toFixed(1));
 
   return {
+    source,
+    sourceNote,
     avgDb: Number(acoustic.avgDb || 0),
     peakDb: Number(acoustic.peakDb || 0),
     silenceRatio: Number(acoustic.silenceRatio || 0),
@@ -3800,6 +4116,50 @@ function computeVocalDynamics(localAnalysis) {
     pitchVariationScore,
     monotoneRiskScore,
     monotoneSections
+  };
+}
+
+function resolveAnalyzerMetricProvenance({ file, transcript, localAnalysis }) {
+  const hasAudioFile = Boolean(file);
+  const transcriptText = cleanString(transcript && transcript.text);
+  const hasTranscript = Boolean(transcriptText);
+  const pauses = cleanObjectArray(localAnalysis && localAnalysis.pauseMoments, 400);
+  const acoustic = localAnalysis && typeof localAnalysis.acoustic === "object" ? localAnalysis.acoustic : {};
+  const pitch = localAnalysis && typeof localAnalysis.pitch === "object" ? localAnalysis.pitch : {};
+
+  const hasAcousticSignal = [acoustic.avgDb, acoustic.peakDb, acoustic.dynamicRangeDb, acoustic.volumeStdDb]
+    .some((value) => Number.isFinite(Number(value)) && Number(value) !== 0);
+  const hasPitchSignal = [pitch.meanHz, pitch.stdHz, pitch.rangeHz, pitch.varietyScore]
+    .some((value) => Number.isFinite(Number(value)) && Number(value) !== 0);
+
+  const pacingSource = hasTranscript
+    ? (hasAudioFile ? "audio" : "transcript_estimate")
+    : "unavailable";
+  const vocalSource = (hasAcousticSignal || hasPitchSignal)
+    ? "audio"
+    : hasAudioFile
+      ? "unavailable"
+      : "unavailable";
+
+  return {
+    pacing: {
+      source: pacingSource,
+      note: hasAudioFile
+        ? "Pacing derived from transcript segmentation of uploaded audio."
+        : "Pacing estimated from transcript text and timing buckets; treat as directional."
+    },
+    vocalDynamics: {
+      source: vocalSource,
+      note: (hasAcousticSignal || hasPitchSignal)
+        ? "Vocal metrics derived from local acoustic analysis."
+        : hasAudioFile
+          ? "No reliable acoustic metrics were available from the uploaded file."
+          : "No uploaded audio waveform was provided, so acoustic vocal metrics are unavailable."
+    },
+    pauseSignals: {
+      source: pauses.length ? "audio_or_local_analysis" : "unavailable",
+      count: pauses.length
+    }
   };
 }
 
@@ -3862,7 +4222,8 @@ async function sermonInsightsAgent(input) {
     transcriptBuckets: buckets,
     regexReferences,
     pacingAnalysis: pacingForPrompt,
-    vocalDynamics: vocalForPrompt
+    vocalDynamics: vocalForPrompt,
+    metricProvenance: input && input.metricProvenance ? input.metricProvenance : {}
   });
   let ai = await chatJson({
     ...insightsPrompt,
@@ -3963,8 +4324,8 @@ async function sermonInsightsAgent(input) {
         executiveSummary: cleanString(coachingRaw.executiveSummary),
         strengths: cleanArray(coachingRaw.strengths, 8),
         risks: cleanArray(coachingRaw.risks, 8),
-        priorityActions: cleanArray(coachingRaw.priorityActions, 8),
-        practiceDrills: cleanArray(coachingRaw.practiceDrills, 10),
+        priorityActions: normalizeCoachingListItems(coachingRaw.priorityActions, 8),
+        practiceDrills: normalizeCoachingListItems(coachingRaw.practiceDrills, 10),
         nextWeekPlan: cleanArray(coachingRaw.nextWeekPlan, 10)
       }
     }
@@ -4128,53 +4489,40 @@ function evaluateTeachingKitDraft(rawDraft, requestedLength) {
   };
 }
 
-function evaluateResearchHelperDraft(rawDraft, baselineScores) {
-  const draft = rawDraft && typeof rawDraft === "object" ? rawDraft : {};
-  const signals = [];
-  const overallVerdict = cleanString(draft.overallVerdict);
-  const scores = Array.isArray(baselineScores) && baselineScores.length
-    ? baselineScores
-    : cleanObjectArray(draft.scores, 8).map((row) => ({
-        label: cleanString(row.label),
-        score: clampNumber(Number(row.score), 0, 10, 0),
-        rationale: cleanString(row.rationale)
-      })).filter((row) => row.label);
-  const strengths = cleanArray(draft.strengths, 12);
-  const gaps = cleanArray(draft.gaps, 14);
-  const revisions = cleanArray(draft.revisions, 14);
-  const tightenLines = cleanArray(draft.tightenLines, 10);
-
-  if (overallVerdict.length < 38) {
-    signals.push("Overall verdict needs clearer synthesis.");
-  }
-  if (scores.length) {
-    const weakRationales = scores.filter((row) => cleanString(row.rationale).length < 24);
-    if (weakRationales.length >= 2 && revisions.length < 7) {
-      signals.push("Weak score rationale needs stronger revision guidance follow-through.");
-    }
-  }
-  if (strengths.length < 3) {
-    signals.push("Strength recognition is too sparse.");
-  }
-  if (gaps.length < 5) {
-    signals.push("Gap analysis lacks detail.");
-  }
-  if (revisions.length < 6) {
-    signals.push("Revision guidance is insufficient.");
-  }
-  if (tightenLines.length < 3) {
-    signals.push("Line-tightening guidance needs more examples.");
+function normalizeCoachingListItems(value, max = 8) {
+  if (!Array.isArray(value)) {
+    return [];
   }
 
-  const lowScoreCount = scores.filter((row) => Number(row.score || 0) <= 6).length;
-  if (lowScoreCount >= 2 && revisions.length < 8) {
-    signals.push("Revision pack is too light for the detected weaknesses.");
-  }
-
-  return {
-    shouldRefine: signals.length > 0,
-    signals
-  };
+  return value
+    .map((item) => {
+      if (typeof item === "string") {
+        return cleanString(item);
+      }
+      if (!item || typeof item !== "object" || Array.isArray(item)) {
+        return "";
+      }
+      const action = cleanString(item.action || item.title || item.target || item.focus);
+      const rationale = cleanString(item.rationale || item.why);
+      const metric = cleanString(item.metric || item.measure);
+      const priority = cleanString(item.priority);
+      const pieces = [];
+      if (action) {
+        pieces.push(action);
+      }
+      if (rationale) {
+        pieces.push(`Why: ${rationale}`);
+      }
+      if (metric) {
+        pieces.push(`Metric: ${metric}`);
+      }
+      if (priority) {
+        pieces.push(`Priority: ${priority}`);
+      }
+      return cleanString(pieces.join(" | "));
+    })
+    .filter(Boolean)
+    .slice(0, max);
 }
 
 function evaluateSermonCoachingDraft(rawDraft) {
@@ -4186,8 +4534,8 @@ function evaluateSermonCoachingDraft(rawDraft) {
   const executiveSummary = cleanString(coaching.executiveSummary);
   const strengths = cleanArray(coaching.strengths, 12);
   const risks = cleanArray(coaching.risks, 12);
-  const priorityActions = cleanArray(coaching.priorityActions, 12);
-  const practiceDrills = cleanArray(coaching.practiceDrills, 12);
+  const priorityActions = normalizeCoachingListItems(coaching.priorityActions, 12);
+  const practiceDrills = normalizeCoachingListItems(coaching.practiceDrills, 12);
   const nextWeekPlan = cleanArray(coaching.nextWeekPlan, 12);
   const weakActionRows = priorityActions.filter((line) => line.split(" ").length < 5);
   const weakDrills = practiceDrills.filter((line) => !/\b(min|minute|repeat|set|timer|times?)\b/i.test(line));

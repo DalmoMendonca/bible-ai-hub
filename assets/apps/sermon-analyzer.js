@@ -54,12 +54,39 @@
   }
 
   function listHtml(items, max = 8) {
-    const rows = cleanArray(items, max);
+    const rows = normalizeListItems(items, max);
     if (!rows.length) {
       return `<p class="inline-hint">No items returned.</p>`;
     }
 
     return `<ul class="list">${rows.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
+  }
+
+  function normalizeListItems(items, max = 8) {
+    if (!Array.isArray(items)) {
+      return [];
+    }
+    return items
+      .map((item) => {
+        if (typeof item === "string") {
+          return cleanString(item);
+        }
+        if (!item || typeof item !== "object" || Array.isArray(item)) {
+          return "";
+        }
+        const action = cleanString(item.action || item.title || item.target || item.focus);
+        const rationale = cleanString(item.rationale || item.why);
+        const metric = cleanString(item.metric || item.measure);
+        const priority = cleanString(item.priority);
+        const parts = [];
+        if (action) parts.push(action);
+        if (rationale) parts.push(`Why: ${rationale}`);
+        if (metric) parts.push(`Metric: ${metric}`);
+        if (priority) parts.push(`Priority: ${priority}`);
+        return cleanString(parts.join(" | "));
+      })
+      .filter(Boolean)
+      .slice(0, max);
   }
 
   function formatBytes(bytes) {
@@ -83,6 +110,24 @@
       return `${hrs}:${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
     }
     return `${mins}:${String(secs).padStart(2, "0")}`;
+  }
+
+  function formatMetric(value, suffix = "", decimals = 1) {
+    if (!Number.isFinite(Number(value))) {
+      return "N/A";
+    }
+    return `${Number(value).toFixed(decimals)}${suffix}`;
+  }
+
+  function formatMetricSource(source) {
+    const clean = cleanString(source, "unavailable").toLowerCase();
+    if (clean === "audio") {
+      return "Audio-derived";
+    }
+    if (clean === "transcript_estimate") {
+      return "Transcript estimate";
+    }
+    return "Unavailable";
   }
 
   function percentile(values, p) {
@@ -564,15 +609,21 @@
     lines.push("Sermon Analyzer Report");
     lines.push(`Generated: ${cleanString(payload.meta.generatedAt)}`);
     lines.push(`Duration: ${formatClock(payload.meta.durationSeconds)}`);
+    if (payload.meta && payload.meta.metricProvenance) {
+      const pacingSource = cleanString(payload.meta.metricProvenance.pacing && payload.meta.metricProvenance.pacing.source, "unavailable");
+      const vocalSource = cleanString(payload.meta.metricProvenance.vocalDynamics && payload.meta.metricProvenance.vocalDynamics.source, "unavailable");
+      lines.push(`Pacing source: ${pacingSource}`);
+      lines.push(`Vocal source: ${vocalSource}`);
+    }
     lines.push("");
     lines.push("Executive Summary:");
     lines.push(cleanString(payload.coachingFeedback.executiveSummary));
     lines.push("");
     lines.push("Priority Actions:");
-    cleanArray(payload.coachingFeedback.priorityActions, 12).forEach((item) => lines.push(`- ${item}`));
+    normalizeListItems(payload.coachingFeedback.priorityActions, 12).forEach((item) => lines.push(`- ${item}`));
     lines.push("");
     lines.push("Practice Drills:");
-    cleanArray(payload.coachingFeedback.practiceDrills, 12).forEach((item) => lines.push(`- ${item}`));
+    normalizeListItems(payload.coachingFeedback.practiceDrills, 12).forEach((item) => lines.push(`- ${item}`));
     lines.push("");
     lines.push("Scripture References:");
     cleanArray(payload.contentAnalysis.scriptureReferences, 20).forEach((item) => lines.push(`- ${item}`));
@@ -589,18 +640,31 @@
     const coaching = payload.coachingFeedback || {};
     const coachMode = payload.coachMode || {};
     const comparative = payload.comparativeAnalytics || {};
+    const metricProvenance = meta.metricProvenance && typeof meta.metricProvenance === "object"
+      ? meta.metricProvenance
+      : {};
+    const pacingSource = metricProvenance.pacing && typeof metricProvenance.pacing === "object"
+      ? metricProvenance.pacing
+      : {};
+    const vocalSource = metricProvenance.vocalDynamics && typeof metricProvenance.vocalDynamics === "object"
+      ? metricProvenance.vocalDynamics
+      : {};
+    const hasVocalSignal = [vocal.varietyScore, vocal.dynamicRangeDb, vocal.pitchStdHz]
+      .some((value) => value !== null && value !== undefined && Number.isFinite(Number(value)));
 
     return `
       <div class="card">
         <span class="kicker">Report Overview</span>
         <div class="metric-grid">
           <div class="metric"><strong>${formatClock(meta.durationSeconds)}</strong><span>Duration</span></div>
-          <div class="metric"><strong>${Number(pacing.avgWpm || 0).toFixed(1)}</strong><span>Average WPM</span></div>
-          <div class="metric"><strong>${Number(vocal.varietyScore || 0).toFixed(1)}</strong><span>Vocal variety score</span></div>
-          <div class="metric"><strong>${Number(pacing.rhythmScore || 0).toFixed(1)}</strong><span>Rhythm score</span></div>
-          <div class="metric"><strong>${Number(vocal.dynamicRangeDb || 0).toFixed(1)} dB</strong><span>Dynamic range</span></div>
-          <div class="metric"><strong>${Number(content.gospelClarityScore || 0).toFixed(1)}</strong><span>Gospel clarity score</span></div>
+          <div class="metric"><strong>${formatMetric(pacing.avgWpm)}</strong><span>Average WPM</span></div>
+          <div class="metric"><strong>${formatMetric(vocal.varietyScore)}</strong><span>Vocal variety score</span></div>
+          <div class="metric"><strong>${formatMetric(pacing.rhythmScore)}</strong><span>Rhythm score</span></div>
+          <div class="metric"><strong>${formatMetric(vocal.dynamicRangeDb, " dB")}</strong><span>Dynamic range</span></div>
+          <div class="metric"><strong>${formatMetric(content.gospelClarityScore)}</strong><span>Gospel clarity score</span></div>
         </div>
+        <p class="inline-hint"><strong>Pacing source:</strong> ${escapeHtml(formatMetricSource(pacingSource.source))}${cleanString(pacingSource.note) ? ` | ${escapeHtml(cleanString(pacingSource.note))}` : ""}</p>
+        <p class="inline-hint"><strong>Vocal source:</strong> ${escapeHtml(formatMetricSource(vocalSource.source))}${cleanString(vocalSource.note) ? ` | ${escapeHtml(cleanString(vocalSource.note))}` : ""}</p>
       </div>
 
       <div class="card">
@@ -611,7 +675,7 @@
       <div class="card">
         <span class="kicker">Pacing Analysis</span>
         <p><strong>Target band:</strong> ${escapeHtml(cleanString(pacing.targetBandWpm, "120-150"))}</p>
-        <p><strong>Pause moments:</strong> ${Number(pacing.pauseCount || 0)} (${Number(pacing.pauseTimeSec || 0).toFixed(1)}s total)</p>
+        <p><strong>Pause moments:</strong> ${Number(pacing.pauseCount || 0)} (${formatMetric(pacing.pauseTimeSec, "s")} total)</p>
         <h3 class="section-title" style="margin-top:0.95rem;">Fast Sections</h3>
         ${renderSectionsWithRange(pacing.fastSections, "fast")}
         <h3 class="section-title" style="margin-top:0.95rem;">Slow Sections</h3>
@@ -620,9 +684,11 @@
 
       <div class="card">
         <span class="kicker">Vocal Dynamics</span>
-        <p><strong>Average loudness:</strong> ${Number(vocal.avgDb || 0).toFixed(1)} dB | <strong>Peak:</strong> ${Number(vocal.peakDb || 0).toFixed(1)} dB</p>
-        <p><strong>Pitch mean/std:</strong> ${Number(vocal.pitchMeanHz || 0).toFixed(1)} Hz / ${Number(vocal.pitchStdHz || 0).toFixed(1)} Hz</p>
-        <p><strong>Pitch range:</strong> ${Number(vocal.pitchRangeHz || 0).toFixed(1)} Hz | <strong>Monotone risk:</strong> ${Number(vocal.monotoneRiskScore || 0).toFixed(1)}</p>
+        ${hasVocalSignal ? `
+          <p><strong>Average loudness:</strong> ${formatMetric(vocal.avgDb, " dB")} | <strong>Peak:</strong> ${formatMetric(vocal.peakDb, " dB")}</p>
+          <p><strong>Pitch mean/std:</strong> ${formatMetric(vocal.pitchMeanHz, " Hz")} / ${formatMetric(vocal.pitchStdHz, " Hz")}</p>
+          <p><strong>Pitch range:</strong> ${formatMetric(vocal.pitchRangeHz, " Hz")} | <strong>Monotone risk:</strong> ${formatMetric(vocal.monotoneRiskScore)}</p>
+        ` : `<p class="inline-hint">Vocal dynamics are unavailable for this run. Upload audio with local waveform analysis for full acoustic metrics.</p>`}
         <h3 class="section-title" style="margin-top:0.95rem;">Monotone Sections</h3>
         ${renderMonotoneSections(vocal.monotoneSections)}
       </div>
@@ -718,6 +784,10 @@
   }
 
   function renderCharts(payload, localAnalysis) {
+    if (!localAnalysis || !localAnalysis.channelData || !localAnalysis.payload) {
+      chartsWrap.classList.add("hidden");
+      return;
+    }
     chartsWrap.classList.remove("hidden");
 
     drawWaveform(localAnalysis.channelData);
