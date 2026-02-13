@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>How Bible AI Hub Works | API + Prompt Map</title>
+  <meta name="description" content="Visual architecture map of Bible AI Hub: API calls, prompts, and data flow for all six applications." />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="author" content="Bible AI Hub" />
+  <meta name="theme-color" content="#0f5f9b" />
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+  <script src="./assets/sw-cleanup.js"></script>
+  <link rel="stylesheet" href="./assets/styles.css" />
+  <style>
+    .how-main { max-width: 1160px; margin: 0 auto; padding: 0 0.2rem; }
+    .how-hero {
+      background:
+        radial-gradient(120% 100% at 0% 0%, rgba(255,255,255,.24) 0%, rgba(255,255,255,0) 56%),
+        linear-gradient(110deg, #2f9ed2, #2b67c7);
+      color: #fff;
+    }
+    .how-hero p { max-width: 830px; margin: 0 auto; opacity: .96; }
+    .pills { margin-top: .9rem; display: flex; gap: .45rem; flex-wrap: wrap; justify-content: center; }
+    .pill {
+      border: 1px solid rgba(255,255,255,.5);
+      border-radius: 999px;
+      background: rgba(255,255,255,.14);
+      padding: .24rem .7rem;
+      font-size: .8rem;
+      font-weight: 700;
+    }
+    .overview-grid {
+      margin-top: .95rem;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: .75rem;
+    }
+    .overview-card {
+      border: 1px solid #d9e6f2;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #fff, #f8fbff);
+      padding: .75rem .85rem;
+    }
+    .overview-card h3 { margin: 0; font-size: .9rem; color: #214666; }
+    .overview-card p { margin: .32rem 0 0; font-size: .85rem; color: #4f6983; line-height: 1.34; }
+    .maps { margin-top: 1rem; display: grid; gap: 1rem; }
+    .map {
+      border: 1px solid #d8e5f1;
+      border-radius: 14px;
+      background: #fff;
+      overflow: hidden;
+      box-shadow: 0 8px 18px rgba(15,23,42,.06);
+    }
+    .map-head {
+      padding: .84rem .95rem;
+      border-bottom: 1px solid #dde9f4;
+      background: linear-gradient(90deg, #f6fbff, #f8f9ff);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .8rem;
+    }
+    .map-head h2 { margin: 0; font-size: 1.03rem; color: #1d3f5f; }
+    .route {
+      border-radius: 999px;
+      border: 1px solid #cee2f2;
+      background: #eef6ff;
+      color: #28537b;
+      padding: .22rem .66rem;
+      font-size: .78rem;
+      font-family: "Space Grotesk", "Segoe UI", sans-serif;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .map-body {
+      padding: .9rem .95rem .95rem;
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: .95rem;
+    }
+    .flow {
+      border: 1px solid #deebf4;
+      border-radius: 12px;
+      background: #fcfeff;
+      padding: .7rem;
+    }
+    .flow-row {
+      display: flex;
+      gap: .48rem;
+      align-items: stretch;
+      overflow-x: auto;
+      padding-bottom: .2rem;
+      scrollbar-width: thin;
+    }
+    .node {
+      min-width: 160px;
+      border: 1px solid #d5e4f2;
+      border-radius: 12px;
+      background: #fff;
+      padding: .5rem .58rem;
+      box-shadow: 0 3px 9px rgba(15,23,42,.04);
+    }
+    .node.prompt { border-color: #c7dcf0; background: linear-gradient(180deg, #f5fbff, #fff); }
+    .node.ai { border-color: #c8e1d7; background: linear-gradient(180deg, #f4fff9, #fff); }
+    .node.data { border-color: #e2d8c4; background: linear-gradient(180deg, #fffaf1, #fff); }
+    .k { font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; color: #607890; font-weight: 700; }
+    .v { margin-top: .08rem; font-size: .86rem; color: #1d3f5e; font-weight: 700; line-height: 1.3; }
+    .s { margin-top: .08rem; font-size: .77rem; color: #4f6a85; line-height: 1.28; }
+    .arrow { align-self: center; color: #7890a7; font-weight: 700; font-size: 1.02rem; }
+    .branch {
+      margin-top: .52rem;
+      border: 1px dashed #cfe0f0;
+      border-radius: 10px;
+      background: #f6fbff;
+      padding: .45rem .55rem;
+      color: #4c6882;
+      font-size: .8rem;
+      line-height: 1.34;
+    }
+    .side { display: grid; gap: .65rem; }
+    .card-lite {
+      border: 1px solid #dbe8f3;
+      border-radius: 12px;
+      background: #f9fcff;
+      padding: .62rem .68rem;
+    }
+    .card-lite h3 { margin: 0; font-size: .87rem; color: #234a6b; }
+    .card-lite ul { margin: .42rem 0 0; padding-left: 1rem; color: #4f6983; font-size: .8rem; line-height: 1.34; }
+    .chip-grid { margin-top: .43rem; display: grid; gap: .42rem; }
+    .prompt-chip {
+      border: 1px solid #cfe2f2;
+      border-radius: 10px;
+      background: #fff;
+      padding: .4rem .52rem;
+    }
+    .prompt-chip code { display: block; font-size: .76rem; color: #1f415f; font-weight: 700; }
+    .prompt-chip span { display: block; margin-top: .1rem; font-size: .76rem; color: #506a84; line-height: 1.28; }
+    .common {
+      margin-top: 1rem;
+      border: 1px solid #dbe8f3;
+      border-radius: 14px;
+      background: #fff;
+      padding: .9rem;
+    }
+    .common-grid { margin-top: .6rem; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
+    .common-item {
+      border: 1px solid #dbe8f3;
+      border-radius: 12px;
+      background: #f9fcff;
+      padding: .6rem .68rem;
+    }
+    .common-item h4 { margin: 0; font-size: .85rem; color: #254b6b; }
+    .common-item p { margin: .28rem 0 0; font-size: .79rem; color: #4f6a84; line-height: 1.32; }
+    .disclaimer {
+      margin-top: .65rem;
+      border: 1px solid #dce7f2;
+      border-radius: 12px;
+      background: #f7fbff;
+      padding: .62rem .7rem;
+      color: #4b6782;
+      font-size: .8rem;
+      line-height: 1.34;
+    }
+    @media (max-width: 1024px) {
+      .overview-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .map-body { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 700px) {
+      .overview-grid, .common-grid { grid-template-columns: 1fr; }
+      .map-head { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="site-wrap">
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="/">Bible AI Hub</a>
+      </div>
+    </header>
+    <main class="main">
+      <div class="how-main">
+        <section class="panel">
+          <div class="hero compact how-hero">
+            <div class="hero-icon-wrap" aria-hidden="true">
+              <svg class="hero-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 5.25h18M3 12h18M3 18.75h18M7.5 5.25v13.5m9-13.5v13.5" />
+              </svg>
+            </div>
+            <h1>How Bible AI Hub Works</h1>
+            <p>A visual map of all six production app pipelines: user input, API calls, prompt orchestration, quality checks, and final output shaping.</p>
+            <div class="pills">
+              <span class="pill">6 app diagrams</span>
+              <span class="pill">12 prompt IDs</span>
+              <span class="pill">OpenAI + platform API flow</span>
+            </div>
+          </div>
+          <div class="content">
+            <h2 class="title">System Layer</h2>
+            <p class="lead">Every app runs on the same session and workspace layer, then branches into tool-specific AI orchestration.</p>
+            <div class="overview-grid">
+              <article class="overview-card">
+                <h3>Auth and workspace scope</h3>
+                <p><code>/api/auth/session</code> is checked first; if unavailable, <code>/api/auth/guest</code> creates a scoped session with workspace headers for every tool call.</p>
+              </article>
+              <article class="overview-card">
+                <h3>Prompt runtime</h3>
+                <p>Prompt JSON is assembled server-side, then routed to OpenAI endpoints: <code>/chat/completions</code>, <code>/embeddings</code>, and <code>/audio/transcriptions</code>.</p>
+              </article>
+              <article class="overview-card">
+                <h3>Reliability and observability</h3>
+                <p>All apps use quality gates, optional refinement prompts, and event telemetry (<code>/api/events</code>) before returning final payloads.</p>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="maps" aria-label="Application flow maps">
+          <article class="map" id="map-bible-study">
+            <header class="map-head">
+              <h2>1) Bible Study Chat</h2>
+              <span class="route">POST /api/ai/bible-study</span>
+            </header>
+            <div class="map-body">
+              <div class="flow">
+                <div class="flow-row" role="img" aria-label="Bible Study API and prompt flow">
+                  <div class="node data"><div class="k">Input</div><div class="v">Reference + focus + question</div><div class="s">Passage text is fetched in-browser from Bible API when needed.</div></div>
+                  <div class="arrow">-></div>
+                  <div class="node"><div class="k">API</div><div class="v">/api/ai/bible-study</div><div class="s">Feature access + quota + normalized context.</div></div>
+                  <div class="arrow">-></div>
+                  <div class="node prompt"><div class="k">Prompt</div><div class="v">bible-study.package</div><div class="s">Builds full CLEAR + 10-step package.</div></div>
+                  <div class="arrow">-></div>
+                  <div class="node prompt"><div class="k">Optional refine</div><div class="v">bible-study.refiner</div><div class="s">Runs when quality gates detect shallow output.</div></div>
+                  <div class="arrow">-></div>
+                  <div class="node ai"><div class="k">Output shaping</div><div class="v">Evidence + confidence + exports</div><div class="s">Each CLEAR stage gets citations and confidence labels.</div></div>
+                </div>
+                <div class="branch"><strong>Prompt role:</strong> the package prompt drafts the complete study plan; the refiner upgrades weak sections before response normalization and evidence attachment.</div>
+              </div>
+              <aside class="side">
+                <div class="card-lite">
+                  <h3>Inputs that matter most</h3>
+                  <ul>
+                    <li>Passage text quality (from <code>https://bible-api.com/{reference}?translation=web</code>)</li>
+                    <li>Focused study question</li>
+                    <li>Theological profile directive</li>
+                  </ul>
+                </div>
+                <div class="card-lite">
+                  <h3>Prompts</h3>
+                  <div class="chip-grid">
+                    <div class="prompt-chip"><code>bible-study.package v2026-02-12.3</code><span>Primary generation for CLEAR + 10-step workflow.</span></div>
+                    <div class="prompt-chip"><code>bible-study.refiner v2026-02-12.1</code><span>Optional repair pass for depth, specificity, and anchoring.</span></div>
+                  </div>
+                </div>
+                <div class="card-lite">
+                  <h3>Supporting API calls in this page</h3>
+                  <ul>
+                    <li><code>GET https://bible-api.com/{reference}?translation=web</code> (passage fetch)</li>
+                    <li><code>POST /api/events</code> (tool start + success)</li>
+                    <li><code>/api/projects</code> + <code>/api/handoffs</code> (save/load/handoff)</li>
+                  </ul>
+                </div>
+              </aside>
+            </div>
+          </article>
+
+          <article class="map" id="map-sermon-preparation">
+            <header class="map-head">
+              <h2>2) Sermon Preparation</h2>
+              <span class="route">POST /api/ai/sermon-preparation</span>
+            </header>
+            <div class="map-body">
+              <div class="flow">
+                <div class="flow-row" role="img" aria-label="Sermon Preparation API and prompt flow">
+                  <div class="node data"><div class="k">Input</div><div class="v">Passage + audience + minutes + goal</div><div class="s">Optional style mode, series memory, and tighten toggle.</div></div>
+                  <div class="arrow">-></div>
+                  <div class="node"><div class="k">API</div><div class="v">/api/ai/sermon-preparation</div><div class="s">Parses passage bounds and continuity directives.</div></div>
+                  <div class="arrow">-></div>
+                  <div class="node prompt"><div class="k">Prompt</div><div class="v">sermon-preparation.plan</div><div class="s">Builds big idea, outline, transitions, applications, timing.</div></div>
+                  <div class="arrow">-></div>
+                  <div class="node prompt"><div class="k">Optional refine</div><div class="v">sermon-preparation.refiner</div><div class="s">Runs for weak quality signals and optional tighten pass.</div></div>
+                  <div class="arrow">-></div>
+                  <div class="node ai"><div class="k">Output shaping</div><div class="v">Boundary diagnostics + preachability score</div><div class="s">Out-of-range support refs are moved to contextual notes.</div></div>
+                </div>
+                <div class="branch"><strong>Prompt role:</strong> plan prompt generates the full sermon skeleton; refiner improves weak sections; final server checks enforce passage-boundary discipline.</div>
+              </div>
+              <aside class="side">
+                <div class="card-lite">
+                  <h3>Inputs that matter most</h3>
+                  <ul>
+                    <li>Accurate passage text (often fetched from Bible API)</li>
+                    <li>Audience and target minutes</li>
+                    <li>Goal quality and style mode</li>
+                  </ul>
+                </div>
+                <div class="card-lite">
+                  <h3>Prompts</h3>
+                  <div class="chip-grid">
+                    <div class="prompt-chip"><code>sermon-preparation.plan v2026-02-12.3</code><span>Primary sermon-plan generation prompt.</span></div>
+                    <div class="prompt-chip"><code>sermon-preparation.refiner v2026-02-12.1</code><span>Optional quality/tightening prompt.</span></div>
+                  </div>
+                </div>
+                <div class="card-lite">
+                  <h3>Supporting API calls in this page</h3>
+                  <ul>
+                    <li><code>GET https://bible-api.com/{reference}?translation=web</code> (passage fetch)</li>
+                    <li><code>POST /api/series</code> (optional continuity logging)</li>
+                    <li><code>POST /api/events</code>, <code>/api/projects</code>, <code>/api/handoffs</code></li>
+                  </ul>
+                </div>
+              </aside>
+            </div>
+          </article>
+
+          <article class="map" id="map-teaching-tools">
+            <header class="map-head">
+              <h2>3) Teaching Tools</h2>
+              <span class="route">POST /api/ai/teaching-tools</span>
+            </header>
+            <div class="map-body">
+              <div class="flow">
+                <div class="flow-row" role="img" aria-label="Teaching Tools API and prompt flow">
+                  <div class="node data"><div class="k">Input</div><div class="v">Passage or topic + teaching context</div><div class="s">Audience(s), setting, group size, resources, desired outcome.</div></div>
+                  <div class="arrow">-></div>
+                  <div class="node"><div class="k">API</div><div class="v">/api/ai/teaching-tools</div><div class="s">Supports single and multi-audience generation.</div></div>
+                  <div class="arrow">-></div>
+                  <div class="node prompt"><div class="k">Prompt</div><div class="v">teaching-tools.kit</div><div class="s">Executed once per selected audience.</div></div>
+                  <div class="arrow">-></div>
+                  <div class="node prompt"><div class="k">Optional refine</div><div class="v">teaching-tools.refiner</div><div class="s">Runs when timeline/question depth is weak.</div></div>
+                  <div class="arrow">-></div>
+                  <div class="node ai"><div class="k">Output shaping</div><div class="v">Kit normalization + exports</div><div class="s">Returns handouts, markdown, slides, and comparisons.</div></div>
+                </div>
+                <div class="branch"><strong>Prompt role:</strong> kit prompt creates the full lesson package; refiner improves classroom realism and practical application before final formatting.</div>
+              </div>
+              <aside class="side">
+                <div class="card-lite">
+                  <h3>Inputs that matter most</h3>
+                  <ul>
+                    <li>Source type (passage text vs topical brief)</li>
+                    <li>Audience profile and class length</li>
+                    <li>Available resources and main outcome</li>
+                  </ul>
+                </div>
+                <div class="card-lite">
+                  <h3>Prompts</h3>
+                  <div class="chip-grid">
+                    <div class="prompt-chip"><code>teaching-tools.kit v2026-02-12.3</code><span>Primary teaching-kit generation prompt.</span></div>
+                    <div class="prompt-chip"><code>teaching-tools.refiner v2026-02-12.1</code><span>Optional quality pass for weak sections.</span></div>
+                  </div>
+                </div>
+                <div class="card-lite">
+                  <h3>Supporting API calls in this page</h3>
+                  <ul>
+                    <li><code>GET https://bible-api.com/{reference}?translation=web</code> (only when input is a passage)</li>
+                    <li><code>POST /api/events</code> (tool + generation telemetry)</li>
+                    <li><code>/api/projects</code> (save/load generated kits)</li>
+                  </ul>
+                </div>
+              </aside>
+            </div>
+          </article>
+
+          <article class="map" id="map-research-helper">
+            <header class="map-head">
+              <h2>4) Sermon Evaluation (Research Helper)</h2>
+              <span class="route">POST /api/ai/research-helper</span>
+            </header>
+            <div class="map-body">
+              <div class="flow">
+                <div class="flow-row" role="img" aria-label="Research Helper API and prompt flow">
+                  <div class="node data"><div class="k">Input</div><div class="v">Manuscript + diagnostics + objective</div><div class="s">Revision objective: balanced, clarity, brevity, warmth, or exegetical precision.</div></div>
+                  <div class="arrow">-></div>
+                  <div class="node"><div class="k">API</div><div class="v">/api/ai/research-helper</div><div class="s">Normalizes objective and baseline score rows.</div></div>
+                  <div class="arrow">-></div>
+                  <div class="node prompt"><div class="k">Prompt</div><div class="v">research-helper.evaluation</div><div class="s">Creates verdict, scores, revisions, tighten-lines.</div></div>
+                  <div class="arrow">-></div>
+                  <div class="node prompt"><div class="k">Optional refine</div><div class="v">research-helper.revision-pack</div><div class="s">Runs when coaching depth/rationale is insufficient.</div></div>
+                  <div class="arrow">-></div>
+                  <div class="node ai"><div class="k">Output shaping</div><div class="v">Rationale enforcement + trends</div><div class="s">Each revision line includes why-it-helps context.</div></div>
+                </div>
+                <div class="branch"><strong>Prompt role:</strong> evaluation prompt performs the main audit; revision-pack prompt strengthens weak guidance and returns a higher-impact revision set.</div>
+              </div>
+              <aside class="side">
+                <div class="card-lite">
+                  <h3>Inputs that matter most</h3>
+                  <ul>
+                    <li>Complete manuscript quality</li>
+                    <li>Target duration and sermon type</li>
+                    <li>Selected revision objective</li>
+                  </ul>
+                </div>
+                <div class="card-lite">
+                  <h3>Prompts</h3>
+                  <div class="chip-grid">
+                    <div class="prompt-chip"><code>research-helper.evaluation v2026-02-13.1</code><span>Main evaluation and coaching prompt.</span></div>
+                    <div class="prompt-chip"><code>research-helper.revision-pack v2026-02-13.1</code><span>Optional high-impact revision prompt.</span></div>
+                  </div>
+                </div>
+                <div class="card-lite">
+                  <h3>Supporting API calls in this page</h3>
+                  <ul>
+                    <li><code>POST /api/events</code> (tool and success tracking)</li>
+                    <li><code>/api/projects</code> (save/load evaluation sessions)</li>
+                    <li><code>POST /api/projects/:id/exports</code> (trend CSV export log)</li>
+                  </ul>
+                </div>
+              </aside>
+            </div>
+          </article>
+
+          <article class="map" id="map-sermon-analyzer">
+            <header class="map-head">
+              <h2>5) Sermon Analyzer</h2>
+              <span class="route">POST /api/ai/sermon-analyzer + GET /jobs/:id</span>
+            </header>
+            <div class="map-body">
+              <div class="flow">
+                <div class="flow-row" role="img" aria-label="Sermon Analyzer API and prompt flow">
+                  <div class="node data"><div class="k">Input</div><div class="v">Audio file or transcript override</div><div class="s">Client also sends local DSP analysis JSON.</div></div>
+                  <div class="arrow">-></div>
+                  <div class="node"><div class="k">API</div><div class="v">/api/ai/sermon-analyzer (async)</div><div class="s">Returns jobId; client polls /api/ai/sermon-analyzer/jobs/:id.</div></div>
+                  <div class="arrow">-></div>
+                  <div class="node ai"><div class="k">Transcription</div><div class="v">OpenAI /audio/transcriptions</div><div class="s">Falls back to manual transcript when needed.</div></div>
+                  <div class="arrow">-></div>
+                  <div class="node prompt"><div class="k">Prompt</div><div class="v">sermon-analyzer.insights</div><div class="s">Creates emotional arc, content analysis, coaching feedback.</div></div>
+                  <div class="arrow">-></div>
+                  <div class="node prompt"><div class="k">Optional refine</div><div class="v">sermon-analyzer.coaching-refiner</div><div class="s">Runs when coaching actionability is weak.</div></div>
+                  <div class="arrow">-></div>
+                  <div class="node ai"><div class="k">Output shaping</div><div class="v">Metric provenance + drills + comparison</div><div class="s">Flags audio vs transcript-estimate confidence.</div></div>
+                </div>
+                <div class="branch"><strong>Prompt role:</strong> insights prompt synthesizes transcript and metrics; coaching-refiner upgrades generic recommendations into measurable drills and next-week actions.</div>
+              </div>
+              <aside class="side">
+                <div class="card-lite">
+                  <h3>Inputs that matter most</h3>
+                  <ul>
+                    <li>Audio quality and transcript quality</li>
+                    <li>Preaching context and coaching goal</li>
+                    <li>Local acoustic/pacing metrics</li>
+                  </ul>
+                </div>
+                <div class="card-lite">
+                  <h3>Prompts</h3>
+                  <div class="chip-grid">
+                    <div class="prompt-chip"><code>sermon-analyzer.insights v2026-02-12.3</code><span>Main coaching and analysis synthesis prompt.</span></div>
+                    <div class="prompt-chip"><code>sermon-analyzer.coaching-refiner v2026-02-12.1</code><span>Optional precision pass for coaching quality.</span></div>
+                  </div>
+                </div>
+                <div class="card-lite">
+                  <h3>Supporting API calls in this page</h3>
+                  <ul>
+                    <li><code>GET /api/ai/sermon-analyzer/jobs/:jobId</code> (async polling)</li>
+                    <li><code>POST /api/coach/drills/complete</code> (practice drill tracking)</li>
+                    <li><code>POST /api/events</code> + <code>/api/projects</code> (telemetry + save/load)</li>
+                  </ul>
+                </div>
+              </aside>
+            </div>
+          </article>
+
+          <article class="map" id="map-video-search">
+            <header class="map-head">
+              <h2>6) Search Training Videos</h2>
+              <span class="route">POST /api/ai/video-search</span>
+            </header>
+            <div class="map-body">
+              <div class="flow">
+                <div class="flow-row" role="img" aria-label="Video Search API and prompt flow">
+                  <div class="node data"><div class="k">Input</div><div class="v">Query + filters + transcribe mode</div><div class="s">Category, difficulty, Logos version, duration, sorting.</div></div>
+                  <div class="arrow">-></div>
+                  <div class="node"><div class="k">API</div><div class="v">/api/ai/video-search</div><div class="s">Catalog refresh + optional transcript ingestion.</div></div>
+                  <div class="arrow">-></div>
+                  <div class="node ai"><div class="k">Retrieval</div><div class="v">Embeddings + lexical ranking</div><div class="s">Uses OpenAI /embeddings and transcript chunks.</div></div>
+                  <div class="arrow">-></div>
+                  <div class="node prompt"><div class="k">Optional recovery</div><div class="v">video-search.recovery</div><div class="s">Runs when initial result set is sparse.</div></div>
+                  <div class="arrow">-></div>
+                  <div class="node prompt"><div class="k">Guidance prompt</div><div class="v">video-search.guidance</div><div class="s">Creates watch path and next-query suggestions.</div></div>
+                  <div class="arrow">-></div>
+                  <div class="node ai"><div class="k">Output shaping</div><div class="v">Confidence tiers + timestamped clips</div><div class="s">Low-confidence states prepend cautionary guidance.</div></div>
+                </div>
+                <div class="branch"><strong>Prompt role:</strong> recovery prompt proposes stronger searches when matches are weak; guidance prompt converts retrieved clips into an actionable learning path.</div>
+                <div class="branch"><strong>Ingestion branch:</strong> if transcripts are missing and transcribe mode is auto/force, server can transcribe candidate videos using OpenAI <code>/audio/transcriptions</code> before ranking.</div>
+              </div>
+              <aside class="side">
+                <div class="card-lite">
+                  <h3>Inputs that matter most</h3>
+                  <ul>
+                    <li>Query clarity and specificity</li>
+                    <li>Filter breadth (strict filters can remove relevant videos)</li>
+                    <li>Transcript coverage in the library</li>
+                  </ul>
+                </div>
+                <div class="card-lite">
+                  <h3>Prompts</h3>
+                  <div class="chip-grid">
+                    <div class="prompt-chip"><code>video-search.guidance v2026-02-12.3</code><span>Primary guidance and next-query recommendation prompt.</span></div>
+                    <div class="prompt-chip"><code>video-search.recovery v2026-02-12.1</code><span>Optional sparse-result recovery prompt.</span></div>
+                  </div>
+                </div>
+                <div class="card-lite">
+                  <h3>Supporting API calls in this page</h3>
+                  <ul>
+                    <li><code>POST /api/video-library/ingest-next</code> (manual ingest step)</li>
+                    <li><code>POST /api/video-governance</code> and <code>/api/learning-paths*</code> (admin/path features)</li>
+                    <li><code>POST /api/events</code> + <code>/api/projects</code> (telemetry + save/load)</li>
+                  </ul>
+                </div>
+              </aside>
+            </div>
+          </article>
+        </section>
+
+        <section class="common">
+          <h2 class="title" style="margin:0;">Shared Calls Used Across Apps</h2>
+          <p class="lead" style="margin-top:.25rem;">These calls are common infrastructure for all six tools.</p>
+          <div class="common-grid">
+            <article class="common-item">
+              <h4>Session bootstrap</h4>
+              <p><code>GET /api/auth/session</code> + fallback <code>POST /api/auth/guest</code> in the shared client layer.</p>
+            </article>
+            <article class="common-item">
+              <h4>Event tracking</h4>
+              <p><code>POST /api/events</code> for <code>tool_start</code>, generation success, and cross-feature interactions.</p>
+            </article>
+            <article class="common-item">
+              <h4>Project persistence</h4>
+              <p><code>/api/projects</code> endpoints for save/load/version/export across Bible Study, Sermon Prep, Teaching, Evaluation, Analyzer, and Search.</p>
+            </article>
+            <article class="common-item">
+              <h4>Cross-tool handoff</h4>
+              <p><code>/api/handoffs</code> transfers structured outputs between apps (for example Bible Study to Sermon Preparation).</p>
+            </article>
+          </div>
+          <div class="disclaimer">
+            <strong>Accuracy note:</strong> this page reflects current production code paths in <code>assets/apps/*.js</code>, <code>assets/shared.js</code>, <code>server.js</code>, <code>server/bible-study-workflow.js</code>, and <code>server/prompts/*.js</code>.
+          </div>
+        </section>
+      </div>
+    </main>
+    <footer class="micro-footer">
+      <p>Made with &#10084;&#65039; | <a href="https://hiredalmo.com" target="_blank" rel="noopener noreferrer">hiredalmo.com</a></p>
+    </footer>
+  </div>
+</body>
+</html>
+
+
