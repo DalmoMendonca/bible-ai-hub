@@ -108,9 +108,21 @@ async function run() {
       throw new Error("OPENAI_API_KEY is not configured. Cannot run smoke tests.");
     }
 
-    const bibleStudy = await runStep("Bible Study", () => fetchJsonWithRetry(`${BASE_URL}/api/ai/bible-study`, {
+    const auth = await fetchJson(`${BASE_URL}/api/auth/guest`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({})
+    });
+    const authHeaders = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${auth.sessionToken}`,
+      "X-Session-Token": auth.sessionToken,
+      "X-Workspace-Id": auth.workspaceId
+    };
+
+    const bibleStudy = await runStep("Bible Study", () => fetchJsonWithRetry(`${BASE_URL}/api/ai/bible-study`, {
+      method: "POST",
+      headers: authHeaders,
       body: JSON.stringify({
         passage: {
           reference: "John 3:16-17",
@@ -129,7 +141,7 @@ async function run() {
 
     const sermonPrep = await runStep("Sermon Preparation", () => fetchJsonWithRetry(`${BASE_URL}/api/ai/sermon-preparation`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders,
       body: JSON.stringify({
         passage: {
           reference: "Romans 12:1-2",
@@ -148,7 +160,7 @@ async function run() {
 
     const teachingTools = await runStep("Teaching Tools", () => fetchJsonWithRetry(`${BASE_URL}/api/ai/teaching-tools`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders,
       body: JSON.stringify({
         sourceTitle: "Faith That Works",
         passageText: "James 2:14-17 explores faith and works.",
@@ -167,7 +179,7 @@ async function run() {
 
     const researchHelper = await runStep("Research Helper", () => fetchJsonWithRetry(`${BASE_URL}/api/ai/research-helper`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders,
       body: JSON.stringify({
         sermonType: "Expository",
         targetMinutes: 35,
@@ -181,7 +193,7 @@ async function run() {
 
     const sermonAnalyzer = await runStep("Sermon Analyzer", () => fetchJsonWithRetry(`${BASE_URL}/api/ai/sermon-analyzer`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders,
       body: JSON.stringify({
         context: "Sunday morning",
         goal: "Improve clarity and pacing",
@@ -199,7 +211,7 @@ async function run() {
 
     const videoSearch = await runStep("Video Search", () => fetchJsonWithRetry(`${BASE_URL}/api/ai/video-search`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders,
       body: JSON.stringify({
         query: "How do I do a word study in Logos?",
         category: "all",

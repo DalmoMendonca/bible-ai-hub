@@ -110,6 +110,190 @@ a {
   color: var(--brand-primary);
 }
 
+.bah-shell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.bah-project-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+}
+
+.bah-project-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.42);
+}
+
+.bah-project-panel {
+  position: relative;
+  width: min(780px, calc(100% - 2rem));
+  max-height: min(78vh, 860px);
+  overflow: auto;
+  margin: 4.5rem auto 0;
+  border-radius: 14px;
+  border: 1px solid #d5e2ef;
+  background: #fff;
+  box-shadow: 0 28px 60px rgba(15, 23, 42, 0.28);
+  padding: 1rem;
+}
+
+.bah-project-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.7rem;
+}
+
+.bah-project-head h3 {
+  margin: 0;
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
+  color: #1f3957;
+  font-size: 1.08rem;
+}
+
+.bah-project-close {
+  border: 0;
+  border-radius: 9px;
+  background: #e8eef6;
+  color: #27415d;
+  font: inherit;
+  font-weight: 700;
+  padding: 0.4rem 0.7rem;
+  cursor: pointer;
+}
+
+.bah-project-controls {
+  display: grid;
+  gap: 0.55rem;
+  grid-template-columns: minmax(0, 1fr);
+  margin-bottom: 0.75rem;
+}
+
+.bah-project-list {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.bah-project-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  border: 1px solid #dbe6f3;
+  border-radius: 10px;
+  background: #f9fbff;
+  padding: 0.7rem;
+}
+
+.bah-project-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.bah-project-main strong {
+  color: #1f3957;
+  font-size: 0.95rem;
+}
+
+.bah-project-main span {
+  color: #59718c;
+  font-size: 0.79rem;
+}
+
+.bah-project-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.bah-onboarding {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+}
+
+.bah-onboarding-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.48);
+}
+
+.bah-onboarding-panel {
+  position: relative;
+  width: min(760px, calc(100% - 2rem));
+  max-height: min(86vh, 900px);
+  overflow: auto;
+  margin: 3.4rem auto 0;
+  border-radius: 16px;
+  border: 1px solid #d4e3f2;
+  background: #fff;
+  box-shadow: 0 30px 60px rgba(15, 23, 42, 0.28);
+  padding: 1rem;
+}
+
+.bah-onboarding-panel h3 {
+  margin: 0 0 0.4rem;
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
+  color: #203b59;
+}
+
+.bah-onboarding-workflow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.bah-account-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 115;
+}
+
+.bah-account-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.bah-account-panel {
+  position: relative;
+  width: min(620px, calc(100% - 2rem));
+  margin: 5rem auto 0;
+  border-radius: 14px;
+  border: 1px solid #d5e2ef;
+  background: #fff;
+  box-shadow: 0 28px 60px rgba(15, 23, 42, 0.28);
+  padding: 1rem;
+}
+
+.bah-workspace-select {
+  min-width: 170px;
+  max-width: 240px;
+  padding: 0.34rem 0.46rem;
+  font-size: 0.82rem;
+}
+
+.bah-user-btn,
+.bah-notice-btn {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: var(--brand-muted);
+  font-weight: 600;
+}
+
+.bah-user-btn:hover,
+.bah-notice-btn:hover {
+  color: var(--brand-primary);
+}
+
 .main {
   flex: 1;
   padding: 1.5rem 1rem 2rem;
@@ -253,6 +437,42 @@ a {
 
 .card + .card {
   margin-top: 0.9rem;
+}
+
+.seo-copy p {
+  margin: 0.35rem 0 0.85rem;
+  color: #445f7a;
+  line-height: 1.58;
+}
+
+.seo-link-list a {
+  color: #0f68b5;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.seo-faq details {
+  border: 1px solid #d9e4f1;
+  border-radius: 10px;
+  background: #f9fbff;
+  padding: 0.7rem 0.8rem;
+}
+
+.seo-faq details + details {
+  margin-top: 0.55rem;
+}
+
+.seo-faq summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: #223b56;
+}
+
+.seo-faq p {
+  margin: 0.5rem 0 0;
+  color: #4a6078;
+  line-height: 1.55;
 }
 
 .teaching-feature-grid {
@@ -450,6 +670,21 @@ a {
   color: #5b738c;
 }
 
+.progress-track {
+  margin-top: 0.45rem;
+  width: 100%;
+  height: 7px;
+  border-radius: 999px;
+  background: #e7eef7;
+  overflow: hidden;
+}
+
+.progress-fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #2d9fd3, #2a69c8);
+}
+
 .clear-method-wrap {
   overflow-x: auto;
 }
@@ -592,8 +827,18 @@ a {
 .tool-card svg {
   width: 30px;
   height: 30px;
+  min-width: 30px;
+  min-height: 30px;
+  max-width: 30px;
+  max-height: 30px;
   color: var(--brand-primary);
   margin-bottom: 0.36rem;
+}
+
+.hero-icon,
+.feature-icon,
+.feature-head svg {
+  display: block;
 }
 
 .tool-card h3 {
@@ -1041,6 +1286,25 @@ a {
   border: 1px solid #fecaca;
 }
 
+.coach-drill-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.coach-drill-btn {
+  padding: 0.36rem 0.65rem;
+  font-size: 0.78rem;
+}
+
+.coach-drill-btn.is-complete {
+  background: #def7e8;
+  color: #0f6c3f;
+  border: 1px solid #b6e9cb;
+}
+
 .chart-grid {
   margin-top: 0.95rem;
   display: grid;
@@ -1160,11 +1424,28 @@ a {
   .hero.home .hero-icon-wrap {
     margin: 0 auto;
   }
+
+  .bah-project-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .bah-project-actions {
+    width: 100%;
+  }
+
+  .bah-onboarding-workflow {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 @media (min-width: 720px) {
   .content {
     padding: 1.7rem;
+  }
+
+  .bah-project-controls {
+    grid-template-columns: minmax(0, 1fr) 220px;
   }
 
   .form-grid {

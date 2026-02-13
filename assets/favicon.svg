@@ -1,0 +1,11 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Bible AI Hub">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1d9ad6"/>
+      <stop offset="100%" stop-color="#2862cf"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#g)"/>
+  <path d="M20 19h11c3.3 0 6 2.7 6 6v20H26c-3.3 0-6-2.7-6-6V19Zm24 0H33c-3.3 0-6 2.7-6 6v20h11c3.3 0 6-2.7 6-6V19Z" fill="#fff" opacity="0.96"/>
+  <path d="M32 23v20" stroke="#1d7db7" stroke-width="2" stroke-linecap="round"/>
+</svg>

@@ -5,10 +5,24 @@
     escapeHtml,
     tokenize,
     highlightTerms,
+    apiGet,
     apiPost,
+    apiPatch,
+    saveProject,
+    updateProject,
+    hydrateProjectFromQuery,
+    createLearningPath,
+    listLearningPaths,
+    getLearningPath,
+    updateLearningPath,
+    deleteLearningPath,
+    shareLearningPath,
+    appendProjectExport,
     cleanArray,
     cleanString,
-    setBusy
+    setBusy,
+    trackEvent,
+    registerToolLifecycle
   } = window.AIBible;
 
   const API_BASE = window.location.protocol === "file:" ? "http://localhost:3000" : "";
@@ -21,6 +35,7 @@
   const maxMinutesInput = $("#videoMaxMinutes");
   const sortSelect = $("#videoSort");
   const autoTranscribeInput = $("#videoAutoTranscribe");
+  const disablePersonalizationInput = $("#videoDisablePersonalization");
   const notice = $("#videoNotice");
   const result = $("#videoResult");
   const libraryStats = $("#libraryStats");
@@ -28,7 +43,11 @@
   const ingestButton = $("#videoIngestNext");
   const refreshButton = $("#videoRefresh");
   const playerMount = $("#videoPlayerMount");
+  const pathLibrary = $("#videoPathLibrary");
   let latestResultMap = new Map();
+  let activeProjectId = "";
+  let activePath = null;
+  registerToolLifecycle("video-search");
 
   function showNotice(message, type) {
     notice.className = `notice ${type || ""}`.trim();
@@ -109,8 +128,10 @@
           <div class="video-result-head">
             <h3>${highlightedTitle}</h3>
             <div class="video-result-actions">
-              <button type="button" class="video-play-inline" data-play-result="${escapeHtml(cleanString(item.id))}">Play Here</button>
-              <a class="video-jump-link" href="${escapeHtml(cleanString(item.url))}" target="_blank" rel="noopener noreferrer">Jump to ${escapeHtml(cleanString(item.timestamp, "0:00"))}</a>
+              ${item.locked
+                ? `<a class="video-jump-link" href="${escapeHtml(cleanString(item.url))}" target="_blank" rel="noopener noreferrer">Unlock Premium</a>`
+                : `<button type="button" class="video-play-inline" data-play-result="${escapeHtml(cleanString(item.id))}">Play Here</button>
+                   <a class="video-jump-link" href="${escapeHtml(cleanString(item.url))}" target="_blank" rel="noopener noreferrer">Jump to ${escapeHtml(cleanString(item.timestamp, "0:00"))}</a>`}
             </div>
           </div>
           <p><strong>Category:</strong> ${escapeHtml(cleanString(item.category))}
@@ -120,6 +141,7 @@
           | <strong>Duration:</strong> ${escapeHtml(cleanString(item.duration))}
           </p>
           <p>${highlightedSnippet}</p>
+          ${item.locked ? `<p class="inline-hint">Premium clip. Upgrade to play this video.</p>` : ""}
           ${item.sourceAvailable === false ? `<p class="inline-hint">Source video is hosted externally for playback.</p>` : ""}
           <p><strong>Why:</strong> ${escapeHtml(cleanString(item.why))}</p>
           <div class="tag-row">
@@ -165,6 +187,149 @@
         </div>
       </div>
     `;
+  }
+
+  function buildPathResults(pathRow) {
+    const items = Array.isArray(pathRow && pathRow.items) ? pathRow.items : [];
+    return items
+      .slice()
+      .sort((a, b) => Number(a.order || 0) - Number(b.order || 0))
+      .map((item) => ({
+        id: `path-${cleanString(pathRow.id)}-${cleanString(item.id)}`,
+        videoId: cleanString(item.videoId),
+        title: cleanString(item.title, "Path Item"),
+        category: "Learning Path",
+        topic: cleanString(item.goal, "Path item"),
+        difficulty: "n/a",
+        logosVersion: "n/a",
+        duration: "n/a",
+        transcriptStatus: "ready",
+        timestamp: formatTimestamp(Number(item.timestampSeconds || 0)),
+        timestampSeconds: Number(item.timestampSeconds || 0),
+        snippet: cleanString(item.notes || item.goal || ""),
+        tags: [],
+        playbackUrl: cleanString(item.url),
+        url: cleanString(item.url),
+        why: cleanString(item.goal || "Saved from search results."),
+        score: 100
+      }));
+  }
+
+  function formatTimestamp(seconds) {
+    const safe = Math.max(0, Math.floor(Number(seconds || 0)));
+    const h = Math.floor(safe / 3600);
+    const m = Math.floor((safe % 3600) / 60);
+    const s = safe % 60;
+    if (h > 0) {
+      return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    }
+    return `${m}:${String(s).padStart(2, "0")}`;
+  }
+
+  async function loadPathLibrary() {
+    if (!pathLibrary) {
+      return;
+    }
+    pathLibrary.innerHTML = `<h3 class="section-title">Learning Paths</h3><p class="inline-hint">Loading...</p>`;
+    let payload = { paths: [] };
+    try {
+      payload = await listLearningPaths();
+    } catch (error) {
+      pathLibrary.innerHTML = `<h3 class="section-title">Learning Paths</h3><p class="inline-hint">${escapeHtml(cleanString(error.message, "Could not load learning paths."))}</p>`;
+      return;
+    }
+    const paths = Array.isArray(payload.paths) ? payload.paths : [];
+    if (!paths.length) {
+      pathLibrary.innerHTML = `
+        <h3 class="section-title">Learning Paths</h3>
+        <p class="inline-hint">No saved paths yet. Save top results to create your first path.</p>
+      `;
+      return;
+    }
+    pathLibrary.innerHTML = `
+      <h3 class="section-title">Learning Paths</h3>
+      <div class="list">
+        ${paths.slice(0, 18).map((pathRow) => `
+          <article class="result-item">
+            <h3>${escapeHtml(cleanString(pathRow.title))}</h3>
+            <p>${Number(Array.isArray(pathRow.items) ? pathRow.items.length : 0)} item(s)</p>
+            <div class="btn-row">
+              <button type="button" class="btn secondary" data-path-open="${escapeHtml(cleanString(pathRow.id))}">Open</button>
+              <button type="button" class="btn secondary" data-path-share="${escapeHtml(cleanString(pathRow.id))}">Share</button>
+              <button type="button" class="btn secondary" data-path-delete="${escapeHtml(cleanString(pathRow.id))}">Delete</button>
+            </div>
+          </article>
+        `).join("")}
+      </div>
+    `;
+    $all("[data-path-open]", pathLibrary).forEach((buttonEl) => {
+      buttonEl.addEventListener("click", async () => {
+        const pathId = cleanString(buttonEl.getAttribute("data-path-open"));
+        if (!pathId) {
+          return;
+        }
+        try {
+          const response = await getLearningPath(pathId);
+          const pathRow = response && response.path ? response.path : null;
+          if (!pathRow) {
+            return;
+          }
+          activePath = pathRow;
+          const rows = buildPathResults(pathRow);
+          latestResultMap = new Map(rows.map((row) => [cleanString(row.id), row]));
+          result.innerHTML = `
+            <div class="card">
+              <span class="kicker">Learning Path</span>
+              <h3 class="section-title">${escapeHtml(cleanString(pathRow.title))}</h3>
+              <p class="inline-hint">${Number(rows.length)} step(s) loaded from saved path.</p>
+            </div>
+            ${renderResults(rows, [])}
+          `;
+          wireResultPlayButtons();
+          showNotice(`Loaded learning path "${escapeHtml(cleanString(pathRow.title))}".`, "ok");
+        } catch (error) {
+          showNotice(`Could not open path: ${escapeHtml(cleanString(error.message))}`, "error");
+        }
+      });
+    });
+    $all("[data-path-share]", pathLibrary).forEach((buttonEl) => {
+      buttonEl.addEventListener("click", async () => {
+        const pathId = cleanString(buttonEl.getAttribute("data-path-share"));
+        if (!pathId) {
+          return;
+        }
+        try {
+          const response = await shareLearningPath(pathId);
+          const shareUrl = cleanString(response && response.share && response.share.shareUrl);
+          const absolute = shareUrl ? `${window.location.origin}${shareUrl}` : "";
+          if (absolute) {
+            await navigator.clipboard.writeText(absolute);
+          }
+          showNotice(absolute ? "Path share link copied." : "Path is shared with your workspace.", "ok");
+        } catch (error) {
+          showNotice(`Could not share path: ${escapeHtml(cleanString(error.message))}`, "error");
+        }
+      });
+    });
+    $all("[data-path-delete]", pathLibrary).forEach((buttonEl) => {
+      buttonEl.addEventListener("click", async () => {
+        const pathId = cleanString(buttonEl.getAttribute("data-path-delete"));
+        if (!pathId) {
+          return;
+        }
+        if (!window.confirm("Delete this learning path?")) {
+          return;
+        }
+        try {
+          await deleteLearningPath(pathId);
+          await trackEvent("learning_path_deleted", { pathId });
+          await loadPathLibrary();
+          showNotice("Learning path deleted.", "ok");
+        } catch (error) {
+          showNotice(`Could not delete path: ${escapeHtml(cleanString(error.message))}`, "error");
+        }
+      });
+    });
   }
 
   function wireQueryChips() {
@@ -414,6 +579,76 @@
     }
   });
 
+  async function renderSearchPayload(payload, query) {
+    const rows = Array.isArray(payload.results) ? payload.results : [];
+    const related = Array.isArray(payload.relatedContent) ? payload.relatedContent : [];
+    const queryTerms = tokenize(query);
+    renderStats(payload.stats);
+    latestResultMap = new Map(rows.map((row) => [cleanString(row.id), row]));
+
+    result.innerHTML = `
+      ${renderIngestion(payload.ingestion)}
+      ${payload.personalization && payload.personalization.enabled ? `<div class="card"><span class="kicker">Personalized Recommendations Enabled</span><p class="inline-hint">Suggestions are influenced by your recent activity. You can disable this in the form.</p></div>` : ""}
+      ${payload.guidance ? `<div class="card"><span class="kicker">AI Guidance</span><p>${escapeHtml(cleanString(payload.guidance))}</p></div>` : ""}
+      ${rows.length ? `<div class="card"><span class="kicker">Learning Paths & Search Sessions</span><div class="btn-row"><button type="button" class="btn secondary" id="videoSavePath">Save Top Results as Path</button><button type="button" class="btn secondary" id="videoSaveSearchProject">${activeProjectId ? "Update Search Session" : "Save Search Session"}</button></div></div>` : ""}
+      ${renderResults(rows, queryTerms)}
+      ${renderRelated(related)}
+      ${renderSuggestions(payload.suggestedQueries)}
+    `;
+    wireResultSuggestionChips();
+    wireResultPlayButtons();
+    const savePathBtn = $("#videoSavePath", result);
+    if (savePathBtn) {
+      savePathBtn.addEventListener("click", async () => {
+        try {
+          const created = await createLearningPath(`Learning Path: ${query}`, rows.slice(0, 8).map((row, index) => ({
+            order: index + 1,
+            title: row.title,
+            videoId: row.videoId,
+            timestampSeconds: row.timestampSeconds,
+            url: row.url,
+            goal: row.why,
+            notes: `Match score ${row.score}`
+          })));
+          await trackEvent("learning_path_saved", { resultCount: rows.length });
+          showNotice("Learning path saved.", "ok");
+          await loadPathLibrary();
+          const createdPathId = cleanString(created && created.path && created.path.id);
+          if (activeProjectId && createdPathId) {
+            await appendProjectExport(activeProjectId, "learning-path-created", { pathId: createdPathId });
+          }
+        } catch (error) {
+          showNotice(`Could not save learning path: ${escapeHtml(cleanString(error.message))}`, "error");
+        }
+      });
+    }
+    const saveSearchBtn = $("#videoSaveSearchProject", result);
+    if (saveSearchBtn) {
+      saveSearchBtn.addEventListener("click", async () => {
+        const projectPayload = {
+          query,
+          payload
+        };
+        try {
+          if (activeProjectId) {
+            await updateProject(activeProjectId, projectPayload);
+          } else {
+            const saved = await saveProject("video-search", `Video Search - ${query}`, projectPayload);
+            activeProjectId = cleanString(saved && saved.project && saved.project.id);
+          }
+          await trackEvent("project_saved", { tool: "video-search", resultCount: rows.length });
+          showNotice("Search session saved.", "ok");
+          await renderSearchPayload(payload, query);
+        } catch (error) {
+          showNotice(`Could not save search session: ${escapeHtml(cleanString(error.message))}`, "error");
+        }
+      });
+    }
+    if (!rows.length) {
+      clearInlinePlayer();
+    }
+  }
+
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
@@ -424,6 +659,7 @@
     const maxMinutes = Number(maxMinutesInput.value || 0);
     const sortMode = sortSelect.value;
     const autoTranscribe = Boolean(autoTranscribeInput.checked);
+    const disablePersonalization = Boolean(disablePersonalizationInput && disablePersonalizationInput.checked);
 
     if (!query) {
       showNotice("Enter a question to run AI video search.", "error");
@@ -435,6 +671,13 @@
     setBusy(button, "Searching...", true);
 
     try {
+      if (disablePersonalizationInput) {
+        await apiPatch("/api/user/settings", {
+          personalization: {
+            optOut: disablePersonalization
+          }
+        });
+      }
       const payload = await apiPost("/api/ai/video-search", {
         query,
         filters: {
@@ -448,24 +691,9 @@
         transcribeMode: autoTranscribe ? "auto" : "skip"
       });
 
-      const rows = Array.isArray(payload.results) ? payload.results : [];
-      const related = Array.isArray(payload.relatedContent) ? payload.relatedContent : [];
-      const queryTerms = tokenize(query);
-      renderStats(payload.stats);
-      latestResultMap = new Map(rows.map((row) => [cleanString(row.id), row]));
+      await renderSearchPayload(payload, query);
 
-      result.innerHTML = `
-        ${renderIngestion(payload.ingestion)}
-        ${payload.guidance ? `<div class="card"><span class="kicker">AI Guidance</span><p>${escapeHtml(cleanString(payload.guidance))}</p></div>` : ""}
-        ${renderResults(rows, queryTerms)}
-        ${renderRelated(related)}
-        ${renderSuggestions(payload.suggestedQueries)}
-      `;
-      wireResultSuggestionChips();
-      wireResultPlayButtons();
-      if (!rows.length) {
-        clearInlinePlayer();
-      }
+      const rows = Array.isArray(payload.results) ? payload.results : [];
 
       const completed = payload.ingestion && Array.isArray(payload.ingestion.completed)
         ? payload.ingestion.completed.length
@@ -477,6 +705,7 @@
         `Found ${rows.length} timestamped result${rows.length === 1 ? "" : "s"} for "${escapeHtml(query)}"${completed ? ` and transcribed ${completed} new video${completed === 1 ? "" : "s"}` : ""}${unavailable ? ` (${unavailable} source${unavailable === 1 ? "" : "s"} only available as hosted playback)` : ""}.`,
         rows.length ? "ok" : "error"
       );
+      await trackEvent("generation_success", { tool: "video-search", resultCount: rows.length });
     } catch (error) {
       result.innerHTML = "";
       clearInlinePlayer();
@@ -487,6 +716,106 @@
   });
 
   wireQueryChips();
-  loadLibraryStatus(false);
+  if (disablePersonalizationInput) {
+    void apiGet("/api/user/settings")
+      .then((settings) => {
+        if (settings && settings.personalization) {
+          disablePersonalizationInput.checked = Boolean(settings.personalization.optOut);
+        }
+      })
+      .catch(() => {});
+  }
+  const govSaveButton = $("#govSave");
+  if (govSaveButton) {
+    govSaveButton.addEventListener("click", async () => {
+      const videoId = cleanString($("#govVideoId") && $("#govVideoId").value);
+      const videoIds = videoId.split(",").map((value) => value.trim()).filter(Boolean);
+      const tier = cleanString($("#govTier") && $("#govTier").value, "free");
+      const requiredPlans = cleanString($("#govPlans") && $("#govPlans").value)
+        .split(",")
+        .map((value) => value.trim())
+        .filter(Boolean);
+      if (!videoId) {
+        showNotice("Enter a video ID to save governance.", "error");
+        return;
+      }
+      try {
+        await apiPost("/api/video-governance", {
+          videoIds,
+          tier,
+          requiredPlans
+        });
+        await trackEvent("video_governance_updated", { videoId, tier });
+        showNotice(`Access rule saved for ${escapeHtml(videoId)}.`, "ok");
+      } catch (error) {
+        showNotice(`Could not save access rule: ${escapeHtml(cleanString(error.message))}`, "error");
+      }
+    });
+  }
+
+  async function hydrateFromProject() {
+    try {
+      const project = await hydrateProjectFromQuery("video-search");
+      if (!project || !project.payload || typeof project.payload !== "object") {
+        return false;
+      }
+      activeProjectId = cleanString(project.id);
+      const payload = project.payload.payload && typeof project.payload.payload === "object"
+        ? project.payload.payload
+        : null;
+      const query = cleanString(project.payload.query);
+      if (!payload || !query) {
+        return false;
+      }
+      queryInput.value = query;
+      await renderSearchPayload(payload, query);
+      showNotice("Loaded saved video search session.", "ok");
+      return true;
+    } catch (error) {
+      showNotice(`Could not load project: ${escapeHtml(cleanString(error.message))}`, "error");
+      return false;
+    }
+  }
+
+  async function hydrateFromPathQuery() {
+    const params = new URLSearchParams(window.location.search || "");
+    const pathId = cleanString(params.get("path"));
+    if (!pathId) {
+      return false;
+    }
+    try {
+      const payload = await getLearningPath(pathId);
+      const pathRow = payload && payload.path ? payload.path : null;
+      if (!pathRow) {
+        return false;
+      }
+      activePath = pathRow;
+      const rows = buildPathResults(pathRow);
+      latestResultMap = new Map(rows.map((row) => [cleanString(row.id), row]));
+      result.innerHTML = `
+        <div class="card">
+          <span class="kicker">Learning Path</span>
+          <h3 class="section-title">${escapeHtml(cleanString(pathRow.title))}</h3>
+          <p class="inline-hint">${rows.length} step(s) loaded from shared path.</p>
+        </div>
+        ${renderResults(rows, [])}
+      `;
+      wireResultPlayButtons();
+      showNotice(`Loaded path "${escapeHtml(cleanString(pathRow.title))}".`, "ok");
+      return true;
+    } catch (error) {
+      showNotice(`Could not load path: ${escapeHtml(cleanString(error.message))}`, "error");
+      return false;
+    }
+  }
+
+  void (async () => {
+    await loadLibraryStatus(false);
+    await loadPathLibrary();
+    const projectLoaded = await hydrateFromProject();
+    if (!projectLoaded) {
+      await hydrateFromPathQuery();
+    }
+  })();
 })();
 

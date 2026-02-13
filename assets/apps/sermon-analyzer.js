@@ -3,10 +3,18 @@
     $,
     escapeHtml,
     tokenize,
+    apiGet,
+    apiPost,
     apiPostForm,
     cleanArray,
     cleanString,
-    setBusy
+    setBusy,
+    saveProject,
+    updateProject,
+    appendProjectExport,
+    hydrateProjectFromQuery,
+    trackEvent,
+    registerToolLifecycle
   } = window.AIBible;
 
   const form = $("#audioForm");
@@ -28,8 +36,11 @@
   const vocalCanvas = $("#vocalChart");
 
   let lastReportText = "";
+  let lastPayload = null;
+  let activeProjectId = "";
   const MAX_SAFE_UPLOAD_BYTES = 5.5 * 1024 * 1024;
   const OPTIMIZED_SAMPLE_RATE = 8000;
+  registerToolLifecycle("sermon-analyzer");
 
   function showNotice(message, type) {
     notice.className = `notice ${type || ""}`.trim();
@@ -576,6 +587,8 @@
     const vocal = payload.vocalDynamics || {};
     const content = payload.contentAnalysis || {};
     const coaching = payload.coachingFeedback || {};
+    const coachMode = payload.coachMode || {};
+    const comparative = payload.comparativeAnalytics || {};
 
     return `
       <div class="card">
@@ -643,6 +656,29 @@
         ${listHtml(coaching.nextWeekPlan, 10)}
       </div>
 
+      ${coachMode && Array.isArray(coachMode.drills) && coachMode.drills.length ? `
+        <div class="card">
+          <span class="kicker">Coach Mode (${escapeHtml(String(coachMode.planDays || 7))} Days)</span>
+          <ul class="list coach-drill-list">
+            ${(coachMode.drills || []).map((drill) => `
+              <li>
+                <strong>Day ${Number(drill.day || 0)} - ${escapeHtml(cleanString(drill.focus))}:</strong> ${escapeHtml(cleanString(drill.target))} (${escapeHtml(cleanString(drill.metric))})
+                <button type="button" class="btn secondary coach-drill-btn" data-drill-id="${escapeHtml(`day-${Number(drill.day || 0)}-${cleanString(drill.focus).toLowerCase().replace(/\s+/g, "-")}`)}" data-drill-day="${escapeHtml(String(Number(drill.day || 0)))}">Mark Complete</button>
+              </li>
+            `).join("")}
+          </ul>
+        </div>
+      ` : ""}
+
+      ${comparative ? `
+        <div class="card">
+          <span class="kicker">Comparative Analytics</span>
+          <p><strong>Pacing delta:</strong> ${escapeHtml(String(comparative.pacingDeltaWpm || 0))} WPM</p>
+          <p><strong>Vocal variety delta:</strong> ${escapeHtml(String(comparative.vocalVarietyDelta || 0))}</p>
+          <p><strong>Clarity delta:</strong> ${escapeHtml(String(comparative.clarityDelta || 0))}</p>
+        </div>
+      ` : ""}
+
       <div class="card">
         <span class="kicker">Full Transcript</span>
         <p><strong>Language:</strong> ${escapeHtml(cleanString(transcript.language, "unknown"))} | <strong>Words:</strong> ${Number(transcript.wordCount || tokenize(transcript.text || "").length)}</p>
@@ -650,6 +686,35 @@
         ${renderTranscriptTable(transcript.segments)}
       </div>
     `;
+  }
+
+  function wireCoachDrillButtons() {
+    const buttons = Array.from(document.querySelectorAll(".coach-drill-btn"));
+    for (const buttonEl of buttons) {
+      buttonEl.addEventListener("click", async () => {
+        const drillId = cleanString(buttonEl.getAttribute("data-drill-id"));
+        const day = cleanString(buttonEl.getAttribute("data-drill-day"));
+        if (!drillId) {
+          return;
+        }
+        buttonEl.disabled = true;
+        buttonEl.textContent = "Saving...";
+        try {
+          await apiPost("/api/coach/drills/complete", {
+            drillId,
+            date: new Date().toISOString().slice(0, 10),
+            completed: true
+          });
+          buttonEl.textContent = "Completed";
+          buttonEl.classList.add("is-complete");
+          await trackEvent("coach_drill_marked_complete", { tool: "sermon-analyzer", drillId, day });
+        } catch (error) {
+          buttonEl.disabled = false;
+          buttonEl.textContent = "Mark Complete";
+          showNotice(`Could not save drill completion: ${escapeHtml(cleanString(error.message))}`, "error");
+        }
+      });
+    }
   }
 
   function renderCharts(payload, localAnalysis) {
@@ -835,13 +900,23 @@
       formData.append("transcriptOverride", cleanString(transcriptInput.value));
       formData.append("localAnalysis", JSON.stringify(localAnalysis.payload));
 
-      const payload = await apiPostForm("/api/ai/sermon-analyzer", formData);
+      formData.append("asyncMode", "true");
+      const kickoff = await apiPostForm("/api/ai/sermon-analyzer", formData);
+      let payload = kickoff;
+      if (cleanString(kickoff.mode) === "async" && kickoff.jobId) {
+        setBusy(button, "Processing Queue Job...", true);
+        payload = await pollAnalyzerJob(kickoff.jobId);
+      }
+
       renderPipeline(payload.orchestration);
       renderCharts(payload, localAnalysis);
       result.innerHTML = renderReport(payload);
+      wireCoachDrillButtons();
       lastReportText = buildReportText(payload);
+      lastPayload = payload;
 
       showNotice(`Full sermon analyzer report generated.${escapeHtml(optimizationNote)}`, "ok");
+      await trackEvent("generation_success", { tool: "sermon-analyzer" });
     } catch (error) {
       chartsWrap.classList.add("hidden");
       showNotice(`Sermon analysis failed: ${escapeHtml(error.message || "Unknown error")}`, "error");
@@ -859,6 +934,11 @@
 
     try {
       await navigator.clipboard.writeText(reportText);
+      if (activeProjectId) {
+        await appendProjectExport(activeProjectId, "sermon-analyzer-report-copy", {
+          fileName: cleanString(lastPayload && lastPayload.meta && lastPayload.meta.fileName)
+        });
+      }
       showNotice("Analyzer report copied to clipboard.", "ok");
     } catch (_) {
       const temp = document.createElement("textarea");
@@ -870,5 +950,76 @@
       showNotice("Analyzer report copied to clipboard.", "ok");
     }
   });
+
+  const saveBtn = document.createElement("button");
+  saveBtn.type = "button";
+  saveBtn.className = "btn secondary";
+  saveBtn.textContent = "Save Report";
+  saveBtn.addEventListener("click", async () => {
+    if (!lastPayload) {
+      showNotice("Generate an analyzer report before saving.", "error");
+      return;
+    }
+    try {
+      if (activeProjectId) {
+        await updateProject(activeProjectId, lastPayload);
+      } else {
+        const saved = await saveProject("sermon-analyzer", `Analyzer Report - ${cleanString(lastPayload.meta && lastPayload.meta.fileName)}`, lastPayload);
+        activeProjectId = cleanString(saved && saved.project && saved.project.id);
+      }
+      await trackEvent("project_saved", { tool: "sermon-analyzer" });
+      showNotice("Analyzer report saved.", "ok");
+    } catch (error) {
+      showNotice(`Could not save report: ${escapeHtml(error.message || "Unknown error")}`, "error");
+    }
+  });
+  const row = document.querySelector("#audioForm .btn-row");
+  if (row) {
+    row.appendChild(saveBtn);
+  }
+
+  async function hydrateFromProject() {
+    try {
+      const project = await hydrateProjectFromQuery("sermon-analyzer");
+      if (!project || !project.payload || typeof project.payload !== "object") {
+        return;
+      }
+      const payload = project.payload;
+      activeProjectId = cleanString(project.id);
+      if (payload.meta && payload.meta.fileName) {
+        showNotice(`Loaded saved analyzer report (${escapeHtml(cleanString(payload.meta.fileName))}).`, "ok");
+      } else {
+        showNotice("Loaded saved analyzer report.", "ok");
+      }
+      lastPayload = payload;
+      lastReportText = buildReportText(payload);
+      result.innerHTML = renderReport(payload);
+      wireCoachDrillButtons();
+      chartsWrap.classList.add("hidden");
+      pipelineStatus.classList.add("hidden");
+    } catch (error) {
+      showNotice(`Could not load project: ${escapeHtml(cleanString(error.message))}`, "error");
+    }
+  }
+
+  async function pollAnalyzerJob(jobId) {
+    const started = Date.now();
+    const timeoutMs = 8 * 60 * 1000;
+
+    while (Date.now() - started < timeoutMs) {
+      const status = await apiGet(`/api/ai/sermon-analyzer/jobs/${encodeURIComponent(cleanString(jobId))}`);
+      const state = cleanString(status.status);
+      if (state === "completed" && status.result) {
+        return status.result;
+      }
+      if (state === "failed") {
+        throw new Error(cleanString(status.failureReason, "Analyzer job failed."));
+      }
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+    }
+    throw new Error("Analyzer job timed out. Retry with a shorter audio file.");
+  }
+
+  void hydrateFromProject();
 })();
 

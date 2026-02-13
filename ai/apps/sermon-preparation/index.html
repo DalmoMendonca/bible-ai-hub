@@ -1,9 +1,110 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sermon Preparation | Bible AI Hub</title>
+  <title>AI Sermon Preparation Tool | Build Expository Outlines Fast</title>
+  <meta name="description" content="Create sermon plans from Scripture with AI, including big ideas, title options, movements, transitions, applications, and timing plans." />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <meta name="author" content="Bible AI Hub" />
+  <meta name="theme-color" content="#0f5f9b" />
+  <link rel="canonical" href="https://bible.hiredalmo.com/ai/apps/sermon-preparation/" />
+  <link rel="alternate" hreflang="en" href="https://bible.hiredalmo.com/ai/apps/sermon-preparation/" />
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/assets/social-share.png" />
+
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Bible AI Hub" />
+  <meta property="og:title" content="AI Sermon Preparation Tool | Build Expository Outlines Fast" />
+  <meta property="og:description" content="Turn a passage into a structured sermon workflow with big idea, outline, transitions, applications, and practical timing." />
+  <meta property="og:url" content="https://bible.hiredalmo.com/ai/apps/sermon-preparation/" />
+  <meta property="og:image" content="https://bible.hiredalmo.com/assets/social-share.png" />
+  <meta property="og:image:secure_url" content="https://bible.hiredalmo.com/assets/social-share.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Bible AI Hub Sermon Preparation app" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="AI Sermon Preparation Tool | Build Expository Outlines Fast" />
+  <meta name="twitter:description" content="Generate sermon outlines, transitions, applications, and timing plans from Scripture with AI." />
+  <meta name="twitter:image" content="https://bible.hiredalmo.com/assets/social-share.png" />
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          "name": "Sermon Preparation",
+          "url": "https://bible.hiredalmo.com/ai/apps/sermon-preparation/",
+          "applicationCategory": "EducationalApplication",
+          "operatingSystem": "Web",
+          "description": "An AI sermon preparation app that produces big ideas, titles, movements, applications, and timing plans from biblical passages.",
+          "offers": {
+            "@type": "Offer",
+            "price": "15",
+            "priceCurrency": "USD"
+          },
+          "publisher": {
+            "@type": "Organization",
+            "name": "Bible AI Hub",
+            "url": "https://bible.hiredalmo.com/"
+          }
+        },
+        {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Bible AI Hub",
+              "item": "https://bible.hiredalmo.com/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Sermon Preparation",
+              "item": "https://bible.hiredalmo.com/ai/apps/sermon-preparation/"
+            }
+          ]
+        }
+      ]
+    }
+  </script>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What does the AI sermon preparation tool generate?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "It generates a big idea, title options, structured outline movements, transitions, applications, illustrations, and a timing plan based on your passage and audience."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is this for expository sermons only?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The tool is strongest for text-centered expository preaching, but it can also support topical, teaching, and conference-style messages."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I improve output quality?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Use a clear passage reference, describe your audience, and define your desired listener response in the sermon goal field."
+          }
+        }
+      ]
+    }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
@@ -14,7 +115,7 @@
   <div class="site-wrap">
     <header class="site-header">
       <div class="header-inner">
-        <a class="brand" href="../../">Bible AI Hub</a>
+        <a class="brand" href="/">Bible AI Hub</a>
       </div>
     </header>
 
@@ -34,6 +135,25 @@
           <div class="content">
             <h2 class="title">Sermon Workflow Assistant</h2>
             <p class="lead">Enter a passage, audience, and goal. AI generates a big idea, title options, structured movements, transitions, and timing plan.</p>
+
+            <div class="card">
+              <h3 class="section-title">Series Planner</h3>
+              <p class="inline-hint">Create and maintain a sermon series calendar with week-by-week continuity context.</p>
+              <div class="form-grid">
+                <div class="field">
+                  <label for="seriesTitle">Series Title</label>
+                  <input id="seriesTitle" class="input" placeholder="e.g., Gospel of Mark" />
+                </div>
+                <div class="field">
+                  <label for="seriesDate">First Week Date</label>
+                  <input id="seriesDate" class="input" type="date" />
+                </div>
+                <div class="field span-2">
+                  <button id="seriesCreate" type="button" class="btn secondary">Create Series</button>
+                </div>
+              </div>
+              <div id="seriesList" class="result"></div>
+            </div>
 
             <div class="card">
               <form id="prepForm" class="form-grid">
@@ -58,9 +178,32 @@
                   <label for="prepMinutes">Message Length (minutes)</label>
                   <input id="prepMinutes" class="input" type="number" min="8" max="90" value="30" />
                 </div>
+                <div class="field">
+                  <label for="prepStyleMode">Style Mode</label>
+                  <select id="prepStyleMode" class="select">
+                    <option value="expository">Expository</option>
+                    <option value="narrative">Narrative</option>
+                    <option value="topical">Topical</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="prepSeriesTitle">Series Title (optional)</label>
+                  <input id="prepSeriesTitle" class="input" placeholder="e.g., Kingdom Parables" />
+                </div>
+                <div class="field">
+                  <label for="prepSeriesWeek">Series Week (optional)</label>
+                  <input id="prepSeriesWeek" class="input" placeholder="e.g., Week 2" />
+                </div>
+                <div class="field span-2">
+                  <label for="prepSeriesThemes">Prior Series Themes (optional)</label>
+                  <input id="prepSeriesThemes" class="input" placeholder="comma-separated themes from prior messages" />
+                </div>
                 <div class="field span-2">
                   <label for="prepGoal">Sermon Goal</label>
                   <textarea id="prepGoal" class="textarea" placeholder="What response do you want from listeners?"></textarea>
+                </div>
+                <div class="field span-2">
+                  <label class="check-row"><input id="prepTighten" type="checkbox" /> Run optional tightening pass for weak sections</label>
                 </div>
                 <div class="field span-2">
                   <div class="btn-row">
@@ -68,6 +211,31 @@
                   </div>
                 </div>
               </form>
+            </div>
+
+            <div class="card seo-copy">
+              <h3 class="section-title">Build a Faster Sermon Workflow</h3>
+              <ul class="list seo-link-list">
+                <li>Use this AI sermon preparation tool after studying your passage in <a href="/ai/apps/bible-study/">Bible Study Chat</a>.</li>
+                <li>Generate a draft outline in minutes, then iterate transitions and applications for your audience.</li>
+                <li>Finalize manuscript quality with <a href="/ai/apps/research-helper/">AI Sermon Evaluation</a> and delivery with <a href="/ai/apps/sermon-analyzer/">AI Sermon Analyzer</a>.</li>
+              </ul>
+            </div>
+
+            <div class="card seo-faq">
+              <h3 class="section-title">FAQ: AI Sermon Preparation Tool</h3>
+              <details>
+                <summary>What does this tool generate?</summary>
+                <p>You get a big idea, title options, movement-based outline, transitions, applications, illustrations, and timing segments for your message.</p>
+              </details>
+              <details>
+                <summary>Can it help with different sermon formats?</summary>
+                <p>Yes. It works best for text-centered preaching and can also support topical or ministry-context messages.</p>
+              </details>
+              <details>
+                <summary>How can I get better outputs?</summary>
+                <p>Give a specific passage, audience context, sermon length, and a clear outcome you want listeners to pursue.</p>
+              </details>
             </div>
 
             <div id="prepNotice" class="notice hidden"></div>
@@ -78,7 +246,7 @@
     </main>
 
     <footer class="micro-footer">
-      <p>Made with ❤️ | <a href="https://hiredalmo.com" target="_blank" rel="noopener noreferrer">hiredalmo.com</a></p>
+      <p>Made with &#10084;&#65039; | <a href="https://hiredalmo.com" target="_blank" rel="noopener noreferrer">hiredalmo.com</a></p>
     </footer>
   </div>
 
@@ -86,3 +254,5 @@
   <script src="../../../assets/apps/sermon-preparation.js"></script>
 </body>
 </html>
+
+

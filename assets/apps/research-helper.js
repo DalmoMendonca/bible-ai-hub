@@ -9,13 +9,23 @@
     cleanArray,
     cleanString,
     apiPost,
-    setBusy
+    setBusy,
+    saveProject,
+    updateProject,
+    appendProjectExport,
+    hydrateProjectFromQuery,
+    getHandoff,
+    trackEvent,
+    registerToolLifecycle
   } = window.AIBible;
 
   const form = $("#evalForm");
   const notice = $("#evalNotice");
   const result = $("#evalResult");
   const button = $("#evalButton");
+  let lastGenerated = null;
+  let activeProjectId = "";
+  registerToolLifecycle("research-helper");
 
   function showNotice(message, type) {
     notice.className = `notice ${type || ""}`.trim();
@@ -85,6 +95,25 @@
       .join("");
   }
 
+  function renderTrendSeries(series) {
+    const safe = Array.isArray(series) ? series.map((value) => Number(value || 0)).filter((value) => Number.isFinite(value)) : [];
+    if (!safe.length) {
+      return `<p class="inline-hint">No trend history yet.</p>`;
+    }
+    const max = Math.max(...safe, 1);
+    return `
+      <div class="metric-grid">
+        ${safe.map((value, index) => `
+          <div class="metric">
+            <strong>${Number(value).toFixed(2)}</strong>
+            <span>Run ${index + 1}</span>
+            <div class="progress-track"><span class="progress-fill" style="width:${Math.max(4, (value / max) * 100)}%"></span></div>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }
+
   function renderAnalysis(diagnostics, ai) {
     const refsLabel = diagnostics.references.length
       ? diagnostics.references.slice(0, 10).join(", ")
@@ -116,6 +145,24 @@
         <span class="kicker">AI Scores</span>
         ${renderScores(ai.scores)}
       </div>
+
+      ${ai && ai.trends ? `
+        <div class="card">
+          <span class="kicker">Trend Window (Last ${escapeHtml(String(ai.trends.window || 10))})</span>
+          <p><strong>Average score:</strong> ${escapeHtml(String(ai.trends.averageScore || 0))}</p>
+          <p><strong>Previous average:</strong> ${escapeHtml(String(ai.trends.previousAverage || 0))}</p>
+          <p><strong>Delta:</strong> ${escapeHtml(String(ai.trends.delta || 0))}</p>
+          ${renderTrendSeries(ai.trends.series)}
+        </div>
+      ` : ""}
+
+      ${ai && ai.revisionDelta ? `
+        <div class="card">
+          <span class="kicker">Revision Delta</span>
+          <p><strong>Score delta:</strong> ${escapeHtml(String(ai.revisionDelta.scoreDelta || 0))}</p>
+          <p><strong>Manuscript length delta:</strong> ${escapeHtml(String(ai.revisionDelta.manuscriptLengthDelta || 0))} chars</p>
+        </div>
+      ` : ""}
 
       <div class="card">
         <span class="kicker">Strengths</span>
@@ -164,12 +211,141 @@
         manuscript
       });
 
+      lastGenerated = {
+        input: { sermonType, targetMinutes, manuscript, diagnostics },
+        output: ai
+      };
       result.innerHTML = renderAnalysis(diagnostics, ai);
       showNotice("AI sermon evaluation complete.", "ok");
+      await trackEvent("generation_success", { tool: "research-helper" });
     } catch (error) {
       showNotice(`Could not evaluate sermon: ${escapeHtml(error.message || "Unknown error")}`, "error");
     } finally {
       setBusy(button, "", false);
     }
   });
+
+  const saveBtn = document.createElement("button");
+  saveBtn.type = "button";
+  saveBtn.className = "btn secondary";
+  saveBtn.textContent = "Save Evaluation";
+  saveBtn.addEventListener("click", async () => {
+    if (!lastGenerated) {
+      showNotice("Run an evaluation before saving.", "error");
+      return;
+    }
+    try {
+      if (activeProjectId) {
+        await updateProject(activeProjectId, lastGenerated);
+      } else {
+        const saved = await saveProject("research-helper", "Sermon Evaluation", lastGenerated);
+        activeProjectId = cleanString(saved && saved.project && saved.project.id);
+      }
+      await trackEvent("project_saved", { tool: "research-helper" });
+      showNotice("Evaluation saved.", "ok");
+    } catch (error) {
+      showNotice(`Could not save evaluation: ${escapeHtml(error.message || "Unknown error")}`, "error");
+    }
+  });
+  const exportBtn = document.createElement("button");
+  exportBtn.type = "button";
+  exportBtn.className = "btn secondary";
+  exportBtn.textContent = "Export Trend CSV";
+  exportBtn.addEventListener("click", async () => {
+    if (!lastGenerated || !lastGenerated.output) {
+      showNotice("Run an evaluation before exporting.", "error");
+      return;
+    }
+    const trends = lastGenerated.output.trends && Array.isArray(lastGenerated.output.trends.series)
+      ? lastGenerated.output.trends.series
+      : [];
+    if (!trends.length) {
+      showNotice("No trend data is available yet.", "error");
+      return;
+    }
+    const csv = [
+      "run_index,score",
+      ...trends.map((score, index) => `${index + 1},${Number(score || 0)}`)
+    ].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = "sermon-evaluation-trends.csv";
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    URL.revokeObjectURL(url);
+    if (activeProjectId) {
+      try {
+        await appendProjectExport(activeProjectId, "sermon-evaluation-trends-csv", {
+          rows: trends.length
+        });
+      } catch (_) {
+        // Export history logging should not block download UX.
+      }
+    }
+    showNotice("Trend CSV exported.", "ok");
+  });
+  const buttonRow = document.querySelector("#evalForm .btn-row");
+  if (buttonRow) {
+    buttonRow.appendChild(saveBtn);
+    buttonRow.appendChild(exportBtn);
+  }
+
+  async function hydrateFromHandoff() {
+    const params = new URLSearchParams(window.location.search);
+    if (cleanString(params.get("project"))) {
+      return;
+    }
+    const handoffId = cleanString(params.get("handoff"));
+    if (!handoffId) {
+      return;
+    }
+    try {
+      const response = await getHandoff(handoffId);
+      const payload = response && response.handoff ? response.handoff.payload || {} : {};
+      const manuscriptSeed = cleanString(payload.manuscriptSeed);
+      if (manuscriptSeed) {
+        $("#evalText").value = manuscriptSeed;
+      }
+      showNotice("Loaded handoff context from Sermon Preparation.", "ok");
+    } catch (_) {
+      // keep page usable even if handoff lookup fails
+    }
+  }
+
+  async function hydrateFromProject() {
+    try {
+      const project = await hydrateProjectFromQuery("research-helper");
+      if (!project || !project.payload || typeof project.payload !== "object") {
+        return;
+      }
+      const payload = project.payload;
+      activeProjectId = cleanString(project.id);
+      const input = payload.input && typeof payload.input === "object" ? payload.input : {};
+      if (input.sermonType) {
+        $("#evalType").value = cleanString(input.sermonType);
+      }
+      if (Number.isFinite(Number(input.targetMinutes))) {
+        $("#evalTarget").value = String(Number(input.targetMinutes));
+      }
+      if (input.manuscript) {
+        $("#evalText").value = cleanString(input.manuscript);
+      }
+      if (input.diagnostics && typeof input.diagnostics === "object") {
+        // Keep local diagnostics in sync for immediate render consistency.
+      }
+      if (payload.output && input.diagnostics) {
+        lastGenerated = payload;
+        result.innerHTML = renderAnalysis(input.diagnostics, payload.output);
+      }
+      showNotice("Loaded saved Sermon Evaluation project.", "ok");
+    } catch (error) {
+      showNotice(`Could not load project: ${escapeHtml(cleanString(error.message))}`, "error");
+    }
+  }
+
+  void hydrateFromProject();
+  void hydrateFromHandoff();
 })();

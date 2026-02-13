@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bible AI Hub Landing Page</title>
+  <meta name="description" content="Bible AI Hub keyword landing page template." />
+  <link rel="stylesheet" href="/assets/styles.css" />
+</head>
+<body>
+  <div class="site-wrap">
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="/">Bible AI Hub</a>
+      </div>
+    </header>
+    <main class="main">
+      <div class="container">
+        <section class="panel">
+          <div class="hero compact">
+            <h1 id="landingTitle">Bible AI Hub</h1>
+            <p id="landingSubtitle">AI workflows for pastors and Bible teachers.</p>
+          </div>
+          <div class="content">
+            <div class="card">
+              <h2 class="section-title">Why This Workflow Works</h2>
+              <p id="landingBody">Use this template to publish high-intent SEO pages by keyword cluster.</p>
+              <div class="btn-row">
+                <a class="btn primary" href="/pricing/">Start with the Right Plan</a>
+                <a class="btn secondary" href="/">Back to Bible AI Hub</a>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+    <footer class="micro-footer">
+      <p>Made with &#10084;&#65039; | <a href="https://hiredalmo.com" target="_blank" rel="noopener noreferrer">hiredalmo.com</a></p>
+    </footer>
+  </div>
+  <script>
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      const keyword = params.get("keyword") || "AI Bible study tools";
+      const intent = params.get("intent") || "build faithful, high-quality outputs faster";
+      document.getElementById("landingTitle").textContent = keyword;
+      document.getElementById("landingSubtitle").textContent = `Built for ministries that need to ${intent}.`;
+      document.getElementById("landingBody").textContent = `This page is generated from a keyword cluster. Adapt copy, schema, and CTA based on search intent around "${keyword}".`;
+      document.title = `${keyword} | Bible AI Hub`;
+    })();
+  </script>
+</body>
+</html>

@@ -36,6 +36,12 @@ Run an end-to-end API smoke test (all six apps):
 npm run smoke
 ```
 
+Run a platform/governance smoke test (auth, billing, entitlements, projects, handoffs, team/reporting APIs):
+
+```bash
+npm run smoke:platform
+```
+
 This script starts a temporary local server on port `3199`, validates each AI route, and exits with a non-zero code if any app contract fails.
 
 Run a real file-upload sermon analyzer test:
@@ -119,6 +125,7 @@ OPENAI_RETRY_BASE_MS=650
 
 ## App routes
 
+- `/pricing/`
 - `/ai/apps/bible-study/`
 - `/ai/apps/sermon-preparation/`
 - `/ai/apps/teaching-tools/`
@@ -131,6 +138,8 @@ Legacy links like `/ai/video-search/` still redirect to the new `/ai/apps/...` r
 ## Notes
 
 - OpenAI API key is used server-side only (`server.js`).
+- Platform layer now includes auth, workspaces, entitlement gating, usage metering, quota enforcement, events, projects/history, handoffs, team seats, and async analyzer queue jobs.
+- API auth is session-token based (`Authorization: Bearer <token>` and `X-Workspace-Id`), and the frontend auto-provisions a local guest session for first-time users.
 - Video Search auto-discovers videos in `ai/videos/`, supports OpenAI transcription ingestion, and returns timestamped semantic results.
 - Video Search automatically falls back to lexical ranking if embeddings are temporarily unavailable.
 - If source video files are not present in production, the app still serves indexed transcript search and uses `hostedUrl` playback links.

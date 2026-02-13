@@ -6,7 +6,13 @@
     apiPost,
     cleanArray,
     cleanString,
-    setBusy
+    setBusy,
+    saveProject,
+    updateProject,
+    appendProjectExport,
+    hydrateProjectFromQuery,
+    trackEvent,
+    registerToolLifecycle
   } = window.AIBible;
 
   const form = $("#teachForm");
@@ -15,6 +21,13 @@
   const button = $("#teachButton");
   const printButton = $("#teachPrint");
   const copyButton = $("#teachCopy");
+  const exportLeaderButton = document.createElement("button");
+  const exportStudentButton = document.createElement("button");
+  const exportParentButton = document.createElement("button");
+  const exportSlidesButton = document.createElement("button");
+  let lastGenerated = null;
+  let activeProjectId = "";
+  registerToolLifecycle("teaching-tools");
   const BIBLE_BOOK_PATTERN = /\b(?:gen(?:esis)?|exo(?:dus)?|lev(?:iticus)?|num(?:bers)?|deut(?:eronomy)?|josh(?:ua)?|judg(?:es)?|ruth|(?:1|2)\s*sam(?:uel)?|(?:1|2)\s*kings?|(?:1|2)\s*chron(?:icles)?|ezra|neh(?:emiah)?|esth(?:er)?|job|ps(?:alm|alms)?|prov(?:erbs)?|eccl(?:esiastes)?|song(?:\s+of\s+solomon)?|isa(?:iah)?|jer(?:emiah)?|lam(?:entations)?|ezek(?:iel)?|dan(?:iel)?|hos(?:ea)?|joel|amos|obad(?:iah)?|jonah|mic(?:ah)?|nah(?:um)?|hab(?:akkuk)?|zeph(?:aniah)?|hag(?:gai)?|zech(?:ariah)?|mal(?:achi)?|matt?(?:hew)?|mark|luke?|john|acts?|rom(?:ans)?|(?:1|2)\s*cor(?:inthians)?|gal(?:atians)?|eph(?:esians)?|phil(?:ippians)?|col(?:ossians)?|(?:1|2)\s*thess(?:alonians)?|(?:1|2)\s*tim(?:othy)?|titus|philem(?:on)?|heb(?:rews)?|james?|(?:1|2)\s*peter|(?:1|2|3)\s*john|jude|rev(?:elation)?)\b/i;
 
   function showNotice(message, type) {
@@ -31,6 +44,10 @@
   function setExportButtonsVisible(isVisible) {
     copyButton.classList.toggle("hidden", !isVisible);
     printButton.classList.toggle("hidden", !isVisible);
+    exportLeaderButton.classList.toggle("hidden", !isVisible);
+    exportStudentButton.classList.toggle("hidden", !isVisible);
+    exportParentButton.classList.toggle("hidden", !isVisible);
+    exportSlidesButton.classList.toggle("hidden", !isVisible);
   }
 
   function isLikelyBibleReference(value) {
@@ -223,6 +240,10 @@
 
     const rawPassage = $("#teachPassage").value.trim();
     const audience = $("#teachAudience").value;
+    const selectedAudiences = Array.from(document.querySelectorAll("#teachAudienceKids, #teachAudienceYouth, #teachAudienceAdults"))
+      .filter((inputEl) => inputEl && inputEl.checked)
+      .map((inputEl) => cleanString(inputEl.value))
+      .filter(Boolean);
     const setting = $("#teachSetting").value;
     const groupSize = Number($("#teachGroupSize").value || 12);
     const length = Number($("#teachLength").value || 45);
@@ -259,6 +280,7 @@
         sourceTitle,
         passageText,
         audience,
+        audiences: selectedAudiences,
         setting,
         groupSize,
         length,
@@ -266,11 +288,43 @@
         resources,
         notes
       });
-
+      lastGenerated = {
+        input: {
+          sourceTitle,
+          passageText,
+          audience,
+          selectedAudiences,
+          setting,
+          groupSize,
+          length,
+          resources,
+          outcome,
+          notes,
+          sourceMode: usedPassageLookup ? "passage" : "topic"
+        },
+        output: ai
+      };
       result.innerHTML = renderPlan({ sourceTitle, passageText, audience, setting, groupSize, length, resources }, ai);
+      if (ai && ai.multiAudience && Array.isArray(ai.comparisonSummary) && ai.comparisonSummary.length) {
+        const comparisonCard = document.createElement("div");
+        comparisonCard.className = "card";
+        comparisonCard.innerHTML = `
+          <span class="kicker">Parallel Audience Comparison</span>
+          <div class="metric-grid">
+            ${ai.comparisonSummary.map((row) => `
+              <div class="metric">
+                <strong>${escapeHtml(cleanString(row.audience))}</strong>
+                <span>${Number(row.objectiveCount || 0)} objectives | ${Number(row.discussionQuestionCount || 0)} questions</span>
+              </div>
+            `).join("")}
+          </div>
+        `;
+        result.appendChild(comparisonCard);
+      }
       const sourceMode = usedPassageLookup ? "passage" : "topic";
       showNotice(`Full AI teaching kit generated for ${escapeHtml(sourceTitle)} (${sourceMode} mode).`, "ok");
       setExportButtonsVisible(true);
+      await trackEvent("generation_success", { tool: "teaching-tools", mode: sourceMode });
     } catch (error) {
       showNotice(`Could not generate teaching kit: ${escapeHtml(error.message || "Unknown error")}`, "error");
       setExportButtonsVisible(false);
@@ -288,6 +342,11 @@
     const text = result.innerText.trim();
     try {
       await navigator.clipboard.writeText(text);
+      if (activeProjectId) {
+        await appendProjectExport(activeProjectId, "teaching-kit-copy", {
+          sourceTitle: cleanString(lastGenerated && lastGenerated.input && lastGenerated.input.sourceTitle)
+        });
+      }
       showNotice("Teaching kit copied to clipboard.", "ok");
     } catch (_) {
       const temp = document.createElement("textarea");
@@ -305,8 +364,199 @@
       showNotice("Generate a teaching kit before printing.", "error");
       return;
     }
+    if (activeProjectId) {
+      void appendProjectExport(activeProjectId, "teaching-kit-print", {
+        sourceTitle: cleanString(lastGenerated && lastGenerated.input && lastGenerated.input.sourceTitle)
+      });
+    }
     window.print();
   });
 
   setExportButtonsVisible(false);
+
+  function downloadTextFile(fileName, content) {
+    const blob = new Blob([String(content || "")], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = fileName;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    URL.revokeObjectURL(url);
+  }
+
+  exportLeaderButton.type = "button";
+  exportLeaderButton.className = "btn secondary hidden";
+  exportLeaderButton.textContent = "Leader Handout";
+  exportLeaderButton.addEventListener("click", () => {
+    if (!lastGenerated) {
+      return;
+    }
+    const handout = cleanString(lastGenerated.output && lastGenerated.output.exports && lastGenerated.output.exports.handouts && lastGenerated.output.exports.handouts.leader);
+    downloadTextFile("leader-handout.txt", handout);
+    if (activeProjectId) {
+      void appendProjectExport(activeProjectId, "teaching-kit-leader-handout", {
+        sourceTitle: cleanString(lastGenerated.input && lastGenerated.input.sourceTitle)
+      });
+    }
+  });
+
+  exportStudentButton.type = "button";
+  exportStudentButton.className = "btn secondary hidden";
+  exportStudentButton.textContent = "Student Handout";
+  exportStudentButton.addEventListener("click", () => {
+    if (!lastGenerated) {
+      return;
+    }
+    const handout = cleanString(lastGenerated.output && lastGenerated.output.exports && lastGenerated.output.exports.handouts && lastGenerated.output.exports.handouts.student);
+    downloadTextFile("student-handout.txt", handout);
+    if (activeProjectId) {
+      void appendProjectExport(activeProjectId, "teaching-kit-student-handout", {
+        sourceTitle: cleanString(lastGenerated.input && lastGenerated.input.sourceTitle)
+      });
+    }
+  });
+
+  exportParentButton.type = "button";
+  exportParentButton.className = "btn secondary hidden";
+  exportParentButton.textContent = "Parent Handout";
+  exportParentButton.addEventListener("click", () => {
+    if (!lastGenerated) {
+      return;
+    }
+    const handout = cleanString(lastGenerated.output && lastGenerated.output.exports && lastGenerated.output.exports.handouts && lastGenerated.output.exports.handouts.parent);
+    downloadTextFile("parent-handout.txt", handout);
+    if (activeProjectId) {
+      void appendProjectExport(activeProjectId, "teaching-kit-parent-handout", {
+        sourceTitle: cleanString(lastGenerated.input && lastGenerated.input.sourceTitle)
+      });
+    }
+  });
+
+  exportSlidesButton.type = "button";
+  exportSlidesButton.className = "btn secondary hidden";
+  exportSlidesButton.textContent = "Slide Outline";
+  exportSlidesButton.addEventListener("click", () => {
+    if (!lastGenerated) {
+      return;
+    }
+    const slideOutline = lastGenerated.output && lastGenerated.output.exports && lastGenerated.output.exports.slideOutline;
+    downloadTextFile("slide-outline.json", JSON.stringify(slideOutline || {}, null, 2));
+    if (activeProjectId) {
+      void appendProjectExport(activeProjectId, "teaching-kit-slides", {
+        sourceTitle: cleanString(lastGenerated.input && lastGenerated.input.sourceTitle)
+      });
+    }
+  });
+
+  const saveBtn = document.createElement("button");
+  saveBtn.type = "button";
+  saveBtn.className = "btn secondary";
+  saveBtn.textContent = "Save Kit";
+  saveBtn.addEventListener("click", async () => {
+    if (!lastGenerated) {
+      showNotice("Generate a teaching kit before saving.", "error");
+      return;
+    }
+    try {
+      if (activeProjectId) {
+        await updateProject(activeProjectId, lastGenerated);
+      } else {
+        const saved = await saveProject("teaching-tools", `Teaching Kit - ${cleanString(lastGenerated.input.sourceTitle)}`, lastGenerated);
+        activeProjectId = cleanString(saved && saved.project && saved.project.id);
+      }
+      await trackEvent("project_saved", { tool: "teaching-tools" });
+      showNotice("Teaching kit saved.", "ok");
+    } catch (error) {
+      showNotice(`Could not save kit: ${escapeHtml(error.message || "Unknown error")}`, "error");
+    }
+  });
+  const buttonRow = document.querySelector("#teachForm .btn-row");
+  if (buttonRow) {
+    buttonRow.appendChild(saveBtn);
+    buttonRow.appendChild(exportLeaderButton);
+    buttonRow.appendChild(exportStudentButton);
+    buttonRow.appendChild(exportParentButton);
+    buttonRow.appendChild(exportSlidesButton);
+  }
+
+  async function hydrateFromProject() {
+    try {
+      const project = await hydrateProjectFromQuery("teaching-tools");
+      if (!project || !project.payload || typeof project.payload !== "object") {
+        return;
+      }
+      const payload = project.payload;
+      activeProjectId = cleanString(project.id);
+      const input = payload.input && typeof payload.input === "object" ? payload.input : {};
+      if (input.sourceTitle) {
+        $("#teachPassage").value = cleanString(input.sourceTitle);
+      }
+      if (input.audience) {
+        $("#teachAudience").value = cleanString(input.audience);
+      }
+      if (input.setting) {
+        $("#teachSetting").value = cleanString(input.setting);
+      }
+      if (Number.isFinite(Number(input.groupSize))) {
+        $("#teachGroupSize").value = String(Number(input.groupSize));
+      }
+      if (Number.isFinite(Number(input.length))) {
+        $("#teachLength").value = String(Number(input.length));
+      }
+      if (input.outcome) {
+        $("#teachOutcome").value = cleanString(input.outcome);
+      }
+      if (input.resources) {
+        $("#teachResources").value = cleanString(input.resources);
+      }
+      if (input.notes) {
+        $("#teachNotes").value = cleanString(input.notes);
+      }
+      if (Array.isArray(input.selectedAudiences)) {
+        const selected = new Set(input.selectedAudiences.map((item) => cleanString(item)));
+        const kids = $("#teachAudienceKids");
+        const youth = $("#teachAudienceYouth");
+        const adults = $("#teachAudienceAdults");
+        if (kids) kids.checked = selected.has("Kids (7-11)");
+        if (youth) youth.checked = selected.has("Youth (12-18)");
+        if (adults) adults.checked = selected.has("Adults");
+      }
+      if (payload.output && typeof payload.output === "object") {
+        lastGenerated = payload;
+        result.innerHTML = renderPlan({
+          sourceTitle: cleanString(input.sourceTitle, cleanString(payload.output && payload.output.sourceTitle)),
+          passageText: cleanString(input.passageText),
+          audience: cleanString(input.audience),
+          setting: cleanString(input.setting),
+          groupSize: Number(input.groupSize || 0),
+          length: Number(input.length || 0),
+          resources: cleanString(input.resources)
+        }, payload.output);
+        if (payload.output.multiAudience && Array.isArray(payload.output.comparisonSummary) && payload.output.comparisonSummary.length) {
+          const comparisonCard = document.createElement("div");
+          comparisonCard.className = "card";
+          comparisonCard.innerHTML = `
+            <span class="kicker">Parallel Audience Comparison</span>
+            <div class="metric-grid">
+              ${payload.output.comparisonSummary.map((row) => `
+                <div class="metric">
+                  <strong>${escapeHtml(cleanString(row.audience))}</strong>
+                  <span>${Number(row.objectiveCount || 0)} objectives | ${Number(row.discussionQuestionCount || 0)} questions</span>
+                </div>
+              `).join("")}
+            </div>
+          `;
+          result.appendChild(comparisonCard);
+        }
+        setExportButtonsVisible(true);
+      }
+      showNotice("Loaded saved Teaching Tools project.", "ok");
+    } catch (error) {
+      showNotice(`Could not load project: ${escapeHtml(cleanString(error.message))}`, "error");
+    }
+  }
+
+  void hydrateFromProject();
 })();

@@ -1,6 +1,9 @@
 "use strict";
 
-const { buildBibleStudyPrompt } = require("./prompts");
+const {
+  buildBibleStudyPrompt,
+  buildBibleStudyRefinementPrompt
+} = require("./prompts");
 
 const CLEAR_METHOD_STAGES = [
   {
@@ -67,12 +70,25 @@ function createBibleStudyWorkflow(deps) {
 
   async function generateStudy(studyContext) {
     const context = normalizeStudyContext(studyContext, cleanString);
-    const raw = await generateStudyPayload(context, {
+    const rawDraft = await generateStudyPayload(context, {
       chatJson,
       cleanString
     });
+    const quality = evaluateStudyDraftQuality(rawDraft, cleanString, cleanObjectArray);
+    let rawFinal = rawDraft;
 
-    return normalizeStudyPayload(raw, context, {
+    if (quality.shouldRefine) {
+      try {
+        rawFinal = await generateStudyRefinementPayload(context, quality, rawDraft, {
+          chatJson,
+          cleanString
+        });
+      } catch (_) {
+        rawFinal = rawDraft;
+      }
+    }
+
+    return normalizeStudyPayload(rawFinal, context, {
       cleanString,
       cleanArray,
       cleanObjectArray
@@ -120,6 +136,77 @@ async function generateStudyPayload(studyContext, deps) {
     temperature: 0.18,
     maxTokens: 1400
   });
+}
+
+async function generateStudyRefinementPayload(studyContext, quality, draft, deps) {
+  const { chatJson, cleanString } = deps;
+
+  const prompt = buildBibleStudyRefinementPrompt({
+    passage: studyContext.passage,
+    focus: cleanString(studyContext.focus),
+    question: cleanString(studyContext.question),
+    clearDefinitions: CLEAR_METHOD_STAGES.map((stage) => ({
+      key: stage.key,
+      code: stage.code,
+      label: stage.label,
+      definition: stage.definition
+    })),
+    tenStepMethod: TEN_STEP_STUDY_METHOD,
+    draft,
+    qualitySignals: quality.signals
+  });
+
+  return chatJson({
+    ...prompt,
+    temperature: 0.14,
+    maxTokens: 1700
+  });
+}
+
+function evaluateStudyDraftQuality(rawDraft, cleanString, cleanObjectArray) {
+  const draft = rawDraft && typeof rawDraft === "object" ? rawDraft : {};
+  const signals = [];
+  const summary = cleanString(draft.summary);
+  const clearRows = cleanObjectArray(draft.clear, 12);
+  const clearKeys = new Set(clearRows.map((row) => cleanString(row.key).toLowerCase()).filter(Boolean));
+  const tenStepRows = cleanObjectArray(draft.tenStep, 16);
+  const expectedClearKeys = ["confess", "list", "exegete", "analyze", "relate"];
+  const missingClear = expectedClearKeys.filter((key) => !clearKeys.has(key));
+
+  if (summary.length < 45) {
+    signals.push("Summary is too thin and should be expanded with clearer study direction.");
+  }
+  if (missingClear.length) {
+    signals.push(`Missing CLEAR stages in draft: ${missingClear.join(", ")}.`);
+  }
+  if (clearRows.length < 5) {
+    signals.push("CLEAR section is incomplete.");
+  }
+  const thinClearRows = clearRows.filter((row) => {
+    const actions = Array.isArray(row.actions) ? row.actions : [];
+    const findings = Array.isArray(row.aiFindings) ? row.aiFindings : [];
+    return actions.length < 3 || findings.length < 2;
+  });
+  if (thinClearRows.length >= 2) {
+    signals.push("Multiple CLEAR stages are underdeveloped in actions/findings.");
+  }
+  if (tenStepRows.length < 10) {
+    signals.push("10-step method is incomplete.");
+  } else {
+    const thinTenStep = tenStepRows.filter((row) => {
+      const todo = Array.isArray(row.whatToDo) ? row.whatToDo : [];
+      const aiHelps = Array.isArray(row.aiHelps) ? row.aiHelps : [];
+      return todo.length < 2 || aiHelps.length < 2 || !cleanString(row.objective);
+    });
+    if (thinTenStep.length >= 3) {
+      signals.push("Several 10-step entries lack depth or clear objectives.");
+    }
+  }
+
+  return {
+    shouldRefine: signals.length > 0,
+    signals
+  };
 }
 
 function normalizeStudyPayload(raw, studyContext, deps) {

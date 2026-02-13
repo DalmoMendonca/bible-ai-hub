@@ -1,0 +1,25 @@
+{
+  "questions": [
+    {
+      "id": "role",
+      "label": "What best describes your role?",
+      "options": ["Pastor", "Teacher", "Team Lead", "Other"]
+    },
+    {
+      "id": "sermonCadence",
+      "label": "How often do you prepare sermons or lessons?",
+      "options": ["Weekly", "Biweekly", "Monthly", "As needed"]
+    },
+    {
+      "id": "ministryContext",
+      "label": "What outcome matters most this month?",
+      "options": [
+        "Faster prep workflow",
+        "Stronger manuscript quality",
+        "Better delivery coaching",
+        "Team collaboration"
+      ]
+    }
+  ],
+  "defaultWorkflow": ["bible-study", "sermon-preparation", "research-helper", "sermon-analyzer"]
+}

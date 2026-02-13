@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "events": [
+    "landing_view",
+    "tool_start",
+    "generation_success",
+    "generation_failure",
+    "auth_signup_success",
+    "auth_login_success",
+    "trial_started",
+    "subscription_paid",
+    "pricing_checkout_start",
+    "project_saved",
+    "project_deleted",
+    "handoff_created",
+    "learning_path_saved",
+    "learning_path_deleted",
+    "coach_drill_completed",
+    "coach_drill_marked_complete",
+    "video_governance_updated",
+    "workspace_switch",
+    "onboarding_completed",
+    "sermon_evaluation_result",
+    "mxp_analyzer_job_canceled",
+    "abuse_detected"
+  ],
+  "requiredFields": ["name", "source", "properties"]
+}

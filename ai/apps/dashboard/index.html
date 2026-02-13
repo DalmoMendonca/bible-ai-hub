@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bible AI Hub Dashboard</title>
+  <meta name="description" content="Activation and COGS dashboards for Bible AI Hub product analytics." />
+  <link rel="stylesheet" href="/assets/styles.css" />
+</head>
+<body>
+  <div class="site-wrap">
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="/">Bible AI Hub</a>
+      </div>
+    </header>
+    <main class="main">
+      <div class="container">
+        <section class="panel">
+          <div class="hero compact">
+            <h1>Product Dashboard</h1>
+            <p>Activation, conversion, and COGS overview</p>
+          </div>
+          <div class="content">
+            <div class="card">
+              <h3 class="section-title">Filters</h3>
+              <div class="form-grid">
+                <div class="field">
+                  <label for="dashFrom">From</label>
+                  <input id="dashFrom" class="input" type="date" />
+                </div>
+                <div class="field">
+                  <label for="dashTo">To</label>
+                  <input id="dashTo" class="input" type="date" />
+                </div>
+                <div class="field">
+                  <label for="dashSegment">Segment</label>
+                  <select id="dashSegment" class="select">
+                    <option value="all">All Segments</option>
+                    <option value="organic">Organic</option>
+                    <option value="paid">Paid</option>
+                    <option value="email">Email</option>
+                    <option value="social">Social</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>&nbsp;</label>
+                  <button id="dashRefresh" type="button" class="btn primary">Refresh Dashboard</button>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <h3 class="section-title">Activation Funnel</h3>
+              <div id="activationMount" class="inline-hint">Loading...</div>
+            </div>
+            <div class="card">
+              <h3 class="section-title">KPI Definitions</h3>
+              <div id="kpiMount" class="inline-hint">Loading...</div>
+            </div>
+            <div class="card">
+              <h3 class="section-title">COGS by Feature</h3>
+              <div id="cogsTotals" class="inline-hint"></div>
+              <div id="cogsMount" class="inline-hint">Loading...</div>
+            </div>
+            <div class="card">
+              <h3 class="section-title">Gross Margin by Plan</h3>
+              <div id="marginMount" class="inline-hint">Loading...</div>
+            </div>
+            <div class="card">
+              <h3 class="section-title">Usage Forecast</h3>
+              <div id="forecastMount" class="inline-hint">Loading...</div>
+            </div>
+            <div class="card">
+              <h3 class="section-title">Team + Seat Health</h3>
+              <div id="teamMount" class="inline-hint">Loading...</div>
+            </div>
+            <div class="card">
+              <h3 class="section-title">Analyzer Queue Operations</h3>
+              <div id="queueMount" class="inline-hint">Loading...</div>
+            </div>
+            <div class="card">
+              <h3 class="section-title">Workspace Activity Feed</h3>
+              <div id="activityMount" class="inline-hint">Loading...</div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+    <footer class="micro-footer">
+      <p>Made with &#10084;&#65039; | <a href="https://hiredalmo.com" target="_blank" rel="noopener noreferrer">hiredalmo.com</a></p>
+    </footer>
+  </div>
+  <script src="/assets/shared.js"></script>
+  <script>
+    (function () {
+      const { apiGet, apiPost, cleanString, escapeHtml, setBusy } = window.AIBible;
+      const activationMount = document.getElementById("activationMount");
+      const kpiMount = document.getElementById("kpiMount");
+      const cogsMount = document.getElementById("cogsMount");
+      const cogsTotals = document.getElementById("cogsTotals");
+      const marginMount = document.getElementById("marginMount");
+      const forecastMount = document.getElementById("forecastMount");
+      const teamMount = document.getElementById("teamMount");
+      const queueMount = document.getElementById("queueMount");
+      const activityMount = document.getElementById("activityMount");
+      const fromInput = document.getElementById("dashFrom");
+      const toInput = document.getElementById("dashTo");
+      const segmentInput = document.getElementById("dashSegment");
+      const refreshButton = document.getElementById("dashRefresh");
+
+      function percent(value) {
+        return `${Number(value || 0).toFixed(2)}%`;
+      }
+
+      function money(value) {
+        return `$${Number(value || 0).toFixed(4)}`;
+      }
+
+      function toDateLabel(iso) {
+        const ms = Date.parse(cleanString(iso));
+        if (!Number.isFinite(ms)) {
+          return "Unknown";
+        }
+        return new Date(ms).toLocaleString();
+      }
+
+      function setDefaultDateRange() {
+        const today = new Date();
+        const from = new Date(today.getTime() - (29 * 24 * 60 * 60 * 1000));
+        const iso = (date) => date.toISOString().slice(0, 10);
+        fromInput.value = iso(from);
+        toInput.value = iso(today);
+      }
+
+      async function load() {
+        setBusy(refreshButton, "Refreshing...", true);
+        const from = cleanString(fromInput.value);
+        const to = cleanString(toInput.value);
+        const segment = cleanString(segmentInput.value, "all");
+
+        try {
+          const activation = await apiGet(`/api/analytics/activation?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&segment=${encodeURIComponent(segment)}`);
+          const funnel = activation && activation.funnel ? activation.funnel : {};
+          const rates = activation && activation.conversionRates ? activation.conversionRates : {};
+          activationMount.innerHTML = `
+            <div class="metric-grid">
+              <div class="metric"><strong>${Number(funnel.visit || 0)}</strong><span>Visits</span></div>
+              <div class="metric"><strong>${Number(funnel.start || 0)}</strong><span>Tool Starts</span></div>
+              <div class="metric"><strong>${Number(funnel.success || 0)}</strong><span>Generation Successes</span></div>
+              <div class="metric"><strong>${Number(funnel.signup || 0)}</strong><span>Signups</span></div>
+              <div class="metric"><strong>${Number(funnel.trial || 0)}</strong><span>Trials</span></div>
+              <div class="metric"><strong>${Number(funnel.paid || 0)}</strong><span>Paid</span></div>
+            </div>
+            <ul class="list" style="margin-top:0.8rem;">
+              <li>Visit → Start: ${percent(rates.visitToStartPct)}</li>
+              <li>Start → Success: ${percent(rates.startToSuccessPct)}</li>
+              <li>Success → Signup: ${percent(rates.successToSignupPct)}</li>
+              <li>Signup → Trial: ${percent(rates.signupToTrialPct)}</li>
+              <li>Trial → Paid: ${percent(rates.trialToPaidPct)}</li>
+              <li>Visit → Paid: ${percent(rates.visitToPaidPct)}</li>
+            </ul>
+          `;
+          const kpis = Array.isArray(activation.kpiDefinitions) ? activation.kpiDefinitions : [];
+          kpiMount.innerHTML = kpis.length
+            ? `<ul class="list">${kpis.map((kpi) => `<li><strong>${escapeHtml(cleanString(kpi.label))}</strong>: ${escapeHtml(cleanString(kpi.formula))} (${escapeHtml(cleanString(kpi.owner))})</li>`).join("")}</ul>`
+            : `<p class="inline-hint">No KPI definitions found.</p>`;
+        } catch (error) {
+          activationMount.textContent = cleanString(error.message, "Activation dashboard unavailable.");
+          kpiMount.textContent = cleanString(error.message, "KPI definitions unavailable.");
+        }
+
+        try {
+          const cogs = await apiGet(`/api/analytics/cogs?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`);
+          const rows = Array.isArray(cogs.features) ? cogs.features : [];
+          const totals = cogs && cogs.totals ? cogs.totals : { runs: 0, units: 0, costUsd: 0 };
+          cogsTotals.innerHTML = `
+            <div class="metric-grid">
+              <div class="metric"><strong>${Number(totals.runs || 0)}</strong><span>Total Runs</span></div>
+              <div class="metric"><strong>${Number(totals.units || 0)}</strong><span>Total Units</span></div>
+              <div class="metric"><strong>${money(totals.costUsd || 0)}</strong><span>Total Estimated Cost</span></div>
+            </div>
+          `;
+          if (!rows.length) {
+            cogsMount.innerHTML = `<p class="inline-hint">No usage data yet.</p>`;
+          } else {
+            cogsMount.innerHTML = `
+              <ul class="list">
+                ${rows.map((row) => `
+                  <li>
+                    <strong>${escapeHtml(cleanString(row.feature))}</strong>: ${money(row.costUsd)} total
+                    | ${money(row.costPerRunUsd)} per run
+                    | ${money(row.costPerActiveUserUsd)} per active user
+                  </li>
+                `).join("")}
+              </ul>
+            `;
+          }
+          const marginRows = Array.isArray(cogs.grossMarginByPlan) ? cogs.grossMarginByPlan : [];
+          marginMount.innerHTML = marginRows.length
+            ? `<ul class="list">${marginRows.map((row) => `
+                <li>
+                  <strong>${escapeHtml(cleanString(row.planName, row.planId))}</strong>:
+                  Revenue ${money(row.monthlyRevenueUsd)} | Cost ${money(row.estimatedCostUsd)} | Margin ${money(row.grossMarginUsd)} (${percent(row.grossMarginPct)})
+                </li>
+              `).join("")}</ul>`
+            : `<p class="inline-hint">No plan margin data yet.</p>`;
+        } catch (error) {
+          cogsMount.textContent = cleanString(error.message, "COGS dashboard unavailable.");
+          cogsTotals.textContent = cleanString(error.message, "COGS totals unavailable.");
+          marginMount.textContent = cleanString(error.message, "Gross margin data unavailable.");
+        }
+
+        try {
+          const forecast = await apiGet("/api/usage/forecast");
+          const rows = Array.isArray(forecast.forecast) ? forecast.forecast : [];
+          forecastMount.innerHTML = rows.length
+            ? `<ul class="list">${rows.map((row) => `
+                <li>
+                  <strong>${escapeHtml(cleanString(row.feature))}</strong>:
+                  used ${Number(row.used || 0)}
+                  ${row.limit === null || row.limit === undefined ? "| unlimited" : `| limit ${Number(row.limit)}`}
+                  | projected ${Number(row.projectedMonthly || 0).toFixed(2)}
+                  | risk ${escapeHtml(cleanString(row.risk))}
+                </li>
+              `).join("")}</ul>`
+            : `<p class="inline-hint">No forecast data yet.</p>`;
+        } catch (error) {
+          forecastMount.textContent = cleanString(error.message, "Usage forecast unavailable.");
+        }
+
+        try {
+          const team = await apiGet("/api/team/dashboard");
+          teamMount.innerHTML = `
+            <div class="metric-grid">
+              <div class="metric"><strong>${Number(team.workspace && team.workspace.memberCount || 0)}</strong><span>Members</span></div>
+              <div class="metric"><strong>${Number(team.seats && team.seats.used || 0)}/${Number(team.seats && team.seats.limit || 0)}</strong><span>Seat Usage</span></div>
+              <div class="metric"><strong>${Number(team.activeUsersLast7d || 0)}</strong><span>Active Users (7d)</span></div>
+              <div class="metric"><strong>${Number(team.weeklyOutputVolume || 0)}</strong><span>Weekly Outputs</span></div>
+            </div>
+          `;
+        } catch (error) {
+          teamMount.textContent = cleanString(error.message, "Team dashboard unavailable.");
+        }
+
+        try {
+          const queue = await apiGet("/api/ai/sermon-analyzer/queue-status");
+          const jobs = Array.isArray(queue.jobs) ? queue.jobs : [];
+          queueMount.innerHTML = `
+            <p><strong>Queue depth:</strong> ${Number(queue.queueDepth || 0)} | <strong>Worker running:</strong> ${queue.workerRunning ? "Yes" : "No"}</p>
+            ${jobs.length ? `<ul class="list">${jobs.slice(0, 12).map((job) => `
+              <li>
+                <strong>${escapeHtml(cleanString(job.id))}</strong>: ${escapeHtml(cleanString(job.status))}
+                ${cleanString(job.failureReason) ? `| ${escapeHtml(cleanString(job.failureReason))}` : ""}
+                ${cleanString(job.status) === "queued" || cleanString(job.status) === "processing" ? `<button type="button" class="btn secondary dash-cancel-job" data-job-id="${escapeHtml(cleanString(job.id))}">Cancel</button>` : ""}
+              </li>
+            `).join("")}</ul>` : `<p class="inline-hint">No analyzer jobs yet.</p>`}
+          `;
+          Array.from(document.querySelectorAll(".dash-cancel-job")).forEach((buttonEl) => {
+            buttonEl.addEventListener("click", async () => {
+              const jobId = cleanString(buttonEl.getAttribute("data-job-id"));
+              if (!jobId) {
+                return;
+              }
+              buttonEl.disabled = true;
+              buttonEl.textContent = "Canceling...";
+              try {
+                await apiPost(`/api/ai/sermon-analyzer/jobs/${encodeURIComponent(jobId)}/cancel`, {});
+                buttonEl.textContent = "Canceled";
+                void load();
+              } catch (error) {
+                buttonEl.disabled = false;
+                buttonEl.textContent = "Cancel";
+                window.alert(cleanString(error.message, "Could not cancel job."));
+              }
+            });
+          });
+        } catch (error) {
+          queueMount.textContent = cleanString(error.message, "Queue data unavailable.");
+        }
+
+        try {
+          const activity = await apiGet("/api/activity?limit=80");
+          const items = Array.isArray(activity.items) ? activity.items : [];
+          activityMount.innerHTML = items.length
+            ? `<ul class="list">${items.slice(0, 30).map((item) => `
+                <li>
+                  <strong>${escapeHtml(cleanString(item.type))}</strong>
+                  | ${escapeHtml(cleanString(item.title))}
+                  | ${escapeHtml(toDateLabel(item.createdAt))}
+                </li>
+              `).join("")}</ul>`
+            : `<p class="inline-hint">No activity yet.</p>`;
+        } catch (error) {
+          activityMount.textContent = cleanString(error.message, "Activity feed unavailable.");
+        } finally {
+          setBusy(refreshButton, "", false);
+        }
+      }
+
+      setDefaultDateRange();
+      refreshButton.addEventListener("click", () => {
+        void load();
+      });
+      void load();
+    })();
+  </script>
+</body>
+</html>

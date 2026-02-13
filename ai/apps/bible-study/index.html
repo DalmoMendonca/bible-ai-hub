@@ -1,9 +1,110 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Bible Study Chat | Bible AI Hub</title>
+  <title>Bible Study Chat AI Tool | CLEAR Method and 10-Step Exegesis</title>
+  <meta name="description" content="Use Bible Study Chat to apply the CLEAR method and a 10-step workflow for passage observation, exegesis, context, and practical application." />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <meta name="author" content="Bible AI Hub" />
+  <meta name="theme-color" content="#0f5f9b" />
+  <link rel="canonical" href="https://bible.hiredalmo.com/ai/apps/bible-study/" />
+  <link rel="alternate" hreflang="en" href="https://bible.hiredalmo.com/ai/apps/bible-study/" />
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/assets/social-share.png" />
+
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Bible AI Hub" />
+  <meta property="og:title" content="Bible Study Chat AI Tool | CLEAR Method and 10-Step Exegesis" />
+  <meta property="og:description" content="Generate a passage-specific Bible study plan with CLEAR + 10-step guidance for faithful interpretation and practical ministry application." />
+  <meta property="og:url" content="https://bible.hiredalmo.com/ai/apps/bible-study/" />
+  <meta property="og:image" content="https://bible.hiredalmo.com/assets/social-share.png" />
+  <meta property="og:image:secure_url" content="https://bible.hiredalmo.com/assets/social-share.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Bible AI Hub Bible Study Chat app" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Bible Study Chat AI Tool | CLEAR Method and 10-Step Exegesis" />
+  <meta name="twitter:description" content="Walk through CLEAR and a 10-step Bible study workflow with AI assistance for deeper Scripture study." />
+  <meta name="twitter:image" content="https://bible.hiredalmo.com/assets/social-share.png" />
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          "name": "Bible Study Chat",
+          "url": "https://bible.hiredalmo.com/ai/apps/bible-study/",
+          "applicationCategory": "EducationalApplication",
+          "operatingSystem": "Web",
+          "description": "An AI-assisted Bible study app that guides users through the CLEAR method and a 10-step study workflow.",
+          "offers": {
+            "@type": "Offer",
+            "price": "15",
+            "priceCurrency": "USD"
+          },
+          "publisher": {
+            "@type": "Organization",
+            "name": "Bible AI Hub",
+            "url": "https://bible.hiredalmo.com/"
+          }
+        },
+        {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Bible AI Hub",
+              "item": "https://bible.hiredalmo.com/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Bible Study Chat",
+              "item": "https://bible.hiredalmo.com/ai/apps/bible-study/"
+            }
+          ]
+        }
+      ]
+    }
+  </script>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How does this AI Bible study tool work?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Bible Study Chat guides you through the CLEAR method and a 10-step study workflow so you can move from observation to faithful application with a structured process."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I use this for sermon prep?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. This tool is designed to produce passage insights and study outputs that feed directly into sermon planning and teaching preparation."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What input gives the best result?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Use a specific passage reference, a focused study objective, and one clear question about interpretation or application."
+          }
+        }
+      ]
+    }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
@@ -14,7 +115,7 @@
   <div class="site-wrap">
     <header class="site-header">
       <div class="header-inner">
-        <a class="brand" href="../../">Bible AI Hub</a>
+        <a class="brand" href="/">Bible AI Hub</a>
       </div>
     </header>
 
@@ -76,6 +177,17 @@
                   <label for="focus">Study Focus</label>
                   <input id="focus" class="input" placeholder="e.g., Gospel assurance in this text" />
                 </div>
+                <div class="field">
+                  <label for="theologicalProfile">Theological Profile</label>
+                  <select id="theologicalProfile" class="select">
+                    <option value="text-centered">Text-centered (default)</option>
+                    <option value="reformed">Reformed</option>
+                    <option value="wesleyan">Wesleyan</option>
+                    <option value="baptist">Baptist</option>
+                    <option value="pentecostal">Pentecostal</option>
+                    <option value="anglican">Anglican</option>
+                  </select>
+                </div>
                 <div class="field span-2">
                   <label for="question">Question for the assistant</label>
                   <textarea id="question" class="textarea" placeholder="What does this passage reveal about God's character, and how should my church respond?"></textarea>
@@ -88,6 +200,32 @@
               </form>
             </div>
 
+            <div class="card seo-copy">
+              <h3 class="section-title">Best Use Cases for Bible Study Chat</h3>
+              <ul class="list seo-link-list">
+                <li>Weekly exegesis workflows before writing your sermon.</li>
+                <li>Small-group leader prep for discussion and application.</li>
+                <li>Hermeneutics practice using a repeatable AI Bible study method.</li>
+                <li>Next step: turn your study into an outline with <a href="/ai/apps/sermon-preparation/">AI Sermon Preparation</a>.</li>
+              </ul>
+            </div>
+
+            <div class="card seo-faq">
+              <h3 class="section-title">FAQ: AI Bible Study Tool</h3>
+              <details>
+                <summary>How does this AI Bible study tool work?</summary>
+                <p>The tool guides you through CLEAR and a 10-step process so you can observe, interpret, verify context, and apply the passage in order.</p>
+              </details>
+              <details>
+                <summary>Can I use this for sermon preparation?</summary>
+                <p>Yes. The output is designed to feed sermon planning by clarifying the text’s main movement and practical implications.</p>
+              </details>
+              <details>
+                <summary>What should I enter for best results?</summary>
+                <p>Enter a specific reference, your study focus, and one concrete ministry question to get the most useful analysis.</p>
+              </details>
+            </div>
+
             <div id="studyNotice" class="notice hidden"></div>
             <div id="studyResult" class="result"></div>
           </div>
@@ -96,7 +234,7 @@
     </main>
 
     <footer class="micro-footer">
-      <p>Made with ❤️ | <a href="https://hiredalmo.com" target="_blank" rel="noopener noreferrer">hiredalmo.com</a></p>
+      <p>Made with &#10084;&#65039; | <a href="https://hiredalmo.com" target="_blank" rel="noopener noreferrer">hiredalmo.com</a></p>
     </footer>
   </div>
 
@@ -104,3 +242,5 @@
   <script src="../../../assets/apps/bible-study.js"></script>
 </body>
 </html>
+
+

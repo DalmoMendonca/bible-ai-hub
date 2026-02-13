@@ -1,0 +1,11 @@
+﻿User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /server/
+Disallow: /scripts/
+Disallow: /node_modules/
+Disallow: /.netlify/
+Disallow: /.git/
+Disallow: /_tmp_ref_
+
+Sitemap: https://bible.hiredalmo.com/sitemap.xml

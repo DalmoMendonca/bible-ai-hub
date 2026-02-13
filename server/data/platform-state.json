@@ -1,0 +1,3453 @@
+{
+  "users": [
+    {
+      "id": "usr_a28a3f73caaa41f2e4",
+      "email": "guest+27ce5cd748a9@local.bibleaihub",
+      "name": "Guest 27ce",
+      "role": "user",
+      "passwordHash": "scrypt$a828ef604e8329faf7cbea066c23ff43$b306dd8fcabe245a9d66917cce049d876e2322cf03d33333fbb846bdd2b8fffec2ec76bcfd59471217bfc4775a96b96e6e8e65e45c04f8bfab24dafe857fc676",
+      "googleSub": "",
+      "disabled": false,
+      "deletedAt": null,
+      "activeWorkspaceId": "ws_e2c80a7b46e7d506c5",
+      "onboarding": null,
+      "emailPrefs": {
+        "lifecycle": true
+      },
+      "createdAt": "2026-02-13T04:40:24.041Z",
+      "updatedAt": "2026-02-13T04:40:24.041Z"
+    },
+    {
+      "id": "usr_67028ffd3f4bc62b58",
+      "email": "platform-smoke-1770957816363@example.com",
+      "name": "Platform Smoke",
+      "role": "user",
+      "passwordHash": "scrypt$ad95426b1ba7b112541d5826cacb61bb$fd65e8978e580f1e2f693618218f9f27f17975e4658527279a90d5cd336ea3e5a6050f52b76cd9c020e2839b97a7fd6ba83279ad5473a23ed11bb69ac1aca9f6",
+      "googleSub": "",
+      "disabled": false,
+      "deletedAt": null,
+      "activeWorkspaceId": "ws_c92b083edade4ed81c",
+      "onboarding": null,
+      "emailPrefs": {
+        "lifecycle": true
+      },
+      "createdAt": "2026-02-13T04:43:36.373Z",
+      "updatedAt": "2026-02-13T04:43:36.373Z"
+    },
+    {
+      "id": "usr_5fc982b3871de0c14e",
+      "email": "guest+89150b203714@local.bibleaihub",
+      "name": "Guest 8915",
+      "role": "user",
+      "passwordHash": "scrypt$e88bd249f8b316a38a12f02e6b0872a9$03b3cf6f1fb74cebb65b65cb53844cd1237c3a246fdd208738db639aa01bfb71cb078b1fe9665f3c1c6b9aed7e156f95b47c52eea1f3eba7669499bb23cde17f",
+      "googleSub": "",
+      "disabled": false,
+      "deletedAt": null,
+      "activeWorkspaceId": "ws_46cc2b9789a862c9ac",
+      "onboarding": null,
+      "emailPrefs": {
+        "lifecycle": true
+      },
+      "createdAt": "2026-02-13T04:46:24.925Z",
+      "updatedAt": "2026-02-13T04:46:24.925Z"
+    },
+    {
+      "id": "usr_469b2efe1a74c84b77",
+      "email": "guest+5d55958d77e4@local.bibleaihub",
+      "name": "Guest 5d55",
+      "role": "user",
+      "passwordHash": "scrypt$057a2a2aa1a4e262fa4dc338e7d44ebb$1da6887ca3d9f8d253dafbe0b3d0249d54d6d2d574ec2dd5308cb0f8604ebb7e491f4cadf7cff56305a9582911709a5626d159661f642316df56ed5951c7b48d",
+      "googleSub": "",
+      "disabled": false,
+      "deletedAt": null,
+      "activeWorkspaceId": "ws_d34c7f733c845a2f95",
+      "onboarding": null,
+      "emailPrefs": {
+        "lifecycle": true
+      },
+      "createdAt": "2026-02-13T04:49:23.939Z",
+      "updatedAt": "2026-02-13T04:49:23.939Z"
+    },
+    {
+      "id": "usr_512d512c779e539dab",
+      "email": "guest+87f67a3bfe69@local.bibleaihub",
+      "name": "Guest 87f6",
+      "role": "user",
+      "passwordHash": "scrypt$b3f7d2469d063fbf83c45c7e7f63b419$573e292b28f59b1228884b94b1249c7221abd9fba476e0e7ab14fd9cd58c318a98fbf9dde52b68100db036934a7f4c6bfe3d6bf58ba69ea9c22caa427345cab9",
+      "googleSub": "",
+      "disabled": false,
+      "deletedAt": null,
+      "activeWorkspaceId": "ws_2804b4237e8eb0314e",
+      "onboarding": null,
+      "emailPrefs": {
+        "lifecycle": true
+      },
+      "createdAt": "2026-02-13T04:53:05.870Z",
+      "updatedAt": "2026-02-13T04:53:05.870Z"
+    },
+    {
+      "id": "usr_e1e55d6cc6a6be868e",
+      "email": "guest+1feec3198f22@local.bibleaihub",
+      "name": "Guest 1fee",
+      "role": "user",
+      "passwordHash": "scrypt$4ad2521ed4176312210e02ef6fe400fc$598f0f521f4396994782ac82c83ac7e47e36eab4c562efc54055a89429c444c0261745cdabf655560d18b20ebf7223a48dae77e789577aef6f4cdd880069a7bf",
+      "googleSub": "",
+      "disabled": false,
+      "deletedAt": null,
+      "activeWorkspaceId": "ws_eede9f669373c1ce05",
+      "onboarding": null,
+      "emailPrefs": {
+        "lifecycle": true
+      },
+      "createdAt": "2026-02-13T05:16:35.613Z",
+      "updatedAt": "2026-02-13T05:16:35.613Z"
+    },
+    {
+      "id": "usr_0dad420b845fc5e0ed",
+      "email": "guest+6e081c62dea6@local.bibleaihub",
+      "name": "Guest 6e08",
+      "role": "user",
+      "passwordHash": "scrypt$26690f40dddcd1e6b3ab7e8b8e5b24f2$91d865f7b09ed7d00ecafb064f85c8ac52dcd31be6cd6b8665a7b67cf02f4eccde470c6452663e1e5098f08ad0ca1cd0f5dc90cb70ff595e58f14bef65e96c30",
+      "googleSub": "",
+      "disabled": false,
+      "deletedAt": null,
+      "activeWorkspaceId": "ws_dd953b4cdfca8f349c",
+      "onboarding": null,
+      "emailPrefs": {
+        "lifecycle": true
+      },
+      "createdAt": "2026-02-13T05:19:13.993Z",
+      "updatedAt": "2026-02-13T05:19:13.993Z"
+    },
+    {
+      "id": "usr_e77ab8a5eb3e670d57",
+      "email": "guest+ab9dbc38c185@local.bibleaihub",
+      "name": "Guest ab9d",
+      "role": "user",
+      "passwordHash": "scrypt$eb065fd85d44668efc06174f4052c475$392c79f3aad5e95ee273087b861fb654b4b3fb8df0acf21bc10aca6463263a4a3e4d02640a1ede5056e01973d19446c0692d1f16ddda490ad33c675eb86ee42c",
+      "googleSub": "",
+      "disabled": false,
+      "deletedAt": null,
+      "activeWorkspaceId": "ws_83359ee77f068e8603",
+      "onboarding": null,
+      "emailPrefs": {
+        "lifecycle": true
+      },
+      "createdAt": "2026-02-13T05:29:25.637Z",
+      "updatedAt": "2026-02-13T05:29:25.637Z"
+    },
+    {
+      "id": "usr_3ab4724e388b4e4ce7",
+      "email": "guest+935b1e8c2872@local.bibleaihub",
+      "name": "Guest 935b",
+      "role": "user",
+      "passwordHash": "scrypt$31784f2d50a534a9e647ad0b785de0c4$d978a3823122a91f038001dff563fc0f244c7c6c303806c38a92b47f6b6ddcbb9f51d96f4cd2d49a7e062aaa6c8aa6b0fc554df6c880af9807acafc093941a95",
+      "googleSub": "",
+      "disabled": false,
+      "deletedAt": null,
+      "activeWorkspaceId": "ws_86d10e16a765c9fe5b",
+      "onboarding": null,
+      "emailPrefs": {
+        "lifecycle": true
+      },
+      "createdAt": "2026-02-13T05:32:35.023Z",
+      "updatedAt": "2026-02-13T05:32:35.023Z"
+    },
+    {
+      "id": "usr_414501d702df628d08",
+      "email": "guest+273e2f8a3396@local.bibleaihub",
+      "name": "Guest 273e",
+      "role": "user",
+      "passwordHash": "scrypt$2a2c93a08a62392e4f1f71bda93750c9$e46ac77bde2447cf7d83de1736c642e0e1ac2876e17422b1de1bb6b71ef7a4ea4fe12c5d5a0d4b63e154362e18b55459deb4e9c07d2558aba6b110796db6a7e9",
+      "googleSub": "",
+      "disabled": false,
+      "deletedAt": null,
+      "activeWorkspaceId": "ws_7b6e057fb61116436c",
+      "onboarding": null,
+      "emailPrefs": {
+        "lifecycle": true
+      },
+      "createdAt": "2026-02-13T05:41:29.016Z",
+      "updatedAt": "2026-02-13T05:41:29.016Z"
+    },
+    {
+      "id": "usr_021e85ab35d613649a",
+      "email": "guest+382aa96042a0@local.bibleaihub",
+      "name": "Guest 382a",
+      "role": "user",
+      "passwordHash": "scrypt$f28d96821a1d9ca483f4414db1edd676$ce80ca9edb080d427ca5894215d951c91127485f215e7b10473b35cdbd4536f29483da31b5e5d6bdedfc16c02ef1956dd856efc5698e87a0d84b6f0cbcb3595a",
+      "googleSub": "",
+      "disabled": false,
+      "deletedAt": null,
+      "activeWorkspaceId": "ws_0f8dea9311b80651a0",
+      "onboarding": null,
+      "emailPrefs": {
+        "lifecycle": true
+      },
+      "createdAt": "2026-02-13T05:41:55.964Z",
+      "updatedAt": "2026-02-13T05:41:55.964Z"
+    },
+    {
+      "id": "usr_15cc8854349331eaf9",
+      "email": "guest+8fba4fedb518@local.bibleaihub",
+      "name": "Guest 8fba",
+      "role": "user",
+      "passwordHash": "scrypt$03bd15527d3a278932a39fa0c28c4675$517dcb0b0b57a8473507b5b3cbde521e70f575362fb8853e8b918522144740265de54f6086b6d9b98e3f532d954a0ca56a1677e6f27f41103ff5e014b51a93a4",
+      "googleSub": "",
+      "disabled": false,
+      "deletedAt": null,
+      "activeWorkspaceId": "ws_c2c128ece6ce03a373",
+      "onboarding": null,
+      "emailPrefs": {
+        "lifecycle": true
+      },
+      "createdAt": "2026-02-13T05:42:10.474Z",
+      "updatedAt": "2026-02-13T05:42:10.474Z"
+    },
+    {
+      "id": "usr_308fa7762510465c3a",
+      "email": "guest+156bbf74fe34@local.bibleaihub",
+      "name": "Guest 156b",
+      "role": "user",
+      "passwordHash": "scrypt$79d468edc5933aebbcbe5c7fe44e119b$2400428f113236865fd0b4700d1d431290dfa01d400646deb870614555b7300609bd08bf0e2270e8ab19d7e705f4cc7aaad7631bf97285c3f250f92b97a122fc",
+      "googleSub": "",
+      "disabled": false,
+      "deletedAt": null,
+      "activeWorkspaceId": "ws_5e0d0ca11221d96453",
+      "onboarding": null,
+      "emailPrefs": {
+        "lifecycle": true
+      },
+      "createdAt": "2026-02-13T05:42:25.474Z",
+      "updatedAt": "2026-02-13T05:42:25.474Z"
+    },
+    {
+      "id": "usr_d0a8f8d4d76e26cc98",
+      "email": "guest+c7ce1a4d464c@local.bibleaihub",
+      "name": "Guest c7ce",
+      "role": "user",
+      "passwordHash": "scrypt$6496748a44a4463fc0217ca401e2e63a$2f95684fe059b3766034518e35fa8c0d59213fb26fac9a65be1df80f5c0b9631392315481eaa4bdf2c2973afb44bf451fde336f6c70a18691cd1bc0786cd55cf",
+      "googleSub": "",
+      "disabled": false,
+      "deletedAt": null,
+      "activeWorkspaceId": "ws_37c1878493d7cc5d47",
+      "onboarding": null,
+      "emailPrefs": {
+        "lifecycle": true
+      },
+      "createdAt": "2026-02-13T05:44:39.907Z",
+      "updatedAt": "2026-02-13T05:44:39.907Z"
+    }
+  ],
+  "sessions": [
+    {
+      "token": "96158914a2d78e269e47f149b43da566957c9313cb652a3aaf6e4898",
+      "userId": "usr_a28a3f73caaa41f2e4",
+      "createdAt": "2026-02-13T04:40:24.079Z",
+      "lastSeenAt": "2026-02-13T04:42:40.444Z",
+      "expiresAt": "2026-03-15T04:40:24.079Z"
+    },
+    {
+      "token": "11b0fd55c1dfe4b87fe82d919b6e452793bc772a97b40a4da78bdd15",
+      "userId": "usr_67028ffd3f4bc62b58",
+      "createdAt": "2026-02-13T04:43:36.403Z",
+      "lastSeenAt": "2026-02-13T04:43:36.432Z",
+      "expiresAt": "2026-03-15T04:43:36.403Z"
+    },
+    {
+      "token": "49eccb986cb30f8b1864d951102f149563775c7794a084221a62e954",
+      "userId": "usr_5fc982b3871de0c14e",
+      "createdAt": "2026-02-13T04:46:24.965Z",
+      "lastSeenAt": "2026-02-13T04:48:03.977Z",
+      "expiresAt": "2026-03-15T04:46:24.965Z"
+    },
+    {
+      "token": "ae8b364425709131b31cb24aea6440654583a66e9b90e0158b6e9e9e",
+      "userId": "usr_469b2efe1a74c84b77",
+      "createdAt": "2026-02-13T04:49:23.976Z",
+      "lastSeenAt": "2026-02-13T04:50:59.097Z",
+      "expiresAt": "2026-03-15T04:49:23.976Z"
+    },
+    {
+      "token": "1370efdfc012ef706fbfd716f7f71ae4757640cb8932751949e06293",
+      "userId": "usr_512d512c779e539dab",
+      "createdAt": "2026-02-13T04:53:05.914Z",
+      "lastSeenAt": "2026-02-13T04:54:39.242Z",
+      "expiresAt": "2026-03-15T04:53:05.914Z"
+    },
+    {
+      "token": "8645e6e32cab31abc47f5128f58096ba5f5432e5e337a9e72bb4f957",
+      "userId": "usr_e1e55d6cc6a6be868e",
+      "createdAt": "2026-02-13T05:16:35.667Z",
+      "lastSeenAt": "2026-02-13T05:18:10.815Z",
+      "expiresAt": "2026-03-15T05:16:35.667Z"
+    },
+    {
+      "token": "48f933818ac57f53eba48c1c6c9f3693dc7eb1446d457ad092f6af5f",
+      "userId": "usr_0dad420b845fc5e0ed",
+      "createdAt": "2026-02-13T05:19:14.044Z",
+      "lastSeenAt": "2026-02-13T05:20:51.080Z",
+      "expiresAt": "2026-03-15T05:19:14.044Z"
+    },
+    {
+      "token": "956a7d9f6aa8ab54780a41a2694f04782d4dd54ee2457efd9b05867c",
+      "userId": "usr_e77ab8a5eb3e670d57",
+      "createdAt": "2026-02-13T05:29:25.668Z",
+      "lastSeenAt": "2026-02-13T05:30:58.836Z",
+      "expiresAt": "2026-03-15T05:29:25.668Z"
+    },
+    {
+      "token": "9ecdb82ab0dbeea7a8af44afbd82f85173dea070bbf93a5825980681",
+      "userId": "usr_3ab4724e388b4e4ce7",
+      "createdAt": "2026-02-13T05:32:35.076Z",
+      "lastSeenAt": "2026-02-13T05:34:16.162Z",
+      "expiresAt": "2026-03-15T05:32:35.076Z"
+    },
+    {
+      "token": "bd07f361ec1a51623071d837ea6cb2114f2e9ac56b1254515aa608ab",
+      "userId": "usr_414501d702df628d08",
+      "createdAt": "2026-02-13T05:41:29.049Z",
+      "lastSeenAt": "2026-02-13T05:41:29.075Z",
+      "expiresAt": "2026-03-15T05:41:29.049Z"
+    },
+    {
+      "token": "cd1f635bae465769b87a3bb4e6b73ee42184a28e9769218060ff2105",
+      "userId": "usr_021e85ab35d613649a",
+      "createdAt": "2026-02-13T05:41:56.001Z",
+      "lastSeenAt": "2026-02-13T05:41:56.031Z",
+      "expiresAt": "2026-03-15T05:41:56.001Z"
+    },
+    {
+      "token": "243b78e9ad332f10dcc5d496300b59cc9920eac70eab08b876931988",
+      "userId": "usr_15cc8854349331eaf9",
+      "createdAt": "2026-02-13T05:42:10.511Z",
+      "lastSeenAt": "2026-02-13T05:42:10.535Z",
+      "expiresAt": "2026-03-15T05:42:10.511Z"
+    },
+    {
+      "token": "f3466da355c76c411f8297b5bbca1c00e1141b378414e55ac70d3621",
+      "userId": "usr_308fa7762510465c3a",
+      "createdAt": "2026-02-13T05:42:25.509Z",
+      "lastSeenAt": "2026-02-13T05:44:26.928Z",
+      "expiresAt": "2026-03-15T05:42:25.509Z"
+    },
+    {
+      "token": "5515a4ceaa5cec8c347b68db6d2199fdaf243b18e4d9f0ef9e1b7b00",
+      "userId": "usr_d0a8f8d4d76e26cc98",
+      "createdAt": "2026-02-13T05:44:39.951Z",
+      "lastSeenAt": "2026-02-13T05:46:42.956Z",
+      "expiresAt": "2026-03-15T05:44:39.951Z"
+    }
+  ],
+  "passwordResets": [],
+  "workspaces": [
+    {
+      "id": "ws_e2c80a7b46e7d506c5",
+      "name": "Guest 27ce's Workspace",
+      "type": "personal",
+      "ownerId": "usr_a28a3f73caaa41f2e4",
+      "createdAt": "2026-02-13T04:40:24.078Z",
+      "updatedAt": "2026-02-13T04:40:24.078Z",
+      "members": [
+        {
+          "userId": "usr_a28a3f73caaa41f2e4",
+          "role": "owner",
+          "addedAt": "2026-02-13T04:40:24.078Z"
+        }
+      ]
+    },
+    {
+      "id": "ws_c92b083edade4ed81c",
+      "name": "Platform Smoke's Workspace",
+      "type": "personal",
+      "ownerId": "usr_67028ffd3f4bc62b58",
+      "createdAt": "2026-02-13T04:43:36.401Z",
+      "updatedAt": "2026-02-13T04:43:36.401Z",
+      "members": [
+        {
+          "userId": "usr_67028ffd3f4bc62b58",
+          "role": "owner",
+          "addedAt": "2026-02-13T04:43:36.401Z"
+        }
+      ]
+    },
+    {
+      "id": "ws_46cc2b9789a862c9ac",
+      "name": "Guest 8915's Workspace",
+      "type": "personal",
+      "ownerId": "usr_5fc982b3871de0c14e",
+      "createdAt": "2026-02-13T04:46:24.965Z",
+      "updatedAt": "2026-02-13T04:46:24.965Z",
+      "members": [
+        {
+          "userId": "usr_5fc982b3871de0c14e",
+          "role": "owner",
+          "addedAt": "2026-02-13T04:46:24.965Z"
+        }
+      ]
+    },
+    {
+      "id": "ws_d34c7f733c845a2f95",
+      "name": "Guest 5d55's Workspace",
+      "type": "personal",
+      "ownerId": "usr_469b2efe1a74c84b77",
+      "createdAt": "2026-02-13T04:49:23.975Z",
+      "updatedAt": "2026-02-13T04:49:23.975Z",
+      "members": [
+        {
+          "userId": "usr_469b2efe1a74c84b77",
+          "role": "owner",
+          "addedAt": "2026-02-13T04:49:23.975Z"
+        }
+      ]
+    },
+    {
+      "id": "ws_2804b4237e8eb0314e",
+      "name": "Guest 87f6's Workspace",
+      "type": "personal",
+      "ownerId": "usr_512d512c779e539dab",
+      "createdAt": "2026-02-13T04:53:05.913Z",
+      "updatedAt": "2026-02-13T04:53:05.913Z",
+      "members": [
+        {
+          "userId": "usr_512d512c779e539dab",
+          "role": "owner",
+          "addedAt": "2026-02-13T04:53:05.913Z"
+        }
+      ]
+    },
+    {
+      "id": "ws_eede9f669373c1ce05",
+      "name": "Guest 1fee's Workspace",
+      "type": "personal",
+      "ownerId": "usr_e1e55d6cc6a6be868e",
+      "createdAt": "2026-02-13T05:16:35.666Z",
+      "updatedAt": "2026-02-13T05:16:35.666Z",
+      "members": [
+        {
+          "userId": "usr_e1e55d6cc6a6be868e",
+          "role": "owner",
+          "addedAt": "2026-02-13T05:16:35.666Z"
+        }
+      ]
+    },
+    {
+      "id": "ws_dd953b4cdfca8f349c",
+      "name": "Guest 6e08's Workspace",
+      "type": "personal",
+      "ownerId": "usr_0dad420b845fc5e0ed",
+      "createdAt": "2026-02-13T05:19:14.042Z",
+      "updatedAt": "2026-02-13T05:19:14.042Z",
+      "members": [
+        {
+          "userId": "usr_0dad420b845fc5e0ed",
+          "role": "owner",
+          "addedAt": "2026-02-13T05:19:14.042Z"
+        }
+      ]
+    },
+    {
+      "id": "ws_83359ee77f068e8603",
+      "name": "Guest ab9d's Workspace",
+      "type": "personal",
+      "ownerId": "usr_e77ab8a5eb3e670d57",
+      "createdAt": "2026-02-13T05:29:25.667Z",
+      "updatedAt": "2026-02-13T05:29:25.667Z",
+      "members": [
+        {
+          "userId": "usr_e77ab8a5eb3e670d57",
+          "role": "owner",
+          "addedAt": "2026-02-13T05:29:25.667Z"
+        }
+      ]
+    },
+    {
+      "id": "ws_86d10e16a765c9fe5b",
+      "name": "Guest 935b's Workspace",
+      "type": "personal",
+      "ownerId": "usr_3ab4724e388b4e4ce7",
+      "createdAt": "2026-02-13T05:32:35.075Z",
+      "updatedAt": "2026-02-13T05:32:35.075Z",
+      "members": [
+        {
+          "userId": "usr_3ab4724e388b4e4ce7",
+          "role": "owner",
+          "addedAt": "2026-02-13T05:32:35.075Z"
+        }
+      ]
+    },
+    {
+      "id": "ws_7b6e057fb61116436c",
+      "name": "Guest 273e's Workspace",
+      "type": "personal",
+      "ownerId": "usr_414501d702df628d08",
+      "createdAt": "2026-02-13T05:41:29.048Z",
+      "updatedAt": "2026-02-13T05:41:29.048Z",
+      "members": [
+        {
+          "userId": "usr_414501d702df628d08",
+          "role": "owner",
+          "addedAt": "2026-02-13T05:41:29.048Z"
+        }
+      ]
+    },
+    {
+      "id": "ws_0f8dea9311b80651a0",
+      "name": "Guest 382a's Workspace",
+      "type": "personal",
+      "ownerId": "usr_021e85ab35d613649a",
+      "createdAt": "2026-02-13T05:41:56.000Z",
+      "updatedAt": "2026-02-13T05:41:56.000Z",
+      "members": [
+        {
+          "userId": "usr_021e85ab35d613649a",
+          "role": "owner",
+          "addedAt": "2026-02-13T05:41:56.000Z"
+        }
+      ]
+    },
+    {
+      "id": "ws_c2c128ece6ce03a373",
+      "name": "Guest 8fba's Workspace",
+      "type": "personal",
+      "ownerId": "usr_15cc8854349331eaf9",
+      "createdAt": "2026-02-13T05:42:10.510Z",
+      "updatedAt": "2026-02-13T05:42:10.510Z",
+      "members": [
+        {
+          "userId": "usr_15cc8854349331eaf9",
+          "role": "owner",
+          "addedAt": "2026-02-13T05:42:10.510Z"
+        }
+      ]
+    },
+    {
+      "id": "ws_5e0d0ca11221d96453",
+      "name": "Guest 156b's Workspace",
+      "type": "personal",
+      "ownerId": "usr_308fa7762510465c3a",
+      "createdAt": "2026-02-13T05:42:25.508Z",
+      "updatedAt": "2026-02-13T05:42:25.508Z",
+      "members": [
+        {
+          "userId": "usr_308fa7762510465c3a",
+          "role": "owner",
+          "addedAt": "2026-02-13T05:42:25.508Z"
+        }
+      ]
+    },
+    {
+      "id": "ws_37c1878493d7cc5d47",
+      "name": "Guest c7ce's Workspace",
+      "type": "personal",
+      "ownerId": "usr_d0a8f8d4d76e26cc98",
+      "createdAt": "2026-02-13T05:44:39.949Z",
+      "updatedAt": "2026-02-13T05:44:39.949Z",
+      "members": [
+        {
+          "userId": "usr_d0a8f8d4d76e26cc98",
+          "role": "owner",
+          "addedAt": "2026-02-13T05:44:39.949Z"
+        }
+      ]
+    }
+  ],
+  "subscriptions": [
+    {
+      "id": "sub_44ef1ec07f7e5ac117",
+      "workspaceId": "ws_e2c80a7b46e7d506c5",
+      "userId": "usr_a28a3f73caaa41f2e4",
+      "planId": "bundle-pro",
+      "status": "trialing",
+      "trialStartedAt": "2026-02-13T04:40:24.078Z",
+      "trialEndsAt": "2026-02-27T04:40:24.078Z",
+      "currentPeriodStart": "2026-02-13T04:40:24.078Z",
+      "currentPeriodEnd": "2026-03-15T04:40:24.078Z",
+      "seats": 1,
+      "source": "system-trial",
+      "createdAt": "2026-02-13T04:40:24.078Z",
+      "updatedAt": "2026-02-13T04:40:24.078Z"
+    },
+    {
+      "id": "sub_4416980e4ca0fb2505",
+      "workspaceId": "ws_c92b083edade4ed81c",
+      "userId": "usr_67028ffd3f4bc62b58",
+      "planId": "bundle-pro",
+      "status": "trialing",
+      "trialStartedAt": "2026-02-13T04:43:36.401Z",
+      "trialEndsAt": "2026-02-27T04:43:36.402Z",
+      "currentPeriodStart": "2026-02-13T04:43:36.401Z",
+      "currentPeriodEnd": "2026-03-15T04:43:36.402Z",
+      "seats": 1,
+      "source": "system-trial",
+      "createdAt": "2026-02-13T04:43:36.401Z",
+      "updatedAt": "2026-02-13T04:43:36.401Z"
+    },
+    {
+      "id": "sub_045fd2701e67de79f1",
+      "workspaceId": "ws_c92b083edade4ed81c",
+      "userId": "usr_67028ffd3f4bc62b58",
+      "planId": "bundle-pro",
+      "status": "active",
+      "trialStartedAt": "",
+      "trialEndsAt": "",
+      "currentPeriodStart": "2026-02-13T04:43:36.411Z",
+      "currentPeriodEnd": "2026-03-15T04:43:36.411Z",
+      "seats": 3,
+      "source": "checkout",
+      "createdAt": "2026-02-13T04:43:36.411Z",
+      "updatedAt": "2026-02-13T04:43:36.411Z"
+    },
+    {
+      "id": "sub_fb5ee5c1e90ebc3dfd",
+      "workspaceId": "ws_46cc2b9789a862c9ac",
+      "userId": "usr_5fc982b3871de0c14e",
+      "planId": "bundle-pro",
+      "status": "trialing",
+      "trialStartedAt": "2026-02-13T04:46:24.965Z",
+      "trialEndsAt": "2026-02-27T04:46:24.965Z",
+      "currentPeriodStart": "2026-02-13T04:46:24.965Z",
+      "currentPeriodEnd": "2026-03-15T04:46:24.965Z",
+      "seats": 1,
+      "source": "system-trial",
+      "createdAt": "2026-02-13T04:46:24.965Z",
+      "updatedAt": "2026-02-13T04:46:24.965Z"
+    },
+    {
+      "id": "sub_a4d787f0378a0c0406",
+      "workspaceId": "ws_d34c7f733c845a2f95",
+      "userId": "usr_469b2efe1a74c84b77",
+      "planId": "bundle-pro",
+      "status": "trialing",
+      "trialStartedAt": "2026-02-13T04:49:23.975Z",
+      "trialEndsAt": "2026-02-27T04:49:23.975Z",
+      "currentPeriodStart": "2026-02-13T04:49:23.975Z",
+      "currentPeriodEnd": "2026-03-15T04:49:23.975Z",
+      "seats": 1,
+      "source": "system-trial",
+      "createdAt": "2026-02-13T04:49:23.975Z",
+      "updatedAt": "2026-02-13T04:49:23.975Z"
+    },
+    {
+      "id": "sub_1c8083b4665683eb31",
+      "workspaceId": "ws_2804b4237e8eb0314e",
+      "userId": "usr_512d512c779e539dab",
+      "planId": "bundle-pro",
+      "status": "trialing",
+      "trialStartedAt": "2026-02-13T04:53:05.913Z",
+      "trialEndsAt": "2026-02-27T04:53:05.913Z",
+      "currentPeriodStart": "2026-02-13T04:53:05.913Z",
+      "currentPeriodEnd": "2026-03-15T04:53:05.913Z",
+      "seats": 1,
+      "source": "system-trial",
+      "createdAt": "2026-02-13T04:53:05.913Z",
+      "updatedAt": "2026-02-13T04:53:05.913Z"
+    },
+    {
+      "id": "sub_e82ec173a89e5c7065",
+      "workspaceId": "ws_eede9f669373c1ce05",
+      "userId": "usr_e1e55d6cc6a6be868e",
+      "planId": "bundle-pro",
+      "status": "trialing",
+      "trialStartedAt": "2026-02-13T05:16:35.666Z",
+      "trialEndsAt": "2026-02-27T05:16:35.666Z",
+      "currentPeriodStart": "2026-02-13T05:16:35.666Z",
+      "currentPeriodEnd": "2026-03-15T05:16:35.666Z",
+      "seats": 1,
+      "source": "system-trial",
+      "createdAt": "2026-02-13T05:16:35.666Z",
+      "updatedAt": "2026-02-13T05:16:35.666Z"
+    },
+    {
+      "id": "sub_6ebabe4bbef392f757",
+      "workspaceId": "ws_dd953b4cdfca8f349c",
+      "userId": "usr_0dad420b845fc5e0ed",
+      "planId": "bundle-pro",
+      "status": "trialing",
+      "trialStartedAt": "2026-02-13T05:19:14.042Z",
+      "trialEndsAt": "2026-02-27T05:19:14.043Z",
+      "currentPeriodStart": "2026-02-13T05:19:14.042Z",
+      "currentPeriodEnd": "2026-03-15T05:19:14.043Z",
+      "seats": 1,
+      "source": "system-trial",
+      "createdAt": "2026-02-13T05:19:14.042Z",
+      "updatedAt": "2026-02-13T05:19:14.042Z"
+    },
+    {
+      "id": "sub_93a19ad2dff1db76c3",
+      "workspaceId": "ws_83359ee77f068e8603",
+      "userId": "usr_e77ab8a5eb3e670d57",
+      "planId": "bundle-pro",
+      "status": "trialing",
+      "trialStartedAt": "2026-02-13T05:29:25.667Z",
+      "trialEndsAt": "2026-02-27T05:29:25.667Z",
+      "currentPeriodStart": "2026-02-13T05:29:25.667Z",
+      "currentPeriodEnd": "2026-03-15T05:29:25.667Z",
+      "seats": 1,
+      "source": "system-trial",
+      "createdAt": "2026-02-13T05:29:25.667Z",
+      "updatedAt": "2026-02-13T05:29:25.667Z"
+    },
+    {
+      "id": "sub_f6bb21b478aeeef4c4",
+      "workspaceId": "ws_86d10e16a765c9fe5b",
+      "userId": "usr_3ab4724e388b4e4ce7",
+      "planId": "bundle-pro",
+      "status": "trialing",
+      "trialStartedAt": "2026-02-13T05:32:35.075Z",
+      "trialEndsAt": "2026-02-27T05:32:35.075Z",
+      "currentPeriodStart": "2026-02-13T05:32:35.075Z",
+      "currentPeriodEnd": "2026-03-15T05:32:35.075Z",
+      "seats": 1,
+      "source": "system-trial",
+      "createdAt": "2026-02-13T05:32:35.075Z",
+      "updatedAt": "2026-02-13T05:32:35.075Z"
+    },
+    {
+      "id": "sub_e6e094803e57b7e81c",
+      "workspaceId": "ws_7b6e057fb61116436c",
+      "userId": "usr_414501d702df628d08",
+      "planId": "bundle-pro",
+      "status": "trialing",
+      "trialStartedAt": "2026-02-13T05:41:29.048Z",
+      "trialEndsAt": "2026-02-27T05:41:29.048Z",
+      "currentPeriodStart": "2026-02-13T05:41:29.048Z",
+      "currentPeriodEnd": "2026-03-15T05:41:29.048Z",
+      "seats": 1,
+      "source": "system-trial",
+      "createdAt": "2026-02-13T05:41:29.048Z",
+      "updatedAt": "2026-02-13T05:41:29.048Z"
+    },
+    {
+      "id": "sub_410bce00c8d5027685",
+      "workspaceId": "ws_0f8dea9311b80651a0",
+      "userId": "usr_021e85ab35d613649a",
+      "planId": "bundle-pro",
+      "status": "trialing",
+      "trialStartedAt": "2026-02-13T05:41:56.000Z",
+      "trialEndsAt": "2026-02-27T05:41:56.000Z",
+      "currentPeriodStart": "2026-02-13T05:41:56.000Z",
+      "currentPeriodEnd": "2026-03-15T05:41:56.000Z",
+      "seats": 1,
+      "source": "system-trial",
+      "createdAt": "2026-02-13T05:41:56.000Z",
+      "updatedAt": "2026-02-13T05:41:56.000Z"
+    },
+    {
+      "id": "sub_10ffe7c05ef62e086e",
+      "workspaceId": "ws_c2c128ece6ce03a373",
+      "userId": "usr_15cc8854349331eaf9",
+      "planId": "bundle-pro",
+      "status": "trialing",
+      "trialStartedAt": "2026-02-13T05:42:10.510Z",
+      "trialEndsAt": "2026-02-27T05:42:10.510Z",
+      "currentPeriodStart": "2026-02-13T05:42:10.510Z",
+      "currentPeriodEnd": "2026-03-15T05:42:10.510Z",
+      "seats": 1,
+      "source": "system-trial",
+      "createdAt": "2026-02-13T05:42:10.510Z",
+      "updatedAt": "2026-02-13T05:42:10.510Z"
+    },
+    {
+      "id": "sub_b862b981376d52c79f",
+      "workspaceId": "ws_5e0d0ca11221d96453",
+      "userId": "usr_308fa7762510465c3a",
+      "planId": "bundle-pro",
+      "status": "trialing",
+      "trialStartedAt": "2026-02-13T05:42:25.508Z",
+      "trialEndsAt": "2026-02-27T05:42:25.508Z",
+      "currentPeriodStart": "2026-02-13T05:42:25.508Z",
+      "currentPeriodEnd": "2026-03-15T05:42:25.508Z",
+      "seats": 1,
+      "source": "system-trial",
+      "createdAt": "2026-02-13T05:42:25.508Z",
+      "updatedAt": "2026-02-13T05:42:25.508Z"
+    },
+    {
+      "id": "sub_c2004f334b5652f547",
+      "workspaceId": "ws_37c1878493d7cc5d47",
+      "userId": "usr_d0a8f8d4d76e26cc98",
+      "planId": "bundle-pro",
+      "status": "trialing",
+      "trialStartedAt": "2026-02-13T05:44:39.949Z",
+      "trialEndsAt": "2026-02-27T05:44:39.949Z",
+      "currentPeriodStart": "2026-02-13T05:44:39.949Z",
+      "currentPeriodEnd": "2026-03-15T05:44:39.949Z",
+      "seats": 1,
+      "source": "system-trial",
+      "createdAt": "2026-02-13T05:44:39.949Z",
+      "updatedAt": "2026-02-13T05:44:39.949Z"
+    }
+  ],
+  "webhookEvents": [],
+  "entitlementOverrides": [],
+  "entitlementsAudit": [
+    {
+      "id": "audit_774eb088eb549e6f1b",
+      "workspaceId": "ws_c92b083edade4ed81c",
+      "event": "checkout_completed",
+      "source": "checkout",
+      "detail": "Activated plan bundle-pro",
+      "createdAt": "2026-02-13T04:43:36.411Z"
+    }
+  ],
+  "usage": [
+    {
+      "id": "use_74040961298a3fd925",
+      "requestId": "req_4eb0127fc4149bbabbc6",
+      "workspaceId": "ws_e2c80a7b46e7d506c5",
+      "userId": "usr_a28a3f73caaa41f2e4",
+      "feature": "bible-study",
+      "units": 1,
+      "unitType": "generation",
+      "model": "gpt-4.1-nano",
+      "estimatedCostUsd": 0.01,
+      "metadata": {},
+      "createdAt": "2026-02-13T04:40:56.704Z"
+    },
+    {
+      "id": "use_21203487ebaa1f74af",
+      "requestId": "req_215d8fffdf4fa1a792de",
+      "workspaceId": "ws_e2c80a7b46e7d506c5",
+      "userId": "usr_a28a3f73caaa41f2e4",
+      "feature": "sermon-preparation",
+      "units": 1,
+      "unitType": "generation",
+      "model": "gpt-4.1-mini",
+      "estimatedCostUsd": 0.03,
+      "metadata": {},
+      "createdAt": "2026-02-13T04:41:14.937Z"
+    },
+    {
+      "id": "use_de9be30a7e57b4d118",
+      "requestId": "req_3423f3e11ba423c5a9e5",
+      "workspaceId": "ws_e2c80a7b46e7d506c5",
+      "userId": "usr_a28a3f73caaa41f2e4",
+      "feature": "teaching-tools",
+      "units": 1,
+      "unitType": "kit",
+      "model": "gpt-4.1-nano",
+      "estimatedCostUsd": 0.045,
+      "metadata": {},
+      "createdAt": "2026-02-13T04:42:12.938Z"
+    },
+    {
+      "id": "use_f250343066010b4b39",
+      "requestId": "req_498bba68637ad64f8ac3",
+      "workspaceId": "ws_e2c80a7b46e7d506c5",
+      "userId": "usr_a28a3f73caaa41f2e4",
+      "feature": "research-helper",
+      "units": 1,
+      "unitType": "evaluation",
+      "model": "gpt-4.1-mini",
+      "estimatedCostUsd": 0.028,
+      "metadata": {},
+      "createdAt": "2026-02-13T04:42:26.609Z"
+    },
+    {
+      "id": "use_42b39411a49097980b",
+      "requestId": "req_31c350af1a8c92ad7436",
+      "workspaceId": "ws_e2c80a7b46e7d506c5",
+      "userId": "usr_a28a3f73caaa41f2e4",
+      "feature": "sermon-analyzer",
+      "units": 2,
+      "unitType": "audio_minute",
+      "model": "whisper-1",
+      "estimatedCostUsd": 0.06,
+      "metadata": {},
+      "createdAt": "2026-02-13T04:42:40.434Z"
+    },
+    {
+      "id": "use_415581ce52d61393b2",
+      "requestId": "req_c80a557f64847f203a66",
+      "workspaceId": "ws_e2c80a7b46e7d506c5",
+      "userId": "usr_a28a3f73caaa41f2e4",
+      "feature": "video-search",
+      "units": 1,
+      "unitType": "search",
+      "model": "text-embedding-3-small",
+      "estimatedCostUsd": 0.004,
+      "metadata": {},
+      "createdAt": "2026-02-13T04:42:45.904Z"
+    },
+    {
+      "id": "use_49ff15149f1b08c8f2",
+      "requestId": "req_007813d6f59296f168de",
+      "workspaceId": "ws_46cc2b9789a862c9ac",
+      "userId": "usr_5fc982b3871de0c14e",
+      "feature": "bible-study",
+      "units": 1,
+      "unitType": "generation",
+      "model": "gpt-4.1-nano",
+      "estimatedCostUsd": 0.01,
+      "metadata": {},
+      "createdAt": "2026-02-13T04:46:54.497Z"
+    },
+    {
+      "id": "use_7a6efe30b3e49843a2",
+      "requestId": "req_c02d6465fe353319a5bd",
+      "workspaceId": "ws_46cc2b9789a862c9ac",
+      "userId": "usr_5fc982b3871de0c14e",
+      "feature": "sermon-preparation",
+      "units": 1,
+      "unitType": "generation",
+      "model": "gpt-4.1-mini",
+      "estimatedCostUsd": 0.03,
+      "metadata": {},
+      "createdAt": "2026-02-13T04:47:14.028Z"
+    },
+    {
+      "id": "use_2e7a64a49da89b3c3e",
+      "requestId": "req_6e2c3fa7e4a3fadec259",
+      "workspaceId": "ws_46cc2b9789a862c9ac",
+      "userId": "usr_5fc982b3871de0c14e",
+      "feature": "teaching-tools",
+      "units": 1,
+      "unitType": "kit",
+      "model": "gpt-4.1-nano",
+      "estimatedCostUsd": 0.045,
+      "metadata": {},
+      "createdAt": "2026-02-13T04:47:38.423Z"
+    },
+    {
+      "id": "use_93bc7ac66e29a18ac7",
+      "requestId": "req_14e48c466b2705aa7e24",
+      "workspaceId": "ws_46cc2b9789a862c9ac",
+      "userId": "usr_5fc982b3871de0c14e",
+      "feature": "research-helper",
+      "units": 1,
+      "unitType": "evaluation",
+      "model": "gpt-4.1-mini",
+      "estimatedCostUsd": 0.028,
+      "metadata": {},
+      "createdAt": "2026-02-13T04:47:52.797Z"
+    },
+    {
+      "id": "use_e81eae193408bd6a8d",
+      "requestId": "req_82d558acf17f69594c3f",
+      "workspaceId": "ws_46cc2b9789a862c9ac",
+      "userId": "usr_5fc982b3871de0c14e",
+      "feature": "sermon-analyzer",
+      "units": 2,
+      "unitType": "audio_minute",
+      "model": "whisper-1",
+      "estimatedCostUsd": 0.06,
+      "metadata": {},
+      "createdAt": "2026-02-13T04:48:03.970Z"
+    },
+    {
+      "id": "use_bd3df3376f4e0ef843",
+      "requestId": "req_cf7c589e80b33c9db197",
+      "workspaceId": "ws_46cc2b9789a862c9ac",
+      "userId": "usr_5fc982b3871de0c14e",
+      "feature": "video-search",
+      "units": 1,
+      "unitType": "search",
+      "model": "text-embedding-3-small",
+      "estimatedCostUsd": 0.004,
+      "metadata": {},
+      "createdAt": "2026-02-13T04:48:07.710Z"
+    },
+    {
+      "id": "use_f3c9fa7f66472847f4",
+      "requestId": "req_d2b97065dd930fe75a27",
+      "workspaceId": "ws_d34c7f733c845a2f95",
+      "userId": "usr_469b2efe1a74c84b77",
+      "feature": "bible-study",
+      "units": 1,
+      "unitType": "generation",
+      "model": "gpt-4.1-nano",
+      "estimatedCostUsd": 0.01,
+      "metadata": {},
+      "createdAt": "2026-02-13T04:49:50.021Z"
+    },
+    {
+      "id": "use_2c534f7d2ec4c4a5db",
+      "requestId": "req_d25fc3a806ee3244ec78",
+      "workspaceId": "ws_d34c7f733c845a2f95",
+      "userId": "usr_469b2efe1a74c84b77",
+      "feature": "sermon-preparation",
+      "units": 1,
+      "unitType": "generation",
+      "model": "gpt-4.1-mini",
+      "estimatedCostUsd": 0.03,
+      "metadata": {},
+      "createdAt": "2026-02-13T04:50:10.392Z"
+    },
+    {
+      "id": "use_6923c5a0b4321ee8e2",
+      "requestId": "req_312b590f28ff2fd92f69",
+      "workspaceId": "ws_d34c7f733c845a2f95",
+      "userId": "usr_469b2efe1a74c84b77",
+      "feature": "teaching-tools",
+      "units": 1,
+      "unitType": "kit",
+      "model": "gpt-4.1-nano",
+      "estimatedCostUsd": 0.045,
+      "metadata": {},
+      "createdAt": "2026-02-13T04:50:35.138Z"
+    },
+    {
+      "id": "use_457cb4287cc4eb381d",
+      "requestId": "req_f9a4c48c1ccaa908b914",
+      "workspaceId": "ws_d34c7f733c845a2f95",
+      "userId": "usr_469b2efe1a74c84b77",
+      "feature": "research-helper",
+      "units": 1,
+      "unitType": "evaluation",
+      "model": "gpt-4.1-mini",
+      "estimatedCostUsd": 0.028,
+      "metadata": {},
+      "createdAt": "2026-02-13T04:50:45.720Z"
+    },
+    {
+      "id": "use_abe6d1fa92a1f2d268",
+      "requestId": "req_fe386945fd63c85d707c",
+      "workspaceId": "ws_d34c7f733c845a2f95",
+      "userId": "usr_469b2efe1a74c84b77",
+      "feature": "sermon-analyzer",
+      "units": 2,
+      "unitType": "audio_minute",
+      "model": "whisper-1",
+      "estimatedCostUsd": 0.06,
+      "metadata": {},
+      "createdAt": "2026-02-13T04:50:59.090Z"
+    },
+    {
+      "id": "use_2e36e1fba115a92609",
+      "requestId": "req_57d9b31b5eae41f8ede4",
+      "workspaceId": "ws_d34c7f733c845a2f95",
+      "userId": "usr_469b2efe1a74c84b77",
+      "feature": "video-search",
+      "units": 1,
+      "unitType": "search",
+      "model": "text-embedding-3-small",
+      "estimatedCostUsd": 0.004,
+      "metadata": {},
+      "createdAt": "2026-02-13T04:51:03.609Z"
+    },
+    {
+      "id": "use_0367f7ce899de8bba4",
+      "requestId": "req_3dc9ffdedb29998e85e2",
+      "workspaceId": "ws_2804b4237e8eb0314e",
+      "userId": "usr_512d512c779e539dab",
+      "feature": "bible-study",
+      "units": 1,
+      "unitType": "generation",
+      "model": "gpt-4.1-nano",
+      "estimatedCostUsd": 0.01,
+      "metadata": {},
+      "createdAt": "2026-02-13T04:53:33.585Z"
+    },
+    {
+      "id": "use_97695d6c006b3afec2",
+      "requestId": "req_59890cadb1d11e007c47",
+      "workspaceId": "ws_2804b4237e8eb0314e",
+      "userId": "usr_512d512c779e539dab",
+      "feature": "sermon-preparation",
+      "units": 1,
+      "unitType": "generation",
+      "model": "gpt-4.1-mini",
+      "estimatedCostUsd": 0.03,
+      "metadata": {},
+      "createdAt": "2026-02-13T04:53:55.264Z"
+    },
+    {
+      "id": "use_a1c3e40f6fa47b5270",
+      "requestId": "req_560f723467aee7bf86cd",
+      "workspaceId": "ws_2804b4237e8eb0314e",
+      "userId": "usr_512d512c779e539dab",
+      "feature": "teaching-tools",
+      "units": 1,
+      "unitType": "kit",
+      "model": "gpt-4.1-nano",
+      "estimatedCostUsd": 0.045,
+      "metadata": {},
+      "createdAt": "2026-02-13T04:54:16.862Z"
+    },
+    {
+      "id": "use_7c6e9f3f8760e20bb2",
+      "requestId": "req_aa6e9df43c2dc8ff0868",
+      "workspaceId": "ws_2804b4237e8eb0314e",
+      "userId": "usr_512d512c779e539dab",
+      "feature": "research-helper",
+      "units": 1,
+      "unitType": "evaluation",
+      "model": "gpt-4.1-mini",
+      "estimatedCostUsd": 0.028,
+      "metadata": {},
+      "createdAt": "2026-02-13T04:54:30.847Z"
+    },
+    {
+      "id": "use_9918dc0b382ef7744b",
+      "requestId": "req_d72f47c3500b6035c9c2",
+      "workspaceId": "ws_2804b4237e8eb0314e",
+      "userId": "usr_512d512c779e539dab",
+      "feature": "sermon-analyzer",
+      "units": 2,
+      "unitType": "audio_minute",
+      "model": "whisper-1",
+      "estimatedCostUsd": 0.06,
+      "metadata": {},
+      "createdAt": "2026-02-13T04:54:39.238Z"
+    },
+    {
+      "id": "use_69f3e323e89d85f8d0",
+      "requestId": "req_3034fa61f0814ca77729",
+      "workspaceId": "ws_2804b4237e8eb0314e",
+      "userId": "usr_512d512c779e539dab",
+      "feature": "video-search",
+      "units": 1,
+      "unitType": "search",
+      "model": "text-embedding-3-small",
+      "estimatedCostUsd": 0.004,
+      "metadata": {},
+      "createdAt": "2026-02-13T04:54:44.461Z"
+    },
+    {
+      "id": "use_dbc2037ef944ce3786",
+      "requestId": "req_9ec84b098847563f73d1",
+      "workspaceId": "ws_eede9f669373c1ce05",
+      "userId": "usr_e1e55d6cc6a6be868e",
+      "feature": "bible-study",
+      "units": 1,
+      "unitType": "generation",
+      "model": "gpt-4.1-nano",
+      "estimatedCostUsd": 0.01,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:17:04.146Z"
+    },
+    {
+      "id": "use_3c7a8bade5e86cc911",
+      "requestId": "req_6dac82911e6978470959",
+      "workspaceId": "ws_eede9f669373c1ce05",
+      "userId": "usr_e1e55d6cc6a6be868e",
+      "feature": "sermon-preparation",
+      "units": 1,
+      "unitType": "generation",
+      "model": "gpt-4.1-mini",
+      "estimatedCostUsd": 0.03,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:17:23.294Z"
+    },
+    {
+      "id": "use_097a2eea53f415d02f",
+      "requestId": "req_fa6e304e16a69ba18b83",
+      "workspaceId": "ws_eede9f669373c1ce05",
+      "userId": "usr_e1e55d6cc6a6be868e",
+      "feature": "teaching-tools",
+      "units": 1,
+      "unitType": "kit",
+      "model": "gpt-4.1-nano",
+      "estimatedCostUsd": 0.045,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:17:46.738Z"
+    },
+    {
+      "id": "use_009d6facb331bb0c1c",
+      "requestId": "req_2703d61ada1e6b8148f6",
+      "workspaceId": "ws_eede9f669373c1ce05",
+      "userId": "usr_e1e55d6cc6a6be868e",
+      "feature": "research-helper",
+      "units": 1,
+      "unitType": "evaluation",
+      "model": "gpt-4.1-mini",
+      "estimatedCostUsd": 0.028,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:17:59.148Z"
+    },
+    {
+      "id": "use_613a4c9675afaa601e",
+      "requestId": "req_faabd00d99dff04acb62",
+      "workspaceId": "ws_eede9f669373c1ce05",
+      "userId": "usr_e1e55d6cc6a6be868e",
+      "feature": "sermon-analyzer",
+      "units": 2,
+      "unitType": "audio_minute",
+      "model": "whisper-1",
+      "estimatedCostUsd": 0.06,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:18:10.808Z"
+    },
+    {
+      "id": "use_8e19ff4ffa019ffa12",
+      "requestId": "req_59901eb6f1a601373395",
+      "workspaceId": "ws_eede9f669373c1ce05",
+      "userId": "usr_e1e55d6cc6a6be868e",
+      "feature": "video-search",
+      "units": 1,
+      "unitType": "search",
+      "model": "text-embedding-3-small",
+      "estimatedCostUsd": 0.004,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:18:14.920Z"
+    },
+    {
+      "id": "use_45cc7c9050636679f9",
+      "requestId": "req_901702b6ce4172c65464",
+      "workspaceId": "ws_dd953b4cdfca8f349c",
+      "userId": "usr_0dad420b845fc5e0ed",
+      "feature": "bible-study",
+      "units": 1,
+      "unitType": "generation",
+      "model": "gpt-4.1-nano",
+      "estimatedCostUsd": 0.01,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:19:41.320Z"
+    },
+    {
+      "id": "use_15f5bcc118e2481a74",
+      "requestId": "req_746275813cea172d8a01",
+      "workspaceId": "ws_dd953b4cdfca8f349c",
+      "userId": "usr_0dad420b845fc5e0ed",
+      "feature": "sermon-preparation",
+      "units": 1,
+      "unitType": "generation",
+      "model": "gpt-4.1-mini",
+      "estimatedCostUsd": 0.03,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:20:00.178Z"
+    },
+    {
+      "id": "use_86df653a44464f4ce3",
+      "requestId": "req_97785bfcd64f791c6f1e",
+      "workspaceId": "ws_dd953b4cdfca8f349c",
+      "userId": "usr_0dad420b845fc5e0ed",
+      "feature": "teaching-tools",
+      "units": 1,
+      "unitType": "kit",
+      "model": "gpt-4.1-nano",
+      "estimatedCostUsd": 0.045,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:20:22.734Z"
+    },
+    {
+      "id": "use_ba91e0c8a72b69efa2",
+      "requestId": "req_a39dd2c7dc7071de7f38",
+      "workspaceId": "ws_dd953b4cdfca8f349c",
+      "userId": "usr_0dad420b845fc5e0ed",
+      "feature": "research-helper",
+      "units": 1,
+      "unitType": "evaluation",
+      "model": "gpt-4.1-mini",
+      "estimatedCostUsd": 0.028,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:20:41.034Z"
+    },
+    {
+      "id": "use_742688db021c977be9",
+      "requestId": "req_09d262ec5ea3c960e4af",
+      "workspaceId": "ws_dd953b4cdfca8f349c",
+      "userId": "usr_0dad420b845fc5e0ed",
+      "feature": "sermon-analyzer",
+      "units": 2,
+      "unitType": "audio_minute",
+      "model": "whisper-1",
+      "estimatedCostUsd": 0.06,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:20:51.070Z"
+    },
+    {
+      "id": "use_5822daa133e12f0a1d",
+      "requestId": "req_c941be0c26b05a46c8fb",
+      "workspaceId": "ws_dd953b4cdfca8f349c",
+      "userId": "usr_0dad420b845fc5e0ed",
+      "feature": "video-search",
+      "units": 1,
+      "unitType": "search",
+      "model": "text-embedding-3-small",
+      "estimatedCostUsd": 0.004,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:20:55.166Z"
+    },
+    {
+      "id": "use_1f1e99ba29595039e8",
+      "requestId": "req_255a2912b19a781c7d4f",
+      "workspaceId": "ws_83359ee77f068e8603",
+      "userId": "usr_e77ab8a5eb3e670d57",
+      "feature": "bible-study",
+      "units": 1,
+      "unitType": "generation",
+      "model": "gpt-4.1-nano",
+      "estimatedCostUsd": 0.01,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:29:51.580Z"
+    },
+    {
+      "id": "use_fa1d51c16fa24ae729",
+      "requestId": "req_c23195fca3918b19a18f",
+      "workspaceId": "ws_83359ee77f068e8603",
+      "userId": "usr_e77ab8a5eb3e670d57",
+      "feature": "sermon-preparation",
+      "units": 1,
+      "unitType": "generation",
+      "model": "gpt-4.1-mini",
+      "estimatedCostUsd": 0.03,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:30:14.151Z"
+    },
+    {
+      "id": "use_52d7478a45527ecede",
+      "requestId": "req_3fa65829a68e7a6c8395",
+      "workspaceId": "ws_83359ee77f068e8603",
+      "userId": "usr_e77ab8a5eb3e670d57",
+      "feature": "teaching-tools",
+      "units": 1,
+      "unitType": "kit",
+      "model": "gpt-4.1-nano",
+      "estimatedCostUsd": 0.045,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:30:35.552Z"
+    },
+    {
+      "id": "use_d28f6f606633e732ad",
+      "requestId": "req_e08e68c69cece8620b89",
+      "workspaceId": "ws_83359ee77f068e8603",
+      "userId": "usr_e77ab8a5eb3e670d57",
+      "feature": "research-helper",
+      "units": 1,
+      "unitType": "evaluation",
+      "model": "gpt-4.1-mini",
+      "estimatedCostUsd": 0.028,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:30:47.923Z"
+    },
+    {
+      "id": "use_aa127aeea07209edf2",
+      "requestId": "req_b3b75150e512ddb21dc5",
+      "workspaceId": "ws_83359ee77f068e8603",
+      "userId": "usr_e77ab8a5eb3e670d57",
+      "feature": "sermon-analyzer",
+      "units": 2,
+      "unitType": "audio_minute",
+      "model": "whisper-1",
+      "estimatedCostUsd": 0.06,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:30:58.828Z"
+    },
+    {
+      "id": "use_e30cb85f290fbc6d0d",
+      "requestId": "req_4607b10e62dfe8b60060",
+      "workspaceId": "ws_83359ee77f068e8603",
+      "userId": "usr_e77ab8a5eb3e670d57",
+      "feature": "video-search",
+      "units": 1,
+      "unitType": "search",
+      "model": "text-embedding-3-small",
+      "estimatedCostUsd": 0.004,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:31:03.092Z"
+    },
+    {
+      "id": "use_1d9d1a24f06f3dbab7",
+      "requestId": "req_ba0735de6e044161a617",
+      "workspaceId": "ws_86d10e16a765c9fe5b",
+      "userId": "usr_3ab4724e388b4e4ce7",
+      "feature": "bible-study",
+      "units": 1,
+      "unitType": "generation",
+      "model": "gpt-4.1-nano",
+      "estimatedCostUsd": 0.01,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:33:04.269Z"
+    },
+    {
+      "id": "use_49950d7ef9047460ba",
+      "requestId": "req_023a2910bdc8251ae8d4",
+      "workspaceId": "ws_86d10e16a765c9fe5b",
+      "userId": "usr_3ab4724e388b4e4ce7",
+      "feature": "sermon-preparation",
+      "units": 1,
+      "unitType": "generation",
+      "model": "gpt-4.1-mini",
+      "estimatedCostUsd": 0.03,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:33:24.340Z"
+    },
+    {
+      "id": "use_bc064b570758f3d554",
+      "requestId": "req_bbc254b2b8c8c55c6b72",
+      "workspaceId": "ws_86d10e16a765c9fe5b",
+      "userId": "usr_3ab4724e388b4e4ce7",
+      "feature": "teaching-tools",
+      "units": 1,
+      "unitType": "kit",
+      "model": "gpt-4.1-nano",
+      "estimatedCostUsd": 0.045,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:33:52.127Z"
+    },
+    {
+      "id": "use_e4d6b6a852297137ed",
+      "requestId": "req_05bb944d3f5aee3081f7",
+      "workspaceId": "ws_86d10e16a765c9fe5b",
+      "userId": "usr_3ab4724e388b4e4ce7",
+      "feature": "research-helper",
+      "units": 1,
+      "unitType": "evaluation",
+      "model": "gpt-4.1-mini",
+      "estimatedCostUsd": 0.028,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:34:05.217Z"
+    },
+    {
+      "id": "use_a4bbd93ef9bfaa20ef",
+      "requestId": "req_02fdfe53c5152861b024",
+      "workspaceId": "ws_86d10e16a765c9fe5b",
+      "userId": "usr_3ab4724e388b4e4ce7",
+      "feature": "sermon-analyzer",
+      "units": 2,
+      "unitType": "audio_minute",
+      "model": "whisper-1",
+      "estimatedCostUsd": 0.06,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:34:16.156Z"
+    },
+    {
+      "id": "use_42f4e165e3dfeb00f0",
+      "requestId": "req_69b0186001c086849d18",
+      "workspaceId": "ws_86d10e16a765c9fe5b",
+      "userId": "usr_3ab4724e388b4e4ce7",
+      "feature": "video-search",
+      "units": 1,
+      "unitType": "search",
+      "model": "text-embedding-3-small",
+      "estimatedCostUsd": 0.004,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:34:19.225Z"
+    },
+    {
+      "id": "use_e96081656bb26e41b3",
+      "requestId": "req_cae4c95748a1cdafe8bc",
+      "workspaceId": "ws_5e0d0ca11221d96453",
+      "userId": "usr_308fa7762510465c3a",
+      "feature": "bible-study",
+      "units": 1,
+      "unitType": "generation",
+      "model": "gpt-4.1-nano",
+      "estimatedCostUsd": 0.01,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:43:04.011Z"
+    },
+    {
+      "id": "use_bbd4f3c2703362eb07",
+      "requestId": "req_a9fb9df180632ca9af67",
+      "workspaceId": "ws_5e0d0ca11221d96453",
+      "userId": "usr_308fa7762510465c3a",
+      "feature": "sermon-preparation",
+      "units": 1,
+      "unitType": "generation",
+      "model": "gpt-4.1-mini",
+      "estimatedCostUsd": 0.03,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:43:23.494Z"
+    },
+    {
+      "id": "use_be7ec8551621218e24",
+      "requestId": "req_da0c864dfc08569b60c0",
+      "workspaceId": "ws_5e0d0ca11221d96453",
+      "userId": "usr_308fa7762510465c3a",
+      "feature": "teaching-tools",
+      "units": 1,
+      "unitType": "kit",
+      "model": "gpt-4.1-nano",
+      "estimatedCostUsd": 0.045,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:43:56.469Z"
+    },
+    {
+      "id": "use_6996d6b71406223d89",
+      "requestId": "req_da0f6e079f363ea8a413",
+      "workspaceId": "ws_5e0d0ca11221d96453",
+      "userId": "usr_308fa7762510465c3a",
+      "feature": "research-helper",
+      "units": 1,
+      "unitType": "evaluation",
+      "model": "gpt-4.1-mini",
+      "estimatedCostUsd": 0.028,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:44:11.125Z"
+    },
+    {
+      "id": "use_e9b70ba91f113db059",
+      "requestId": "req_a35a99039b4ce7e6d9",
+      "workspaceId": "ws_5e0d0ca11221d96453",
+      "userId": "usr_308fa7762510465c3a",
+      "feature": "sermon-analyzer",
+      "units": 1,
+      "unitType": "audio_minute",
+      "model": "whisper-1",
+      "estimatedCostUsd": 0.03,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:44:25.851Z"
+    },
+    {
+      "id": "use_aa0c45a8fe9c5e75d1",
+      "requestId": "req_8d5de85672aaabfad74d",
+      "workspaceId": "ws_5e0d0ca11221d96453",
+      "userId": "usr_308fa7762510465c3a",
+      "feature": "video-search",
+      "units": 1,
+      "unitType": "search",
+      "model": "text-embedding-3-small",
+      "estimatedCostUsd": 0.004,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:44:31.404Z"
+    },
+    {
+      "id": "use_613626980e08ee732e",
+      "requestId": "req_7803e0f48cef2603b294",
+      "workspaceId": "ws_37c1878493d7cc5d47",
+      "userId": "usr_d0a8f8d4d76e26cc98",
+      "feature": "bible-study",
+      "units": 1,
+      "unitType": "generation",
+      "model": "gpt-4.1-nano",
+      "estimatedCostUsd": 0.01,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:45:21.975Z"
+    },
+    {
+      "id": "use_f4dfdb41fbda7ad98f",
+      "requestId": "req_d4161b8d3c1145cd0372",
+      "workspaceId": "ws_37c1878493d7cc5d47",
+      "userId": "usr_d0a8f8d4d76e26cc98",
+      "feature": "sermon-preparation",
+      "units": 1,
+      "unitType": "generation",
+      "model": "gpt-4.1-mini",
+      "estimatedCostUsd": 0.03,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:45:51.043Z"
+    },
+    {
+      "id": "use_03a6f37191a7a38477",
+      "requestId": "req_84aed6f787e05c2a034c",
+      "workspaceId": "ws_37c1878493d7cc5d47",
+      "userId": "usr_d0a8f8d4d76e26cc98",
+      "feature": "teaching-tools",
+      "units": 1,
+      "unitType": "kit",
+      "model": "gpt-4.1-nano",
+      "estimatedCostUsd": 0.045,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:46:19.676Z"
+    },
+    {
+      "id": "use_d250cbfd1899db846c",
+      "requestId": "req_d7daa017344d67a31b50",
+      "workspaceId": "ws_37c1878493d7cc5d47",
+      "userId": "usr_d0a8f8d4d76e26cc98",
+      "feature": "research-helper",
+      "units": 1,
+      "unitType": "evaluation",
+      "model": "gpt-4.1-mini",
+      "estimatedCostUsd": 0.028,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:46:32.160Z"
+    },
+    {
+      "id": "use_5b010b3e5b65627a35",
+      "requestId": "req_f38e6e7b2233603a8d46",
+      "workspaceId": "ws_37c1878493d7cc5d47",
+      "userId": "usr_d0a8f8d4d76e26cc98",
+      "feature": "sermon-analyzer",
+      "units": 2,
+      "unitType": "audio_minute",
+      "model": "whisper-1",
+      "estimatedCostUsd": 0.06,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:46:42.945Z"
+    },
+    {
+      "id": "use_4e0bad924e1f0fd588",
+      "requestId": "req_a32e1aaf69c53a1a7bab",
+      "workspaceId": "ws_37c1878493d7cc5d47",
+      "userId": "usr_d0a8f8d4d76e26cc98",
+      "feature": "video-search",
+      "units": 1,
+      "unitType": "search",
+      "model": "text-embedding-3-small",
+      "estimatedCostUsd": 0.004,
+      "metadata": {},
+      "createdAt": "2026-02-13T05:46:46.378Z"
+    }
+  ],
+  "events": [
+    {
+      "id": "evt_cd43ef964d420e782d",
+      "name": "auth_signup_success",
+      "version": 1,
+      "userId": "usr_a28a3f73caaa41f2e4",
+      "workspaceId": "ws_e2c80a7b46e7d506c5",
+      "sessionId": "",
+      "source": "web",
+      "properties": {
+        "method": "guest"
+      },
+      "createdAt": "2026-02-13T04:40:24.080Z"
+    },
+    {
+      "id": "evt_62b6c30488cf720c7a",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_a28a3f73caaa41f2e4",
+      "workspaceId": "ws_e2c80a7b46e7d506c5",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "bible-study",
+        "model": "gpt-4.1-nano",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T04:40:56.705Z"
+    },
+    {
+      "id": "evt_cc71e77e12d19e97e1",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_a28a3f73caaa41f2e4",
+      "workspaceId": "ws_e2c80a7b46e7d506c5",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "sermon-preparation",
+        "model": "gpt-4.1-mini",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T04:41:14.938Z"
+    },
+    {
+      "id": "evt_89a2a5e1bc92b3b74b",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_a28a3f73caaa41f2e4",
+      "workspaceId": "ws_e2c80a7b46e7d506c5",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "teaching-tools",
+        "model": "gpt-4.1-nano",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T04:42:12.939Z"
+    },
+    {
+      "id": "evt_ab4baed73165cbe672",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_a28a3f73caaa41f2e4",
+      "workspaceId": "ws_e2c80a7b46e7d506c5",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "research-helper",
+        "model": "gpt-4.1-mini",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T04:42:26.610Z"
+    },
+    {
+      "id": "evt_48b6d650d30ed89e7c",
+      "name": "sermon_evaluation_result",
+      "version": 1,
+      "userId": "usr_a28a3f73caaa41f2e4",
+      "workspaceId": "ws_e2c80a7b46e7d506c5",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "averageScore": 6.67,
+        "manuscriptLength": 69,
+        "scoreLabels": [
+          "Theological Clarity",
+          "Structure and Flow",
+          "Communication Quality"
+        ],
+        "scoreValues": [
+          8,
+          6,
+          6
+        ]
+      },
+      "createdAt": "2026-02-13T04:42:26.611Z"
+    },
+    {
+      "id": "evt_2884eb5edae6cae13e",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_a28a3f73caaa41f2e4",
+      "workspaceId": "ws_e2c80a7b46e7d506c5",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "sermon-analyzer",
+        "model": "whisper-1",
+        "units": 2
+      },
+      "createdAt": "2026-02-13T04:42:40.436Z"
+    },
+    {
+      "id": "evt_bdd7852a9a1e5a2666",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_a28a3f73caaa41f2e4",
+      "workspaceId": "ws_e2c80a7b46e7d506c5",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "video-search",
+        "model": "text-embedding-3-small",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T04:42:45.906Z"
+    },
+    {
+      "id": "evt_c56b116edf768fdd6e",
+      "name": "auth_signup_success",
+      "version": 1,
+      "userId": "usr_67028ffd3f4bc62b58",
+      "workspaceId": "ws_c92b083edade4ed81c",
+      "sessionId": "",
+      "source": "web",
+      "properties": {
+        "method": "password"
+      },
+      "createdAt": "2026-02-13T04:43:36.403Z"
+    },
+    {
+      "id": "evt_ffb128f6e0d156a62c",
+      "name": "tool_start",
+      "version": 1,
+      "userId": "usr_67028ffd3f4bc62b58",
+      "workspaceId": "ws_c92b083edade4ed81c",
+      "sessionId": "11b0fd55c1dfe4b87fe82d919b6e452793bc772a97b40a4da78bdd15",
+      "source": "smoke",
+      "properties": {
+        "tool": "platform-smoke"
+      },
+      "createdAt": "2026-02-13T04:43:36.408Z"
+    },
+    {
+      "id": "evt_dbbd7c278349b89886",
+      "name": "subscription_paid",
+      "version": 1,
+      "userId": "usr_67028ffd3f4bc62b58",
+      "workspaceId": "ws_c92b083edade4ed81c",
+      "sessionId": "",
+      "source": "web",
+      "properties": {
+        "planId": "bundle-pro",
+        "seats": 3
+      },
+      "createdAt": "2026-02-13T04:43:36.412Z"
+    },
+    {
+      "id": "evt_25d1fb748ad9da936c",
+      "name": "auth_signup_success",
+      "version": 1,
+      "userId": "usr_5fc982b3871de0c14e",
+      "workspaceId": "ws_46cc2b9789a862c9ac",
+      "sessionId": "",
+      "source": "web",
+      "properties": {
+        "method": "guest"
+      },
+      "createdAt": "2026-02-13T04:46:24.966Z"
+    },
+    {
+      "id": "evt_27b1fe1357da5bf07b",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_5fc982b3871de0c14e",
+      "workspaceId": "ws_46cc2b9789a862c9ac",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "bible-study",
+        "model": "gpt-4.1-nano",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T04:46:54.499Z"
+    },
+    {
+      "id": "evt_9e1a64c1dc3ddd0478",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_5fc982b3871de0c14e",
+      "workspaceId": "ws_46cc2b9789a862c9ac",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "sermon-preparation",
+        "model": "gpt-4.1-mini",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T04:47:14.028Z"
+    },
+    {
+      "id": "evt_dd590619e807af7855",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_5fc982b3871de0c14e",
+      "workspaceId": "ws_46cc2b9789a862c9ac",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "teaching-tools",
+        "model": "gpt-4.1-nano",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T04:47:38.424Z"
+    },
+    {
+      "id": "evt_40e2f5b71a203939df",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_5fc982b3871de0c14e",
+      "workspaceId": "ws_46cc2b9789a862c9ac",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "research-helper",
+        "model": "gpt-4.1-mini",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T04:47:52.798Z"
+    },
+    {
+      "id": "evt_5b5390034592dd2fd9",
+      "name": "sermon_evaluation_result",
+      "version": 1,
+      "userId": "usr_5fc982b3871de0c14e",
+      "workspaceId": "ws_46cc2b9789a862c9ac",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "averageScore": 7.33,
+        "manuscriptLength": 69,
+        "scoreLabels": [
+          "Theological Clarity",
+          "Structure and Flow",
+          "Communication Quality"
+        ],
+        "scoreValues": [
+          9,
+          6,
+          7
+        ]
+      },
+      "createdAt": "2026-02-13T04:47:52.799Z"
+    },
+    {
+      "id": "evt_f73c4ad175777567d2",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_5fc982b3871de0c14e",
+      "workspaceId": "ws_46cc2b9789a862c9ac",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "sermon-analyzer",
+        "model": "whisper-1",
+        "units": 2
+      },
+      "createdAt": "2026-02-13T04:48:03.971Z"
+    },
+    {
+      "id": "evt_9ea3db2f80004c7798",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_5fc982b3871de0c14e",
+      "workspaceId": "ws_46cc2b9789a862c9ac",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "video-search",
+        "model": "text-embedding-3-small",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T04:48:07.711Z"
+    },
+    {
+      "id": "evt_8a39b3a39fb4a86762",
+      "name": "auth_signup_success",
+      "version": 1,
+      "userId": "usr_469b2efe1a74c84b77",
+      "workspaceId": "ws_d34c7f733c845a2f95",
+      "sessionId": "",
+      "source": "web",
+      "properties": {
+        "method": "guest"
+      },
+      "createdAt": "2026-02-13T04:49:23.976Z"
+    },
+    {
+      "id": "evt_c750977dc526ac1ea5",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_469b2efe1a74c84b77",
+      "workspaceId": "ws_d34c7f733c845a2f95",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "bible-study",
+        "model": "gpt-4.1-nano",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T04:49:50.023Z"
+    },
+    {
+      "id": "evt_1e991de1732ff9c3fc",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_469b2efe1a74c84b77",
+      "workspaceId": "ws_d34c7f733c845a2f95",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "sermon-preparation",
+        "model": "gpt-4.1-mini",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T04:50:10.393Z"
+    },
+    {
+      "id": "evt_00e7a01b8afddff513",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_469b2efe1a74c84b77",
+      "workspaceId": "ws_d34c7f733c845a2f95",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "teaching-tools",
+        "model": "gpt-4.1-nano",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T04:50:35.139Z"
+    },
+    {
+      "id": "evt_68a05ae1d18bc9a793",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_469b2efe1a74c84b77",
+      "workspaceId": "ws_d34c7f733c845a2f95",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "research-helper",
+        "model": "gpt-4.1-mini",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T04:50:45.722Z"
+    },
+    {
+      "id": "evt_a6e07f8667bdd4eb7e",
+      "name": "sermon_evaluation_result",
+      "version": 1,
+      "userId": "usr_469b2efe1a74c84b77",
+      "workspaceId": "ws_d34c7f733c845a2f95",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "averageScore": 6.67,
+        "manuscriptLength": 69,
+        "scoreLabels": [
+          "Theological Clarity",
+          "Structure and Organization",
+          "Communication Quality"
+        ],
+        "scoreValues": [
+          8,
+          6,
+          6
+        ]
+      },
+      "createdAt": "2026-02-13T04:50:45.723Z"
+    },
+    {
+      "id": "evt_5d70fbc2be1a51201c",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_469b2efe1a74c84b77",
+      "workspaceId": "ws_d34c7f733c845a2f95",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "sermon-analyzer",
+        "model": "whisper-1",
+        "units": 2
+      },
+      "createdAt": "2026-02-13T04:50:59.091Z"
+    },
+    {
+      "id": "evt_f2df27693ae3a53268",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_469b2efe1a74c84b77",
+      "workspaceId": "ws_d34c7f733c845a2f95",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "video-search",
+        "model": "text-embedding-3-small",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T04:51:03.611Z"
+    },
+    {
+      "id": "evt_ff9daeb6519945dc67",
+      "name": "auth_signup_success",
+      "version": 1,
+      "userId": "usr_512d512c779e539dab",
+      "workspaceId": "ws_2804b4237e8eb0314e",
+      "sessionId": "",
+      "source": "web",
+      "properties": {
+        "method": "guest"
+      },
+      "createdAt": "2026-02-13T04:53:05.915Z"
+    },
+    {
+      "id": "evt_a1551176554cf03f20",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_512d512c779e539dab",
+      "workspaceId": "ws_2804b4237e8eb0314e",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "bible-study",
+        "model": "gpt-4.1-nano",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T04:53:33.586Z"
+    },
+    {
+      "id": "evt_ec82e0ca0ae5deab01",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_512d512c779e539dab",
+      "workspaceId": "ws_2804b4237e8eb0314e",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "sermon-preparation",
+        "model": "gpt-4.1-mini",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T04:53:55.265Z"
+    },
+    {
+      "id": "evt_3751d8ab5b45a1afdb",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_512d512c779e539dab",
+      "workspaceId": "ws_2804b4237e8eb0314e",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "teaching-tools",
+        "model": "gpt-4.1-nano",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T04:54:16.862Z"
+    },
+    {
+      "id": "evt_1a9aea55a3998fc038",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_512d512c779e539dab",
+      "workspaceId": "ws_2804b4237e8eb0314e",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "research-helper",
+        "model": "gpt-4.1-mini",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T04:54:30.848Z"
+    },
+    {
+      "id": "evt_8d16abbb659e4d4fa6",
+      "name": "sermon_evaluation_result",
+      "version": 1,
+      "userId": "usr_512d512c779e539dab",
+      "workspaceId": "ws_2804b4237e8eb0314e",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "averageScore": 6.67,
+        "manuscriptLength": 69,
+        "scoreLabels": [
+          "Theological Clarity",
+          "Structure and Flow",
+          "Communication Quality"
+        ],
+        "scoreValues": [
+          8,
+          6,
+          6
+        ]
+      },
+      "createdAt": "2026-02-13T04:54:30.848Z"
+    },
+    {
+      "id": "evt_4da80efcdfb0053080",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_512d512c779e539dab",
+      "workspaceId": "ws_2804b4237e8eb0314e",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "sermon-analyzer",
+        "model": "whisper-1",
+        "units": 2
+      },
+      "createdAt": "2026-02-13T04:54:39.238Z"
+    },
+    {
+      "id": "evt_79c7fe4781253034a3",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_512d512c779e539dab",
+      "workspaceId": "ws_2804b4237e8eb0314e",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "video-search",
+        "model": "text-embedding-3-small",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T04:54:44.462Z"
+    },
+    {
+      "id": "evt_dad5c90ca5b099f3a2",
+      "name": "auth_signup_success",
+      "version": 1,
+      "userId": "usr_e1e55d6cc6a6be868e",
+      "workspaceId": "ws_eede9f669373c1ce05",
+      "sessionId": "",
+      "source": "web",
+      "properties": {
+        "method": "guest"
+      },
+      "createdAt": "2026-02-13T05:16:35.669Z"
+    },
+    {
+      "id": "evt_4bcdbacfb767831c70",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_e1e55d6cc6a6be868e",
+      "workspaceId": "ws_eede9f669373c1ce05",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "bible-study",
+        "model": "gpt-4.1-nano",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T05:17:04.147Z"
+    },
+    {
+      "id": "evt_b4d9a6044f7bae08f1",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_e1e55d6cc6a6be868e",
+      "workspaceId": "ws_eede9f669373c1ce05",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "sermon-preparation",
+        "model": "gpt-4.1-mini",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T05:17:23.296Z"
+    },
+    {
+      "id": "evt_2556c7d42130a5f595",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_e1e55d6cc6a6be868e",
+      "workspaceId": "ws_eede9f669373c1ce05",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "teaching-tools",
+        "model": "gpt-4.1-nano",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T05:17:46.740Z"
+    },
+    {
+      "id": "evt_dc4c64e302924e85ff",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_e1e55d6cc6a6be868e",
+      "workspaceId": "ws_eede9f669373c1ce05",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "research-helper",
+        "model": "gpt-4.1-mini",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T05:17:59.149Z"
+    },
+    {
+      "id": "evt_17768106950eaeb591",
+      "name": "sermon_evaluation_result",
+      "version": 1,
+      "userId": "usr_e1e55d6cc6a6be868e",
+      "workspaceId": "ws_eede9f669373c1ce05",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "averageScore": 6.67,
+        "manuscriptLength": 69,
+        "scoreLabels": [
+          "Theological Clarity",
+          "Structure and Flow",
+          "Communication Quality"
+        ],
+        "scoreValues": [
+          8,
+          6,
+          6
+        ]
+      },
+      "createdAt": "2026-02-13T05:17:59.150Z"
+    },
+    {
+      "id": "evt_c43b15d8f7ed18a972",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_e1e55d6cc6a6be868e",
+      "workspaceId": "ws_eede9f669373c1ce05",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "sermon-analyzer",
+        "model": "whisper-1",
+        "units": 2
+      },
+      "createdAt": "2026-02-13T05:18:10.809Z"
+    },
+    {
+      "id": "evt_d83f7a563cde10206a",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_e1e55d6cc6a6be868e",
+      "workspaceId": "ws_eede9f669373c1ce05",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "video-search",
+        "model": "text-embedding-3-small",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T05:18:14.922Z"
+    },
+    {
+      "id": "evt_8f66401f79d6a6b72d",
+      "name": "auth_signup_success",
+      "version": 1,
+      "userId": "usr_0dad420b845fc5e0ed",
+      "workspaceId": "ws_dd953b4cdfca8f349c",
+      "sessionId": "",
+      "source": "web",
+      "properties": {
+        "method": "guest"
+      },
+      "createdAt": "2026-02-13T05:19:14.045Z"
+    },
+    {
+      "id": "evt_9d898123a4ca3e20ae",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_0dad420b845fc5e0ed",
+      "workspaceId": "ws_dd953b4cdfca8f349c",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "bible-study",
+        "model": "gpt-4.1-nano",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T05:19:41.322Z"
+    },
+    {
+      "id": "evt_59451913cac24298b5",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_0dad420b845fc5e0ed",
+      "workspaceId": "ws_dd953b4cdfca8f349c",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "sermon-preparation",
+        "model": "gpt-4.1-mini",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T05:20:00.180Z"
+    },
+    {
+      "id": "evt_35ff32e91db333fd4c",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_0dad420b845fc5e0ed",
+      "workspaceId": "ws_dd953b4cdfca8f349c",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "teaching-tools",
+        "model": "gpt-4.1-nano",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T05:20:22.735Z"
+    },
+    {
+      "id": "evt_cbfbc07fd66044b987",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_0dad420b845fc5e0ed",
+      "workspaceId": "ws_dd953b4cdfca8f349c",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "research-helper",
+        "model": "gpt-4.1-mini",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T05:20:41.036Z"
+    },
+    {
+      "id": "evt_2aa58e93571128adb9",
+      "name": "sermon_evaluation_result",
+      "version": 1,
+      "userId": "usr_0dad420b845fc5e0ed",
+      "workspaceId": "ws_dd953b4cdfca8f349c",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "averageScore": 6.67,
+        "manuscriptLength": 69,
+        "scoreLabels": [
+          "Theological Clarity",
+          "Structure and Flow",
+          "Communication Quality"
+        ],
+        "scoreValues": [
+          8,
+          6,
+          6
+        ]
+      },
+      "createdAt": "2026-02-13T05:20:41.038Z"
+    },
+    {
+      "id": "evt_2763e94552d159d762",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_0dad420b845fc5e0ed",
+      "workspaceId": "ws_dd953b4cdfca8f349c",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "sermon-analyzer",
+        "model": "whisper-1",
+        "units": 2
+      },
+      "createdAt": "2026-02-13T05:20:51.072Z"
+    },
+    {
+      "id": "evt_c4b6bd946b243bbcfe",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_0dad420b845fc5e0ed",
+      "workspaceId": "ws_dd953b4cdfca8f349c",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "video-search",
+        "model": "text-embedding-3-small",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T05:20:55.168Z"
+    },
+    {
+      "id": "evt_b61a6f8a675a445ffd",
+      "name": "auth_signup_success",
+      "version": 1,
+      "userId": "usr_e77ab8a5eb3e670d57",
+      "workspaceId": "ws_83359ee77f068e8603",
+      "sessionId": "",
+      "source": "web",
+      "properties": {
+        "method": "guest"
+      },
+      "createdAt": "2026-02-13T05:29:25.669Z"
+    },
+    {
+      "id": "evt_f5cbf07299b7ec2ed0",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_e77ab8a5eb3e670d57",
+      "workspaceId": "ws_83359ee77f068e8603",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "bible-study",
+        "model": "gpt-4.1-nano",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T05:29:51.582Z"
+    },
+    {
+      "id": "evt_c6828389ecbcf53785",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_e77ab8a5eb3e670d57",
+      "workspaceId": "ws_83359ee77f068e8603",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "sermon-preparation",
+        "model": "gpt-4.1-mini",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T05:30:14.154Z"
+    },
+    {
+      "id": "evt_4bb9630e5e9324c31e",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_e77ab8a5eb3e670d57",
+      "workspaceId": "ws_83359ee77f068e8603",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "teaching-tools",
+        "model": "gpt-4.1-nano",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T05:30:35.554Z"
+    },
+    {
+      "id": "evt_1b13faa8768bebb7ca",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_e77ab8a5eb3e670d57",
+      "workspaceId": "ws_83359ee77f068e8603",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "research-helper",
+        "model": "gpt-4.1-mini",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T05:30:47.925Z"
+    },
+    {
+      "id": "evt_2d9d974e0d8b959770",
+      "name": "sermon_evaluation_result",
+      "version": 1,
+      "userId": "usr_e77ab8a5eb3e670d57",
+      "workspaceId": "ws_83359ee77f068e8603",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "averageScore": 6.67,
+        "manuscriptLength": 69,
+        "scoreLabels": [
+          "Theological Clarity",
+          "Structure and Flow",
+          "Communication Quality"
+        ],
+        "scoreValues": [
+          8,
+          6,
+          6
+        ]
+      },
+      "createdAt": "2026-02-13T05:30:47.926Z"
+    },
+    {
+      "id": "evt_30bd42ccce7e11e6a7",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_e77ab8a5eb3e670d57",
+      "workspaceId": "ws_83359ee77f068e8603",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "sermon-analyzer",
+        "model": "whisper-1",
+        "units": 2
+      },
+      "createdAt": "2026-02-13T05:30:58.830Z"
+    },
+    {
+      "id": "evt_96ee1d136380de36ee",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_e77ab8a5eb3e670d57",
+      "workspaceId": "ws_83359ee77f068e8603",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "video-search",
+        "model": "text-embedding-3-small",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T05:31:03.094Z"
+    },
+    {
+      "id": "evt_39386fc104ce132593",
+      "name": "auth_signup_success",
+      "version": 1,
+      "userId": "usr_3ab4724e388b4e4ce7",
+      "workspaceId": "ws_86d10e16a765c9fe5b",
+      "sessionId": "",
+      "source": "web",
+      "properties": {
+        "method": "guest"
+      },
+      "createdAt": "2026-02-13T05:32:35.077Z"
+    },
+    {
+      "id": "evt_3f9e114af06ad08f77",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_3ab4724e388b4e4ce7",
+      "workspaceId": "ws_86d10e16a765c9fe5b",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "bible-study",
+        "model": "gpt-4.1-nano",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T05:33:04.270Z"
+    },
+    {
+      "id": "evt_4329a1b009b256aaa2",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_3ab4724e388b4e4ce7",
+      "workspaceId": "ws_86d10e16a765c9fe5b",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "sermon-preparation",
+        "model": "gpt-4.1-mini",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T05:33:24.341Z"
+    },
+    {
+      "id": "evt_3de386c412b3aaf59f",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_3ab4724e388b4e4ce7",
+      "workspaceId": "ws_86d10e16a765c9fe5b",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "teaching-tools",
+        "model": "gpt-4.1-nano",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T05:33:52.128Z"
+    },
+    {
+      "id": "evt_28be95768e25a280cb",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_3ab4724e388b4e4ce7",
+      "workspaceId": "ws_86d10e16a765c9fe5b",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "research-helper",
+        "model": "gpt-4.1-mini",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T05:34:05.218Z"
+    },
+    {
+      "id": "evt_abab4c93e4ae6ca225",
+      "name": "sermon_evaluation_result",
+      "version": 1,
+      "userId": "usr_3ab4724e388b4e4ce7",
+      "workspaceId": "ws_86d10e16a765c9fe5b",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "averageScore": 6.67,
+        "manuscriptLength": 69,
+        "scoreLabels": [
+          "Theological Clarity",
+          "Structure and Flow",
+          "Communication Quality"
+        ],
+        "scoreValues": [
+          8,
+          6,
+          6
+        ]
+      },
+      "createdAt": "2026-02-13T05:34:05.219Z"
+    },
+    {
+      "id": "evt_c350326f7e11e784d1",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_3ab4724e388b4e4ce7",
+      "workspaceId": "ws_86d10e16a765c9fe5b",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "sermon-analyzer",
+        "model": "whisper-1",
+        "units": 2
+      },
+      "createdAt": "2026-02-13T05:34:16.157Z"
+    },
+    {
+      "id": "evt_703bc84cb941d624e7",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_3ab4724e388b4e4ce7",
+      "workspaceId": "ws_86d10e16a765c9fe5b",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "video-search",
+        "model": "text-embedding-3-small",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T05:34:19.226Z"
+    },
+    {
+      "id": "evt_5bfce15ba05fe385ca",
+      "name": "auth_signup_success",
+      "version": 1,
+      "userId": "usr_414501d702df628d08",
+      "workspaceId": "ws_7b6e057fb61116436c",
+      "sessionId": "",
+      "source": "web",
+      "properties": {
+        "method": "guest"
+      },
+      "createdAt": "2026-02-13T05:41:29.050Z"
+    },
+    {
+      "id": "evt_2398034e88ebc227fd",
+      "name": "auth_signup_success",
+      "version": 1,
+      "userId": "usr_021e85ab35d613649a",
+      "workspaceId": "ws_0f8dea9311b80651a0",
+      "sessionId": "",
+      "source": "web",
+      "properties": {
+        "method": "guest"
+      },
+      "createdAt": "2026-02-13T05:41:56.003Z"
+    },
+    {
+      "id": "evt_e6a500270ff997dde7",
+      "name": "auth_signup_success",
+      "version": 1,
+      "userId": "usr_15cc8854349331eaf9",
+      "workspaceId": "ws_c2c128ece6ce03a373",
+      "sessionId": "",
+      "source": "web",
+      "properties": {
+        "method": "guest"
+      },
+      "createdAt": "2026-02-13T05:42:10.513Z"
+    },
+    {
+      "id": "evt_8ce751a4f44617112e",
+      "name": "auth_signup_success",
+      "version": 1,
+      "userId": "usr_308fa7762510465c3a",
+      "workspaceId": "ws_5e0d0ca11221d96453",
+      "sessionId": "",
+      "source": "web",
+      "properties": {
+        "method": "guest"
+      },
+      "createdAt": "2026-02-13T05:42:25.511Z"
+    },
+    {
+      "id": "evt_cf51ced63186964dd4",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_308fa7762510465c3a",
+      "workspaceId": "ws_5e0d0ca11221d96453",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "bible-study",
+        "model": "gpt-4.1-nano",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T05:43:04.013Z"
+    },
+    {
+      "id": "evt_b451fc71579e83173e",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_308fa7762510465c3a",
+      "workspaceId": "ws_5e0d0ca11221d96453",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "sermon-preparation",
+        "model": "gpt-4.1-mini",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T05:43:23.495Z"
+    },
+    {
+      "id": "evt_c8f31918776f61dbb0",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_308fa7762510465c3a",
+      "workspaceId": "ws_5e0d0ca11221d96453",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "teaching-tools",
+        "model": "gpt-4.1-nano",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T05:43:56.471Z"
+    },
+    {
+      "id": "evt_d611f8da13fc41b06d",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_308fa7762510465c3a",
+      "workspaceId": "ws_5e0d0ca11221d96453",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "research-helper",
+        "model": "gpt-4.1-mini",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T05:44:11.128Z"
+    },
+    {
+      "id": "evt_cddf41ac807688a1dc",
+      "name": "sermon_evaluation_result",
+      "version": 1,
+      "userId": "usr_308fa7762510465c3a",
+      "workspaceId": "ws_5e0d0ca11221d96453",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "averageScore": 5,
+        "manuscriptLength": 107,
+        "scoreLabels": [
+          "Theological Clarity",
+          "Structure",
+          "Communication Quality"
+        ],
+        "scoreValues": [
+          7,
+          3,
+          5
+        ]
+      },
+      "createdAt": "2026-02-13T05:44:11.129Z"
+    },
+    {
+      "id": "evt_c519e79f25b283e899",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_308fa7762510465c3a",
+      "workspaceId": "ws_5e0d0ca11221d96453",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "video-search",
+        "model": "text-embedding-3-small",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T05:44:31.407Z"
+    },
+    {
+      "id": "evt_6dd5cfd4d0334b9961",
+      "name": "auth_signup_success",
+      "version": 1,
+      "userId": "usr_d0a8f8d4d76e26cc98",
+      "workspaceId": "ws_37c1878493d7cc5d47",
+      "sessionId": "",
+      "source": "web",
+      "properties": {
+        "method": "guest"
+      },
+      "createdAt": "2026-02-13T05:44:39.952Z"
+    },
+    {
+      "id": "evt_950337bab2a04fa995",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_d0a8f8d4d76e26cc98",
+      "workspaceId": "ws_37c1878493d7cc5d47",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "bible-study",
+        "model": "gpt-4.1-nano",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T05:45:21.978Z"
+    },
+    {
+      "id": "evt_0b459a9ba23ad92925",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_d0a8f8d4d76e26cc98",
+      "workspaceId": "ws_37c1878493d7cc5d47",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "sermon-preparation",
+        "model": "gpt-4.1-mini",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T05:45:51.045Z"
+    },
+    {
+      "id": "evt_c407c3af5d091634b7",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_d0a8f8d4d76e26cc98",
+      "workspaceId": "ws_37c1878493d7cc5d47",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "teaching-tools",
+        "model": "gpt-4.1-nano",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T05:46:19.678Z"
+    },
+    {
+      "id": "evt_2d27330ea82f81238e",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_d0a8f8d4d76e26cc98",
+      "workspaceId": "ws_37c1878493d7cc5d47",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "research-helper",
+        "model": "gpt-4.1-mini",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T05:46:32.163Z"
+    },
+    {
+      "id": "evt_eb93af48a1388b06e3",
+      "name": "sermon_evaluation_result",
+      "version": 1,
+      "userId": "usr_d0a8f8d4d76e26cc98",
+      "workspaceId": "ws_37c1878493d7cc5d47",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "averageScore": 6.67,
+        "manuscriptLength": 69,
+        "scoreLabels": [
+          "Theological Clarity",
+          "Structure and Flow",
+          "Communication Quality"
+        ],
+        "scoreValues": [
+          8,
+          6,
+          6
+        ]
+      },
+      "createdAt": "2026-02-13T05:46:32.165Z"
+    },
+    {
+      "id": "evt_2072bf58a46e832443",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_d0a8f8d4d76e26cc98",
+      "workspaceId": "ws_37c1878493d7cc5d47",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "sermon-analyzer",
+        "model": "whisper-1",
+        "units": 2
+      },
+      "createdAt": "2026-02-13T05:46:42.948Z"
+    },
+    {
+      "id": "evt_f1354e1e6f73a1696e",
+      "name": "generation_success",
+      "version": 1,
+      "userId": "usr_d0a8f8d4d76e26cc98",
+      "workspaceId": "ws_37c1878493d7cc5d47",
+      "sessionId": "",
+      "source": "api",
+      "properties": {
+        "feature": "video-search",
+        "model": "text-embedding-3-small",
+        "units": 1
+      },
+      "createdAt": "2026-02-13T05:46:46.381Z"
+    }
+  ],
+  "projects": [
+    {
+      "id": "prj_2cd382685dbad93a93",
+      "workspaceId": "ws_c92b083edade4ed81c",
+      "tool": "bible-study",
+      "title": "Smoke Project",
+      "sourceProjectId": "",
+      "createdBy": "usr_67028ffd3f4bc62b58",
+      "createdAt": "2026-02-13T04:43:36.418Z",
+      "updatedAt": "2026-02-13T04:43:36.422Z",
+      "payload": {
+        "summary": "smoke"
+      },
+      "versions": [
+        {
+          "id": "ver_5462a28a1e143583e0",
+          "createdAt": "2026-02-13T04:43:36.418Z",
+          "createdBy": "usr_67028ffd3f4bc62b58",
+          "payload": {
+            "summary": "smoke"
+          }
+        }
+      ],
+      "handoffs": [
+        {
+          "id": "hof_189c2c84b309a7e1c9",
+          "workspaceId": "ws_c92b083edade4ed81c",
+          "createdBy": "usr_67028ffd3f4bc62b58",
+          "fromTool": "bible-study",
+          "toTool": "sermon-preparation",
+          "sourceProjectId": "prj_2cd382685dbad93a93",
+          "payload": {
+            "summary": "handoff"
+          },
+          "createdAt": "2026-02-13T04:43:36.422Z"
+        }
+      ]
+    },
+    {
+      "id": "prj_d95d7801a1673c534c",
+      "workspaceId": "ws_7b6e057fb61116436c",
+      "tool": "bible-study",
+      "title": "Crossfunctional Project 1770961289058",
+      "sourceProjectId": "",
+      "createdBy": "usr_414501d702df628d08",
+      "createdAt": "2026-02-13T05:41:29.061Z",
+      "updatedAt": "2026-02-13T05:41:29.068Z",
+      "payload": {
+        "source": "crossfunctional-test"
+      },
+      "versions": [
+        {
+          "id": "ver_fa1f47286cc7684189",
+          "createdAt": "2026-02-13T05:41:29.061Z",
+          "createdBy": "usr_414501d702df628d08",
+          "payload": {
+            "source": "crossfunctional-test"
+          }
+        }
+      ],
+      "handoffs": [
+        {
+          "id": "hof_27824c71713bd8e70b",
+          "workspaceId": "ws_7b6e057fb61116436c",
+          "createdBy": "usr_414501d702df628d08",
+          "fromTool": "bible-study",
+          "toTool": "sermon-preparation",
+          "sourceProjectId": "prj_d95d7801a1673c534c",
+          "payload": {
+            "summary": "handoff from crossfunctional test"
+          },
+          "createdAt": "2026-02-13T05:41:29.068Z"
+        }
+      ]
+    },
+    {
+      "id": "prj_460197eb9ff0c5a66a",
+      "workspaceId": "ws_0f8dea9311b80651a0",
+      "tool": "bible-study",
+      "title": "Crossfunctional Project 1770961316010",
+      "sourceProjectId": "",
+      "createdBy": "usr_021e85ab35d613649a",
+      "createdAt": "2026-02-13T05:41:56.014Z",
+      "updatedAt": "2026-02-13T05:41:56.024Z",
+      "payload": {
+        "source": "crossfunctional-test"
+      },
+      "versions": [
+        {
+          "id": "ver_54e1fd31ee82823d64",
+          "createdAt": "2026-02-13T05:41:56.014Z",
+          "createdBy": "usr_021e85ab35d613649a",
+          "payload": {
+            "source": "crossfunctional-test"
+          }
+        }
+      ],
+      "handoffs": [
+        {
+          "id": "hof_199cbcec33fd39d932",
+          "workspaceId": "ws_0f8dea9311b80651a0",
+          "createdBy": "usr_021e85ab35d613649a",
+          "fromTool": "bible-study",
+          "toTool": "sermon-preparation",
+          "sourceProjectId": "prj_460197eb9ff0c5a66a",
+          "payload": {
+            "summary": "handoff from crossfunctional test"
+          },
+          "createdAt": "2026-02-13T05:41:56.024Z"
+        }
+      ]
+    },
+    {
+      "id": "prj_c18f5adf30fe16f2b5",
+      "workspaceId": "ws_5e0d0ca11221d96453",
+      "tool": "bible-study",
+      "title": "Crossfunctional Project 1770961345519",
+      "sourceProjectId": "",
+      "createdBy": "usr_308fa7762510465c3a",
+      "createdAt": "2026-02-13T05:42:25.522Z",
+      "updatedAt": "2026-02-13T05:42:25.533Z",
+      "payload": {
+        "source": "crossfunctional-test"
+      },
+      "versions": [
+        {
+          "id": "ver_04e485eeb5ce1b33c0",
+          "createdAt": "2026-02-13T05:42:25.522Z",
+          "createdBy": "usr_308fa7762510465c3a",
+          "payload": {
+            "source": "crossfunctional-test"
+          }
+        }
+      ],
+      "handoffs": [
+        {
+          "id": "hof_775f526855f6ff2389",
+          "workspaceId": "ws_5e0d0ca11221d96453",
+          "createdBy": "usr_308fa7762510465c3a",
+          "fromTool": "bible-study",
+          "toTool": "sermon-preparation",
+          "sourceProjectId": "prj_c18f5adf30fe16f2b5",
+          "payload": {
+            "summary": "handoff from crossfunctional test"
+          },
+          "createdAt": "2026-02-13T05:42:25.533Z"
+        }
+      ]
+    }
+  ],
+  "handoffs": [
+    {
+      "id": "hof_189c2c84b309a7e1c9",
+      "workspaceId": "ws_c92b083edade4ed81c",
+      "createdBy": "usr_67028ffd3f4bc62b58",
+      "fromTool": "bible-study",
+      "toTool": "sermon-preparation",
+      "sourceProjectId": "prj_2cd382685dbad93a93",
+      "payload": {
+        "summary": "handoff"
+      },
+      "createdAt": "2026-02-13T04:43:36.422Z"
+    },
+    {
+      "id": "hof_27824c71713bd8e70b",
+      "workspaceId": "ws_7b6e057fb61116436c",
+      "createdBy": "usr_414501d702df628d08",
+      "fromTool": "bible-study",
+      "toTool": "sermon-preparation",
+      "sourceProjectId": "prj_d95d7801a1673c534c",
+      "payload": {
+        "summary": "handoff from crossfunctional test"
+      },
+      "createdAt": "2026-02-13T05:41:29.068Z"
+    },
+    {
+      "id": "hof_199cbcec33fd39d932",
+      "workspaceId": "ws_0f8dea9311b80651a0",
+      "createdBy": "usr_021e85ab35d613649a",
+      "fromTool": "bible-study",
+      "toTool": "sermon-preparation",
+      "sourceProjectId": "prj_460197eb9ff0c5a66a",
+      "payload": {
+        "summary": "handoff from crossfunctional test"
+      },
+      "createdAt": "2026-02-13T05:41:56.024Z"
+    },
+    {
+      "id": "hof_775f526855f6ff2389",
+      "workspaceId": "ws_5e0d0ca11221d96453",
+      "createdBy": "usr_308fa7762510465c3a",
+      "fromTool": "bible-study",
+      "toTool": "sermon-preparation",
+      "sourceProjectId": "prj_c18f5adf30fe16f2b5",
+      "payload": {
+        "summary": "handoff from crossfunctional test"
+      },
+      "createdAt": "2026-02-13T05:42:25.533Z"
+    }
+  ],
+  "analyzerJobs": [
+    {
+      "id": "job_f8dd63eda5bc2aa83c",
+      "workspaceId": "ws_5e0d0ca11221d96453",
+      "userId": "usr_308fa7762510465c3a",
+      "status": "completed",
+      "retries": 0,
+      "failureReason": "",
+      "payload": {
+        "context": "Sunday morning message",
+        "goal": "Improve pacing and clarity",
+        "notes": "Focus on transitions",
+        "transcriptOverride": "Church family, today we open Philippians chapter two and see the humility of Christ, then we respond with joyful obedience.",
+        "localAnalysis": {},
+        "file": null
+      },
+      "result": {
+        "meta": {
+          "fileName": "manual-transcript",
+          "durationSeconds": 8,
+          "transcriptionModel": "whisper-1",
+          "generatedAt": "2026-02-13T05:44:25.850Z",
+          "totalPipelineMs": 14710
+        },
+        "orchestration": [
+          {
+            "agent": "transcription_agent",
+            "status": "completed",
+            "durationMs": 0,
+            "note": "Used manual transcript override"
+          },
+          {
+            "agent": "insights_agent",
+            "status": "completed",
+            "durationMs": 14709,
+            "note": "Generated emotional arc, content analysis, and coaching feedback"
+          }
+        ],
+        "transcript": {
+          "text": "Church family, today we open Philippians chapter two and see the humility of Christ, then we respond with joyful obedience.",
+          "language": "manual",
+          "wordCount": 20,
+          "segments": [
+            {
+              "start": 0,
+              "end": 8,
+              "text": "Church family, today we open Philippians chapter two and see the humility of Christ, then we respond with joyful obedience."
+            }
+          ]
+        },
+        "emotionalArc": {
+          "points": [
+            {
+              "bucketId": 1,
+              "start": 0,
+              "end": 8,
+              "timeSec": 4,
+              "label": "Introduction and Theme Setting",
+              "intensity": 30,
+              "valence": 20,
+              "note": "Warm and inviting tone, establishing a hopeful atmosphere."
+            }
+          ],
+          "summary": "The emotional tone of the sermon begins with a warm, inviting introduction, emphasizing humility and joyful obedience, and maintains a positive, hopeful valence throughout. The overall intensity is moderate, fostering engagement without overwhelming the congregation."
+        },
+        "pacingAnalysis": {
+          "avgWpm": 150,
+          "targetBandWpm": "120-150",
+          "sectionWpm": [
+            {
+              "start": 0,
+              "end": 8,
+              "wpm": 150,
+              "textSample": "Church family, today we open Philippians chapter two and see the humility of Christ, then we respond with joyful obedien"
+            }
+          ],
+          "fastSections": [],
+          "slowSections": [],
+          "pauseCount": 0,
+          "pauseTimeSec": 0,
+          "rhythmScore": 58
+        },
+        "vocalDynamics": {
+          "avgDb": 0,
+          "peakDb": 0,
+          "silenceRatio": 0,
+          "dynamicRangeDb": 0,
+          "volumeStdDb": 0,
+          "pitchMeanHz": 0,
+          "pitchStdHz": 0,
+          "pitchRangeHz": 0,
+          "varietyScore": 0,
+          "volumeRangeScore": 0,
+          "pitchVariationScore": 0,
+          "monotoneRiskScore": 0,
+          "monotoneSections": []
+        },
+        "contentAnalysis": {
+          "summary": "The sermon effectively introduces Philippians 2, highlighting Christ's humility and our response of joyful obedience. It references key scripture, emphasizing themes of humility, obedience, and joy, with a clear structure that moves from biblical exposition to practical application. Calls to action are present but could benefit from clearer transitions.",
+          "scriptureReferences": [
+            "Philippians 2"
+          ],
+          "keyThemes": [
+            "Humility of Christ",
+            "Joyful obedience",
+            "Christian humility",
+            "Response to Christ"
+          ],
+          "structureMovements": [
+            "Introduction and Scripture opening",
+            "Exposition of Christ's humility",
+            "Application and response"
+          ],
+          "illustrationTracking": [
+            "Christ's humility as a model",
+            "Joyful obedience as a response"
+          ],
+          "callsToAction": [
+            "Respond with joyful obedience",
+            "Reflect on Christ's humility"
+          ],
+          "gospelClarityScore": 7
+        },
+        "coachingFeedback": {
+          "executiveSummary": "The sermon effectively engages with scripture and maintains a warm tone, but pacing slightly exceeds optimal range and transitions lack clarity. Implementing specific, timed practice routines and clear verbal cues will significantly improve delivery clarity and emotional flow within one week.",
+          "strengths": [
+            "Effective use of scripture references",
+            "Warm, engaging tone",
+            "Clear key themes that resonate",
+            "Good biblical exposition"
+          ],
+          "risks": [
+            "Pacing slightly above optimal range, which may hinder clarity",
+            "Transitions between sections could be more explicit",
+            "Limited vocal dynamics may reduce emotional engagement",
+            "Lack of varied pitch and volume could lead to monotony"
+          ],
+          "priorityActions": [
+            "Reduce speaking pace to 120 WPM during transitions by consciously slowing down for 10 seconds before and after each transition phrase (e.g., 'Now, let's consider...')",
+            "Create and rehearse at least three specific transition phrases (e.g., 'Moving to our next point,' 'Now, let's shift focus,' 'This leads us to...') and deliver them with deliberate pauses of 2 seconds",
+            "Practice vocal variety by selecting three key phrases and varying pitch and volume—record and review to ensure each variation is distinct and intentional",
+            "Incorporate a 2-second pause after each major point or scripture reference to allow reflection and reinforce clarity"
+          ],
+          "practiceDrills": [
+            "Record a 5-minute sermon segment, focusing on maintaining 120-150 WPM, especially during transitions; listen and adjust pacing accordingly (repeat 3 times within the week)",
+            "Rehearse the identified transition phrases aloud, timing each to include a 2-second pause; perform at least 3 repetitions daily",
+            "Select three key points and practice varying pitch and volume on each, recording and reviewing to ensure clarity and emotional impact (perform 4 times this week)",
+            "Deliver the sermon segment with intentional pauses after each major section, recording to confirm timing and reflection quality (practice 3 times)"
+          ],
+          "nextWeekPlan": [
+            "Prioritize practicing explicit transition cues with timing and clarity, dedicating 15 minutes daily",
+            "Implement vocal variety exercises, focusing on pitch and volume changes during key phrases, with daily recordings for self-review",
+            "Seek feedback from a peer or coach on pacing and transition clarity after each practice session",
+            "Prepare and rehearse a set of 3-4 deliberate pauses after major points, ensuring they are natural and reinforce understanding"
+          ]
+        },
+        "coachMode": {
+          "planDays": 7,
+          "drills": [
+            {
+              "day": 1,
+              "focus": "Pacing discipline",
+              "target": "Run a 5-minute segment at target tempo with intentional pauses.",
+              "metric": "Target WPM band around 112-128"
+            },
+            {
+              "day": 2,
+              "focus": "Vocal dynamics",
+              "target": "Practice a paragraph with deliberate contrast in volume and pitch.",
+              "metric": "Increase variety score beyond 6.5"
+            },
+            {
+              "day": 3,
+              "focus": "Illustration clarity",
+              "target": "Rehearse transitions into and out of one illustration.",
+              "metric": "Record and verify no abrupt transitions."
+            },
+            {
+              "day": 4,
+              "focus": "Scripture emphasis",
+              "target": "Read key verses with slower cadence and emphasis markers.",
+              "metric": "At least 3 explicit emphasis moments."
+            },
+            {
+              "day": 5,
+              "focus": "Application urgency",
+              "target": "Deliver call-to-response section in under 3 minutes.",
+              "metric": "One specific action call for listeners."
+            },
+            {
+              "day": 6,
+              "focus": "Full run-through",
+              "target": "Run a 12-minute rehearsal with no notes.",
+              "metric": "Sustain pacing and vocal variety without drop-off."
+            },
+            {
+              "day": 7,
+              "focus": "Review and compare",
+              "target": "Record final drill and compare with Day 1 baseline.",
+              "metric": "Visible improvement in pacing and dynamics."
+            }
+          ]
+        },
+        "comparativeAnalytics": {
+          "pacingDeltaWpm": 0,
+          "vocalVarietyDelta": 0,
+          "clarityDelta": 0
+        }
+      },
+      "createdAt": "2026-02-13T05:44:11.136Z",
+      "startedAt": "2026-02-13T05:44:11.138Z",
+      "completedAt": "2026-02-13T05:44:25.854Z",
+      "updatedAt": "2026-02-13T05:44:25.855Z"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "note_0230bd60a6a229d864",
+      "userId": "usr_67028ffd3f4bc62b58",
+      "type": "weekly-prep-reminder",
+      "title": "Weekly prep reminder",
+      "body": "Plan this week’s sermon or lesson with Bible AI Hub.",
+      "cta": "/",
+      "createdAt": "2026-02-13T04:43:36.428Z",
+      "readAt": null,
+      "payload": {}
+    }
+  ],
+  "learningPaths": [
+    {
+      "id": "path_bce89f62bc670ab74d",
+      "workspaceId": "ws_c92b083edade4ed81c",
+      "title": "Smoke Path",
+      "createdBy": "usr_67028ffd3f4bc62b58",
+      "items": [
+        {
+          "id": "step_6a1adcd70a11782db4",
+          "order": 1,
+          "title": "Step 1",
+          "videoId": "video-1",
+          "timestampSeconds": 15,
+          "url": "https://example.com#t=15",
+          "goal": "",
+          "notes": ""
+        }
+      ],
+      "createdAt": "2026-02-13T04:43:36.425Z",
+      "updatedAt": "2026-02-13T04:43:36.425Z"
+    },
+    {
+      "id": "path_d4f80045518dcc2557",
+      "workspaceId": "ws_7b6e057fb61116436c",
+      "title": "Crossfunctional Path 1770961289070",
+      "createdBy": "usr_414501d702df628d08",
+      "items": [
+        {
+          "id": "step_c0f5606ff8b81a6502",
+          "order": 1,
+          "title": "Foundational Step",
+          "videoId": "video-1",
+          "timestampSeconds": 12,
+          "url": "https://example.com/watch?v=video-1#t=12",
+          "goal": "",
+          "notes": ""
+        }
+      ],
+      "visibility": "workspace",
+      "shareId": "share_c93076851e16ecbb2c",
+      "createdAt": "2026-02-13T05:41:29.073Z",
+      "updatedAt": "2026-02-13T05:41:29.078Z"
+    },
+    {
+      "id": "path_b251a8ec726bf27ef9",
+      "workspaceId": "ws_0f8dea9311b80651a0",
+      "title": "Crossfunctional Path 1770961316025",
+      "createdBy": "usr_021e85ab35d613649a",
+      "items": [
+        {
+          "id": "step_f5be80721283d81f10",
+          "order": 1,
+          "title": "Foundational Step",
+          "videoId": "video-1",
+          "timestampSeconds": 12,
+          "url": "https://example.com/watch?v=video-1#t=12",
+          "goal": "",
+          "notes": ""
+        }
+      ],
+      "visibility": "workspace",
+      "shareId": "share_ba72b2bef55cc9982e",
+      "createdAt": "2026-02-13T05:41:56.028Z",
+      "updatedAt": "2026-02-13T05:41:56.032Z"
+    },
+    {
+      "id": "path_0cf5deb4932ad5b0db",
+      "workspaceId": "ws_c2c128ece6ce03a373",
+      "title": "x",
+      "createdBy": "usr_15cc8854349331eaf9",
+      "items": [
+        {
+          "id": "step_91dde2608609a4a37a",
+          "order": 1,
+          "title": "a",
+          "videoId": "v",
+          "timestampSeconds": 0,
+          "url": "https://x",
+          "goal": "",
+          "notes": ""
+        }
+      ],
+      "visibility": "workspace",
+      "shareId": "share_8d99081f21e34a1f81",
+      "createdAt": "2026-02-13T05:42:10.529Z",
+      "updatedAt": "2026-02-13T05:42:10.538Z"
+    },
+    {
+      "id": "path_156d0cea1e8e7af62a",
+      "workspaceId": "ws_5e0d0ca11221d96453",
+      "title": "Crossfunctional Path 1770961345535",
+      "createdBy": "usr_308fa7762510465c3a",
+      "items": [
+        {
+          "id": "step_90463aca6a765e10f1",
+          "order": 1,
+          "title": "Foundational Step",
+          "videoId": "video-1",
+          "timestampSeconds": 12,
+          "url": "https://example.com/watch?v=video-1#t=12",
+          "goal": "",
+          "notes": ""
+        }
+      ],
+      "visibility": "workspace",
+      "shareId": "share_1a436982aa56b23103",
+      "createdAt": "2026-02-13T05:42:25.539Z",
+      "updatedAt": "2026-02-13T05:42:25.544Z"
+    }
+  ],
+  "series": [],
+  "teamInvites": [],
+  "videoGovernance": []
+}

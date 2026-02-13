@@ -1,9 +1,110 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Search Training Videos | Bible AI Hub</title>
+  <title>AI Video Search for Bible Training Content | Bible AI Hub</title>
+  <meta name="description" content="Search Bible and Logos training videos with AI. Get timestamped matches, semantic relevance, guided follow-up queries, and related content suggestions." />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <meta name="author" content="Bible AI Hub" />
+  <meta name="theme-color" content="#0f5f9b" />
+  <link rel="canonical" href="https://bible.hiredalmo.com/ai/apps/video-search/" />
+  <link rel="alternate" hreflang="en" href="https://bible.hiredalmo.com/ai/apps/video-search/" />
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/assets/social-share.png" />
+
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Bible AI Hub" />
+  <meta property="og:title" content="AI Video Search for Bible Training Content | Bible AI Hub" />
+  <meta property="og:description" content="Find exact training moments with timestamped AI video search, semantic ranking, and smart follow-up query guidance." />
+  <meta property="og:url" content="https://bible.hiredalmo.com/ai/apps/video-search/" />
+  <meta property="og:image" content="https://bible.hiredalmo.com/assets/social-share.png" />
+  <meta property="og:image:secure_url" content="https://bible.hiredalmo.com/assets/social-share.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Bible AI Hub AI Video Search app" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="AI Video Search for Bible Training Content | Bible AI Hub" />
+  <meta name="twitter:description" content="Search transcripts and metadata to jump to exact timestamps in Bible training videos." />
+  <meta name="twitter:image" content="https://bible.hiredalmo.com/assets/social-share.png" />
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          "name": "Search Training Videos",
+          "url": "https://bible.hiredalmo.com/ai/apps/video-search/",
+          "applicationCategory": "EducationalApplication",
+          "operatingSystem": "Web",
+          "description": "An AI semantic video search app for Bible and Logos training libraries with timestamped results.",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          },
+          "publisher": {
+            "@type": "Organization",
+            "name": "Bible AI Hub",
+            "url": "https://bible.hiredalmo.com/"
+          }
+        },
+        {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Bible AI Hub",
+              "item": "https://bible.hiredalmo.com/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Search Training Videos",
+              "item": "https://bible.hiredalmo.com/ai/apps/video-search/"
+            }
+          ]
+        }
+      ]
+    }
+  </script>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How does AI video search find timestamps?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The system combines transcript search, metadata matching, and semantic ranking to return timestamped clips that best match your question."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I search natural language questions?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. You can ask plain English questions and the tool returns relevant videos and moments where the topic is discussed."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What if my query returns weak matches?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The app suggests alternate follow-up queries and related content to help you broaden or refine your search path."
+          }
+        }
+      ]
+    }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
@@ -14,7 +115,7 @@
   <div class="site-wrap">
     <header class="site-header">
       <div class="header-inner">
-        <a class="brand" href="../../">Bible AI Hub</a>
+        <a class="brand" href="/">Bible AI Hub</a>
       </div>
     </header>
 
@@ -103,6 +204,31 @@
             </div>
 
             <div id="libraryStats" class="video-library-stats"></div>
+            <div id="videoPathLibrary" class="card"></div>
+
+            <div class="card" id="videoGovernanceCard">
+              <h3 class="section-title">Video Access Governance (Admin)</h3>
+              <div class="form-grid">
+                <div class="field">
+                  <label for="govVideoId">Video ID</label>
+                  <input id="govVideoId" class="input" placeholder="video id from library status" />
+                </div>
+                <div class="field">
+                  <label for="govTier">Tier</label>
+                  <select id="govTier" class="select">
+                    <option value="free">Free</option>
+                    <option value="premium">Premium</option>
+                  </select>
+                </div>
+                <div class="field span-2">
+                  <label for="govPlans">Required Plans (comma separated)</label>
+                  <input id="govPlans" class="input" placeholder="bundle-pro,team-growth" />
+                </div>
+                <div class="field span-2">
+                  <button id="govSave" type="button" class="btn secondary">Save Access Rule</button>
+                </div>
+              </div>
+            </div>
 
             <div class="card">
               <form id="videoForm" class="form-grid">
@@ -156,6 +282,10 @@
                   <label>&nbsp;</label>
                   <label class="check-row"><input id="videoAutoTranscribe" type="checkbox" checked /> Auto-transcribe missing videos</label>
                 </div>
+                <div class="field">
+                  <label>&nbsp;</label>
+                  <label class="check-row"><input id="videoDisablePersonalization" type="checkbox" /> Disable personalization</label>
+                </div>
                 <div class="field span-2">
                   <div class="btn-row">
                     <button id="videoButton" type="submit" class="btn primary">Search with AI</button>
@@ -164,6 +294,32 @@
                   </div>
                 </div>
               </form>
+            </div>
+
+            <div class="card seo-copy">
+              <h3 class="section-title">AI Video Search for Ministry Training</h3>
+              <ul class="list seo-link-list">
+                <li>Find exact moments in your training library with timestamped AI matches.</li>
+                <li>Search by natural language question, then jump straight to relevant clips.</li>
+                <li>Use this alongside <a href="/ai/apps/teaching-tools/">AI Teaching Tools</a> to turn findings into lesson plans.</li>
+                <li>Use <a href="/ai/apps/sermon-preparation/">AI Sermon Preparation</a> when your search leads to message development.</li>
+              </ul>
+            </div>
+
+            <div class="card seo-faq">
+              <h3 class="section-title">FAQ: AI Video Search</h3>
+              <details>
+                <summary>How are timestamps selected?</summary>
+                <p>The system ranks matches using transcript evidence and semantic relevance, then returns the most useful starting timestamps.</p>
+              </details>
+              <details>
+                <summary>Can I search in plain English?</summary>
+                <p>Yes. Natural language questions are supported, including workflow and feature questions.</p>
+              </details>
+              <details>
+                <summary>What if I get weak results?</summary>
+                <p>The app offers follow-up query suggestions and related content so you can recover and expand your search path quickly.</p>
+              </details>
             </div>
 
             <div id="videoNotice" class="notice">Ask a question, run search, and jump into timestamped clips instantly.</div>
@@ -175,7 +331,7 @@
     </main>
 
     <footer class="micro-footer">
-      <p>Made with ❤️ | <a href="https://hiredalmo.com" target="_blank" rel="noopener noreferrer">hiredalmo.com</a></p>
+      <p>Made with &#10084;&#65039; | <a href="https://hiredalmo.com" target="_blank" rel="noopener noreferrer">hiredalmo.com</a></p>
     </footer>
   </div>
 
@@ -183,3 +339,5 @@
   <script src="../../../assets/apps/video-search.js"></script>
 </body>
 </html>
+
+

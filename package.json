@@ -8,6 +8,7 @@
     "start": "node server.js",
     "dev": "node server.js",
     "smoke": "node scripts/smoke-test.js",
+    "smoke:platform": "node scripts/platform-smoke.js",
     "sermon:test-file": "node scripts/test-sermon-analyzer-file.js",
     "videos:ingest": "node scripts/ingest-video-library.js",
     "videos:hosted-urls": "node scripts/set-video-hosted-urls.js",
