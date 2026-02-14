@@ -11,6 +11,7 @@
     setBusy,
     saveProject,
     updateProject,
+    saveProjectAndOpen,
     appendProjectExport,
     hydrateProjectFromQuery,
     trackEvent,
@@ -38,6 +39,7 @@
 
   let lastReportText = "";
   let lastPayload = null;
+  let lastProjectPayload = null;
   let activeProjectId = "";
   const MAX_SAFE_UPLOAD_BYTES = 5.5 * 1024 * 1024;
   const OPTIMIZED_SAMPLE_RATE = 8000;
@@ -640,7 +642,7 @@
     return lines.join("\n");
   }
 
-  function renderReport(payload) {
+  function renderReport(payload, projectInput) {
     const meta = payload.meta || {};
     const transcript = payload.transcript || {};
     const emotionalArc = payload.emotionalArc || {};
@@ -661,8 +663,18 @@
       : {};
     const hasVocalSignal = [vocal.varietyScore, vocal.dynamicRangeDb, vocal.pitchStdHz]
       .some((value) => value !== null && value !== undefined && Number.isFinite(Number(value)));
+    const input = projectInput && typeof projectInput === "object" ? projectInput : {};
 
     return `
+      <div class="card">
+        <span class="kicker">Project Inputs</span>
+        <p><strong>Context:</strong> ${escapeHtml(cleanString(input.context, "General sermon context"))}</p>
+        <p><strong>Coaching goal:</strong> ${escapeHtml(cleanString(input.goal, "Not specified"))}</p>
+        <p><strong>Notes:</strong> ${escapeHtml(cleanString(input.notes, "Not specified"))}</p>
+        <p><strong>Transcript override:</strong> ${cleanString(input.transcriptOverride) ? "Provided" : "Not provided"}</p>
+        <p><strong>Source file:</strong> ${escapeHtml(cleanString(input.fileName, cleanString(meta.fileName, "n/a")))}${Number(input.fileSizeBytes || 0) > 0 ? ` (${formatBytes(input.fileSizeBytes)})` : ""}</p>
+      </div>
+
       <div class="card">
         <span class="kicker">Report Overview</span>
         <div class="metric-grid">
@@ -989,12 +1001,38 @@
         payload = await pollAnalyzerJob(kickoff.jobId);
       }
 
+      const generatedProjectPayload = {
+        input: {
+          context: cleanString(contextInput.value),
+          goal: cleanString(goalInput.value),
+          notes: cleanString(notesInput.value),
+          transcriptOverride: cleanString(transcriptInput.value),
+          fileName: cleanString(file && file.name),
+          fileSizeBytes: Number(file && file.size || 0),
+          fileType: cleanString(file && file.type),
+          uploadOptimized: cleanString(uploadFile && uploadFile.name) !== cleanString(file && file.name),
+          localAnalysis: localAnalysis && localAnalysis.payload ? localAnalysis.payload : {}
+        },
+        output: payload
+      };
+      const persisted = await saveProjectAndOpen(
+        "sermon-analyzer",
+        `Analyzer Report - ${cleanString(payload && payload.meta && payload.meta.fileName, cleanString(file && file.name, "audio"))}`,
+        generatedProjectPayload,
+        activeProjectId
+      );
+      activeProjectId = cleanString(persisted && persisted.projectId);
+      if (persisted && persisted.navigated) {
+        return;
+      }
+
       renderPipeline(payload.orchestration);
       renderCharts(payload, localAnalysis);
-      result.innerHTML = renderReport(payload);
+      result.innerHTML = renderReport(payload, generatedProjectPayload.input);
       wireCoachDrillButtons();
       lastReportText = buildReportText(payload);
       lastPayload = payload;
+      lastProjectPayload = generatedProjectPayload;
       setReportActionsVisible(true);
 
       showNotice(`Full sermon analyzer report generated.${escapeHtml(optimizationNote)}`, "ok");
@@ -1039,15 +1077,16 @@
   saveBtn.className = "btn secondary hidden";
   saveBtn.textContent = "Save Report";
   saveBtn.addEventListener("click", async () => {
-    if (!lastPayload) {
+    if (!lastProjectPayload) {
       showNotice("Generate an analyzer report before saving.", "error");
       return;
     }
     try {
       if (activeProjectId) {
-        await updateProject(activeProjectId, lastPayload);
+        await updateProject(activeProjectId, lastProjectPayload);
       } else {
-        const saved = await saveProject("sermon-analyzer", `Analyzer Report - ${cleanString(lastPayload.meta && lastPayload.meta.fileName)}`, lastPayload);
+        const report = lastProjectPayload && lastProjectPayload.output ? lastProjectPayload.output : {};
+        const saved = await saveProject("sermon-analyzer", `Analyzer Report - ${cleanString(report && report.meta && report.meta.fileName)}`, lastProjectPayload);
         activeProjectId = cleanString(saved && saved.project && saved.project.id);
       }
       await trackEvent("project_saved", { tool: "sermon-analyzer" });
@@ -1069,7 +1108,12 @@
       if (!project || !project.payload || typeof project.payload !== "object") {
         return;
       }
-      const payload = project.payload;
+      const payload = project.payload.output && typeof project.payload.output === "object"
+        ? project.payload.output
+        : project.payload;
+      const projectPayload = project.payload.output && typeof project.payload.output === "object"
+        ? project.payload
+        : { input: {}, output: payload };
       activeProjectId = cleanString(project.id);
       if (payload.meta && payload.meta.fileName) {
         showNotice(`Loaded saved analyzer report (${escapeHtml(cleanString(payload.meta.fileName))}).`, "ok");
@@ -1077,8 +1121,9 @@
         showNotice("Loaded saved analyzer report.", "ok");
       }
       lastPayload = payload;
+      lastProjectPayload = projectPayload;
       lastReportText = buildReportText(payload);
-      result.innerHTML = renderReport(payload);
+      result.innerHTML = renderReport(payload, projectPayload.input);
       wireCoachDrillButtons();
       chartsWrap.classList.add("hidden");
       pipelineStatus.classList.add("hidden");

@@ -88,6 +88,9 @@ const PROMPT_EDITOR_EMAIL = "dalmomendonca@gmail.com";
 const RESEND_API_KEY = cleanString(process.env.RESEND_API_KEY);
 const MAGIC_LINK_FROM_EMAIL = cleanString(process.env.MAGIC_LINK_FROM_EMAIL);
 const PUBLIC_BASE_URL = cleanString(process.env.PUBLIC_BASE_URL, "https://bible.hiredalmo.com");
+const AUTH_TOKEN_COOKIE = "bah_session_token";
+const AUTH_WORKSPACE_COOKIE = "bah_workspace_id";
+const AUTH_COOKIE_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 const platform = createPlatformStore({
   rootDir: ROOT_DIR,
   trialDays: Number.isFinite(PLATFORM_TRIAL_DAYS) ? PLATFORM_TRIAL_DAYS : 14
@@ -221,6 +224,7 @@ app.post("/api/auth/signup", asyncHandler(async (req, res) => {
     workspaceId: result.workspaceId,
     properties: { method: "password" }
   });
+  setAuthCookies(req, res, result);
   res.status(201).json(result);
 }));
 
@@ -236,6 +240,7 @@ app.post("/api/auth/login", asyncHandler(async (req, res) => {
     workspaceId: result.workspaceId,
     properties: { method: "password" }
   });
+  setAuthCookies(req, res, result);
   res.json(result);
 }));
 
@@ -252,6 +257,7 @@ app.post("/api/auth/google", asyncHandler(async (req, res) => {
     workspaceId: result.workspaceId,
     properties: { method: "google" }
   });
+  setAuthCookies(req, res, result);
   res.json(result);
 }));
 
@@ -266,6 +272,37 @@ app.get("/api/public-config", (_req, res) => {
   res.json({
     gaMeasurementId: GA_MEASUREMENT_ID || "",
     googleSignInEnabled: Boolean(GOOGLE_CLIENT_ID)
+  });
+});
+
+app.get("/api/auth/diagnostics", (req, res) => {
+  const actor = req.auth && req.auth.user
+    ? (platform.getUserById(req.auth.user.id) || req.auth.user)
+    : null;
+  const email = cleanString(actor && actor.email).toLowerCase();
+  const isAdmin = cleanString(actor && actor.role).toLowerCase() === "admin";
+  res.json({
+    google: {
+      configured: Boolean(GOOGLE_CLIENT_ID),
+      clientIdSuffix: GOOGLE_CLIENT_ID ? GOOGLE_CLIENT_ID.slice(-12) : ""
+    },
+    magicLink: {
+      resendConfigured: Boolean(RESEND_API_KEY),
+      fromEmailConfigured: Boolean(MAGIC_LINK_FROM_EMAIL),
+      fromEmailHint: MAGIC_LINK_FROM_EMAIL ? cleanString(MAGIC_LINK_FROM_EMAIL).replace(/^[^@]*/, "***") : "",
+      publicBaseUrl: cleanString(PUBLIC_BASE_URL),
+      derivedOrigin: deriveRequestOrigin(req)
+    },
+    session: {
+      cookieTokenPresent: Boolean(readRequestCookie(req, AUTH_TOKEN_COOKIE)),
+      headerTokenPresent: Boolean(cleanString(req.headers && req.headers["x-session-token"]) || cleanString(req.headers && req.headers.authorization)),
+      authenticated: Boolean(req.auth && req.auth.user),
+      activeWorkspaceId: cleanString(req.auth && req.auth.workspaceId)
+    },
+    viewer: {
+      email,
+      isAdmin
+    }
   });
 });
 
@@ -292,6 +329,7 @@ app.post("/api/auth/google/token", asyncHandler(async (req, res) => {
     workspaceId: result.workspaceId,
     properties: { method: "google_oauth" }
   });
+  setAuthCookies(req, res, result);
   res.json(result);
 }));
 
@@ -321,6 +359,8 @@ app.post("/api/auth/magic-link/request", asyncHandler(async (req, res) => {
     expiresInMinutes: Number(result.expiresInMinutes || 15),
     expiresAt: cleanString(result.expiresAt),
     simulated: !mailResult.sent,
+    deliveryMode: cleanString(mailResult.mode),
+    deliverySent: Boolean(mailResult.sent),
     magicLinkToken: mailResult.sent ? "" : cleanString(result.magicLinkToken),
     magicLinkUrl: mailResult.sent ? "" : magicLinkUrl,
     detail: mailResult.detail
@@ -336,6 +376,7 @@ app.post("/api/auth/magic-link/verify", asyncHandler(async (req, res) => {
     workspaceId: result.workspaceId,
     properties: { method: "magic_link" }
   });
+  setAuthCookies(req, res, result);
   res.json(result);
 }));
 
@@ -367,6 +408,7 @@ app.post("/api/auth/guest", asyncHandler(async (_req, res) => {
     workspaceId: result.workspaceId,
     properties: { method: "guest" }
   });
+  setAuthCookies(req, res, result);
   res.status(201).json(result);
 }));
 
@@ -374,6 +416,7 @@ app.post("/api/auth/logout", asyncHandler(async (req, res) => {
   if (req.auth && req.auth.sessionToken) {
     platform.logout(req.auth.sessionToken);
   }
+  clearAuthCookies(req, res);
   res.json({ ok: true });
 }));
 
@@ -383,6 +426,10 @@ app.post("/api/auth/refresh", asyncHandler(async (req, res) => {
     return;
   }
   const refreshed = platform.refreshSession(req.auth.sessionToken);
+  setAuthCookies(req, res, {
+    sessionToken: cleanString(refreshed.token),
+    workspaceId: cleanString(req.auth.workspaceId)
+  });
   res.json({
     ok: true,
     session: {
@@ -412,6 +459,11 @@ app.get("/api/auth/session", asyncHandler(async (req, res) => {
     res.status(401).json({ error: "Authentication required." });
     return;
   }
+  const activeWorkspaceId = req.auth.workspaceId || platform.getPrimaryWorkspaceIdForUser(req.auth.user.id);
+  setAuthCookies(req, res, {
+    sessionToken: cleanString(req.auth.sessionToken),
+    workspaceId: cleanString(activeWorkspaceId)
+  });
   const credits = platform.getCreditStatus(req.auth.user.id);
   res.json({
     user: {
@@ -424,7 +476,7 @@ app.get("/api/auth/session", asyncHandler(async (req, res) => {
       expiresAt: req.auth.session && req.auth.session.expiresAt
     },
     workspaces: platform.listWorkspacesForUser(req.auth.user.id),
-    activeWorkspaceId: req.auth.workspaceId || platform.getPrimaryWorkspaceIdForUser(req.auth.user.id)
+    activeWorkspaceId
   });
 }));
 
@@ -434,6 +486,7 @@ app.delete("/api/auth/account", asyncHandler(async (req, res) => {
     return;
   }
   const result = platform.deleteAccount(req.auth.user.id);
+  clearAuthCookies(req, res);
   res.json(result);
 }));
 
@@ -465,6 +518,10 @@ app.post("/api/workspaces", asyncHandler(async (req, res) => {
     return;
   }
   const workspace = platform.createWorkspace(req.auth.user.id, req.body || {});
+  setAuthCookies(req, res, {
+    sessionToken: cleanString(req.auth && req.auth.sessionToken),
+    workspaceId: cleanString(workspace && workspace.id)
+  });
   res.status(201).json({ workspace });
 }));
 
@@ -475,6 +532,10 @@ app.post("/api/workspaces/active", asyncHandler(async (req, res) => {
   }
   const workspaceId = cleanString((req.body || {}).workspaceId);
   const result = platform.setActiveWorkspace(req.auth.user.id, workspaceId);
+  setAuthCookies(req, res, {
+    sessionToken: cleanString(req.auth && req.auth.sessionToken),
+    workspaceId: cleanString(result && result.workspaceId)
+  });
   res.json(result);
 }));
 
@@ -1047,6 +1108,68 @@ app.get("/api/projects", asyncHandler(async (req, res) => {
     sort: cleanString(req.query.sort, "updated_desc")
   });
   res.json({ projects: rows });
+}));
+
+app.get("/api/admin/projects", asyncHandler(async (req, res) => {
+  requireAuth(req, res);
+  if (res.headersSent) {
+    return;
+  }
+  const actor = platform.getUserById(req.auth.user.id);
+  if (!actor || cleanString(actor.role).toLowerCase() !== "admin") {
+    res.status(403).json({ error: "Admin access required." });
+    return;
+  }
+  const search = cleanString(req.query.q).toLowerCase();
+  const sort = cleanString(req.query.sort, "updated_desc");
+  const limit = clampNumber(Number(req.query.limit || 350), 1, 2000, 350);
+  let rows = Array.isArray(platform.state && platform.state.projects)
+    ? platform.state.projects.slice()
+    : [];
+  if (search) {
+    rows = rows.filter((row) => {
+      const user = platform.getUserById(cleanString(row && row.userId));
+      const workspace = platform.getWorkspaceById(cleanString(row && row.workspaceId));
+      const haystack = [
+        cleanString(row && row.id),
+        cleanString(row && row.title),
+        cleanString(row && row.tool),
+        cleanString(user && user.email),
+        cleanString(user && user.name),
+        cleanString(workspace && workspace.name),
+        cleanString(row && row.workspaceId)
+      ].join(" ").toLowerCase();
+      return haystack.includes(search);
+    });
+  }
+  const direction = sort.endsWith("_asc") ? 1 : -1;
+  const compareText = (a, b) => cleanString(a).localeCompare(cleanString(b));
+  if (sort.startsWith("created_")) {
+    rows.sort((a, b) => direction * (Date.parse(cleanString(a && a.createdAt)) - Date.parse(cleanString(b && b.createdAt))));
+  } else if (sort.startsWith("title_")) {
+    rows.sort((a, b) => direction * compareText(a && a.title, b && b.title));
+  } else {
+    rows.sort((a, b) => direction * (Date.parse(cleanString(a && a.updatedAt)) - Date.parse(cleanString(b && b.updatedAt))));
+  }
+  const projects = rows.slice(0, limit).map((row) => {
+    const user = platform.getUserById(cleanString(row && row.userId));
+    const workspace = platform.getWorkspaceById(cleanString(row && row.workspaceId));
+    return {
+      id: cleanString(row && row.id),
+      tool: cleanString(row && row.tool),
+      title: cleanString(row && row.title),
+      createdAt: cleanString(row && row.createdAt),
+      updatedAt: cleanString(row && row.updatedAt),
+      workspaceId: cleanString(row && row.workspaceId),
+      workspaceName: cleanString(workspace && workspace.name),
+      userId: cleanString(row && row.userId),
+      userEmail: cleanString(user && user.email),
+      userName: cleanString(user && user.name),
+      exportsCount: Array.isArray(row && row.exports) ? row.exports.length : 0,
+      versionsCount: Array.isArray(row && row.versions) ? row.versions.length : 0
+    };
+  });
+  res.json({ projects });
 }));
 
 app.get("/api/projects/:projectId", asyncHandler(async (req, res) => {
@@ -2059,6 +2182,15 @@ app.post("/api/ai/research-helper", requireOpenAIKey, requireFeatureAccess("rese
     max: 8,
     type: "tighten"
   });
+  const normalizedStrengths = cleanArray(ai.strengths, 6);
+  const normalizedGaps = cleanArray(ai.gaps, 7);
+  const normalizedAnnotations = normalizeResearchHelperAnnotations(ai.annotations, {
+    manuscript,
+    strengths: normalizedStrengths,
+    gaps: normalizedGaps,
+    revisions: normalizedRevisions,
+    tightenLines: normalizedTightenLines
+  });
 
   recordFeatureUsage(req, "research-helper", {
     unitType: "evaluation",
@@ -2076,11 +2208,12 @@ app.post("/api/ai/research-helper", requireOpenAIKey, requireFeatureAccess("rese
   res.json({
     overallVerdict: cleanString(ai.overallVerdict),
     scores,
-    strengths: cleanArray(ai.strengths, 6),
-    gaps: cleanArray(ai.gaps, 7),
+    strengths: normalizedStrengths,
+    gaps: normalizedGaps,
     revisionObjective,
     revisions: normalizedRevisions.slice(0, 8),
     tightenLines: normalizedTightenLines.slice(0, 4),
+    annotations: normalizedAnnotations,
     trends: trendPayload.trends,
     revisionDelta
   });
@@ -2799,20 +2932,89 @@ function resolveAllowedOrigin(origin) {
   return "";
 }
 
+function parseCookieHeader(rawValue) {
+  const output = {};
+  const rows = String(rawValue || "").split(";");
+  for (const row of rows) {
+    const index = row.indexOf("=");
+    if (index <= 0) {
+      continue;
+    }
+    const key = cleanString(row.slice(0, index));
+    if (!key) {
+      continue;
+    }
+    const value = row.slice(index + 1);
+    try {
+      output[key] = decodeURIComponent(value);
+    } catch (_) {
+      output[key] = value;
+    }
+  }
+  return output;
+}
+
+function readRequestCookie(req, cookieName) {
+  const safeCookieName = cleanString(cookieName);
+  if (!safeCookieName) {
+    return "";
+  }
+  const bag = parseCookieHeader(req && req.headers && req.headers.cookie);
+  return cleanString(bag[safeCookieName]);
+}
+
+function requestIsSecure(req) {
+  const proto = cleanString(req && req.headers && req.headers["x-forwarded-proto"]).split(",")[0].trim().toLowerCase();
+  return proto === "https" || Boolean(req && req.secure);
+}
+
+function setAuthCookies(req, res, payload) {
+  const token = cleanString(payload && payload.sessionToken);
+  const workspaceId = cleanString(payload && payload.workspaceId);
+  const base = {
+    sameSite: "lax",
+    secure: requestIsSecure(req),
+    path: "/",
+    maxAge: AUTH_COOKIE_MAX_AGE_MS
+  };
+  if (token) {
+    res.cookie(AUTH_TOKEN_COOKIE, token, base);
+  }
+  if (workspaceId) {
+    res.cookie(AUTH_WORKSPACE_COOKIE, workspaceId, base);
+  }
+}
+
+function clearAuthCookies(req, res) {
+  const base = {
+    sameSite: "lax",
+    secure: requestIsSecure(req),
+    path: "/"
+  };
+  res.clearCookie(AUTH_TOKEN_COOKIE, base);
+  res.clearCookie(AUTH_WORKSPACE_COOKIE, base);
+}
+
 function parseSessionToken(req) {
   const authHeader = cleanString(req.headers && req.headers.authorization);
   if (authHeader.toLowerCase().startsWith("bearer ")) {
     return cleanString(authHeader.slice(7));
   }
-  return cleanString(req.headers && req.headers["x-session-token"]);
+  const headerToken = cleanString(req.headers && req.headers["x-session-token"]);
+  if (headerToken) {
+    return headerToken;
+  }
+  return cleanString(readRequestCookie(req, AUTH_TOKEN_COOKIE));
 }
 
 function attachAuthContext(req, _res, next) {
   const sessionToken = parseSessionToken(req);
   const auth = platform.resolveAuth(sessionToken);
   const headerWorkspace = cleanString(req.headers && req.headers["x-workspace-id"]);
+  const cookieWorkspace = cleanString(readRequestCookie(req, AUTH_WORKSPACE_COOKIE));
   const workspaceId = cleanString(
     headerWorkspace
+      || cookieWorkspace
       || (auth.user && auth.user.activeWorkspaceId)
       || (auth.user && platform.getPrimaryWorkspaceIdForUser(auth.user.id))
   );
@@ -3524,6 +3726,191 @@ function buildEvaluationTrendPayload(req, scores, manuscript) {
       scoreValues: scores.map((row) => Number(row.score || 0))
     }
   };
+}
+
+function extractSentenceAnchors(text, max = 24) {
+  const source = String(text || "");
+  if (!source.trim()) {
+    return [];
+  }
+  const rows = [];
+  const pattern = /[^.!?\n]+(?:[.!?]+|$)/g;
+  let match = null;
+  while ((match = pattern.exec(source)) && rows.length < max) {
+    const raw = String(match[0] || "");
+    const trimmed = raw.trim();
+    if (!trimmed) {
+      continue;
+    }
+    const leftPadding = raw.search(/\S/);
+    const startIndex = match.index + (leftPadding > 0 ? leftPadding : 0);
+    const endIndex = startIndex + trimmed.length;
+    rows.push({
+      startIndex,
+      endIndex,
+      text: trimmed
+    });
+  }
+  if (!rows.length) {
+    return [{
+      startIndex: 0,
+      endIndex: source.length,
+      text: source
+    }];
+  }
+  return rows;
+}
+
+function locateSnippetRange(text, snippet) {
+  const source = String(text || "");
+  const target = cleanString(snippet);
+  if (!source || !target) {
+    return null;
+  }
+  const lowerSource = source.toLowerCase();
+  const lowerTarget = target.toLowerCase();
+  let startIndex = lowerSource.indexOf(lowerTarget);
+  if (startIndex >= 0) {
+    return {
+      startIndex,
+      endIndex: startIndex + target.length
+    };
+  }
+  const compactTarget = target.replace(/\s+/g, " ").trim();
+  if (!compactTarget || compactTarget === target) {
+    return null;
+  }
+  startIndex = lowerSource.indexOf(compactTarget.toLowerCase());
+  if (startIndex < 0) {
+    return null;
+  }
+  return {
+    startIndex,
+    endIndex: startIndex + compactTarget.length
+  };
+}
+
+function normalizeAnnotationKind(value) {
+  const safe = cleanString(value, "sentence").toLowerCase();
+  if (["sentence", "phrase", "word", "section", "point"].includes(safe)) {
+    return safe;
+  }
+  return "sentence";
+}
+
+function normalizeAnnotationSeverity(value) {
+  const safe = cleanString(value, "improve").toLowerCase();
+  if (["affirm", "improve", "critical"].includes(safe)) {
+    return safe;
+  }
+  if (safe === "positive" || safe === "strength") {
+    return "affirm";
+  }
+  if (safe === "warning" || safe === "risk" || safe === "negative") {
+    return "critical";
+  }
+  return "improve";
+}
+
+function normalizeResearchHelperAnnotations(rawAnnotations, context) {
+  const manuscript = cleanString(context && context.manuscript);
+  if (!manuscript) {
+    return [];
+  }
+  const annotations = [];
+  const seen = new Set();
+  const sentenceAnchors = extractSentenceAnchors(manuscript, 30);
+  const rows = Array.isArray(rawAnnotations) ? rawAnnotations : [];
+  for (const row of rows) {
+    if (!row || typeof row !== "object") {
+      continue;
+    }
+    const kind = normalizeAnnotationKind(row.kind || row.type);
+    const severity = normalizeAnnotationSeverity(row.severity || row.priority);
+    const comment = cleanString(row.comment || row.feedback || row.note || row.reason);
+    const suggestion = cleanString(row.suggestion || row.rewrite || row.revisionHint);
+    const title = cleanString(row.title || row.label || row.tag || `${kind} feedback`);
+    const targetText = cleanString(row.targetText || row.anchorQuote || row.quote || row.text);
+    let startIndex = clampNumber(Number(row.startIndex), 0, manuscript.length, -1);
+    let endIndex = clampNumber(Number(row.endIndex), 0, manuscript.length, -1);
+
+    if (!(startIndex >= 0 && endIndex > startIndex)) {
+      const located = locateSnippetRange(manuscript, targetText);
+      if (located) {
+        startIndex = located.startIndex;
+        endIndex = located.endIndex;
+      }
+    }
+
+    if (!(startIndex >= 0 && endIndex > startIndex)) {
+      const sentenceIndex = clampNumber(Number(row.sentenceIndex), 0, sentenceAnchors.length - 1, -1);
+      if (sentenceIndex >= 0 && sentenceAnchors[sentenceIndex]) {
+        startIndex = sentenceAnchors[sentenceIndex].startIndex;
+        endIndex = sentenceAnchors[sentenceIndex].endIndex;
+      }
+    }
+
+    if (!(startIndex >= 0 && endIndex > startIndex) || !comment) {
+      continue;
+    }
+    const safeStart = clampNumber(startIndex, 0, manuscript.length, 0);
+    const safeEnd = clampNumber(endIndex, safeStart + 1, manuscript.length, safeStart + 1);
+    const key = `${safeStart}:${safeEnd}:${comment.toLowerCase().slice(0, 96)}`;
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    annotations.push({
+      id: `ann_${annotations.length + 1}`,
+      kind,
+      severity,
+      startIndex: safeStart,
+      endIndex: safeEnd,
+      targetText: cleanString(manuscript.slice(safeStart, safeEnd)),
+      title,
+      comment,
+      suggestion
+    });
+    if (annotations.length >= 16) {
+      break;
+    }
+  }
+
+  if (annotations.length >= 4) {
+    return annotations;
+  }
+
+  const fallbackKinds = ["sentence", "phrase", "word", "section", "point"];
+  const strengths = cleanArray(context && context.strengths, 4).map((line) => ({ severity: "affirm", comment: line }));
+  const gaps = cleanArray(context && context.gaps, 4).map((line) => ({ severity: "critical", comment: line }));
+  const revisions = cleanArray(context && context.revisions, 6).map((line) => ({ severity: "improve", comment: line, suggestion: line }));
+  const tightenLines = cleanArray(context && context.tightenLines, 5).map((line) => ({ severity: "improve", comment: `Tighten language: ${line}`, suggestion: line }));
+  const fallback = [...strengths, ...gaps, ...revisions, ...tightenLines].slice(0, 12);
+
+  fallback.forEach((item, index) => {
+    const anchor = sentenceAnchors[index % Math.max(1, sentenceAnchors.length)];
+    if (!anchor || !item.comment) {
+      return;
+    }
+    const key = `${anchor.startIndex}:${anchor.endIndex}:${item.comment.toLowerCase().slice(0, 96)}`;
+    if (seen.has(key)) {
+      return;
+    }
+    seen.add(key);
+    annotations.push({
+      id: `ann_${annotations.length + 1}`,
+      kind: fallbackKinds[index % fallbackKinds.length],
+      severity: normalizeAnnotationSeverity(item.severity),
+      startIndex: anchor.startIndex,
+      endIndex: anchor.endIndex,
+      targetText: cleanString(anchor.text),
+      title: `${fallbackKinds[index % fallbackKinds.length]} feedback`,
+      comment: cleanString(item.comment),
+      suggestion: cleanString(item.suggestion)
+    });
+  });
+
+  return annotations.slice(0, 16);
 }
 
 function enrichSermonAnalyzerReportWithCoaching(report, context) {

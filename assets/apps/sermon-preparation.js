@@ -10,6 +10,7 @@
     setBusy,
     saveProject,
     updateProject,
+    saveProjectAndOpen,
     hydrateProjectFromQuery,
     createHandoff,
     getHandoff,
@@ -83,8 +84,25 @@
       .join("");
   }
 
-  function renderPlan(passage, ai) {
+  function renderPlan(passage, ai, inputSnapshot) {
+    const input = inputSnapshot && typeof inputSnapshot === "object" ? inputSnapshot : {};
     return `
+      <div class="card">
+        <span class="kicker">Project Inputs</span>
+        <p><strong>Theme:</strong> ${escapeHtml(cleanString(input.theme, "Not specified"))}</p>
+        <p><strong>Audience:</strong> ${escapeHtml(cleanString(input.audience, "Sunday congregation"))}</p>
+        <p><strong>Length:</strong> ${escapeHtml(String(Number(input.minutes || 30)))} min</p>
+        <p><strong>Style mode:</strong> ${escapeHtml(cleanString(input.styleMode, "expository"))}</p>
+        <p><strong>Goal:</strong> ${escapeHtml(cleanString(input.goal, "Not specified"))}</p>
+        ${cleanString(input.seriesTitle) || cleanString(input.seriesWeek) || (Array.isArray(input.priorThemes) && input.priorThemes.length)
+          ? `<p><strong>Series context:</strong> ${escapeHtml([
+              cleanString(input.seriesTitle) ? `Title: ${cleanString(input.seriesTitle)}` : "",
+              cleanString(input.seriesWeek) ? `Week: ${cleanString(input.seriesWeek)}` : "",
+              Array.isArray(input.priorThemes) && input.priorThemes.length ? `Prior themes: ${input.priorThemes.map((item) => cleanString(item)).filter(Boolean).join(", ")}` : ""
+            ].filter(Boolean).join(" | "))}</p>`
+          : ""}
+      </div>
+
       <div class="card">
         <span class="kicker">Passage</span>
         <h3 class="section-title">${escapeHtml(passage.reference)} (${escapeHtml(passage.translation_name)})</h3>
@@ -332,7 +350,7 @@
         }
       });
 
-      lastGenerated = {
+      const generated = {
         input: {
           reference,
           theme,
@@ -348,7 +366,18 @@
         passage,
         ai
       };
-      result.innerHTML = `${renderPlan(passage, ai)}${renderActions()}`;
+      const persisted = await saveProjectAndOpen(
+        "sermon-preparation",
+        `Sermon Plan - ${cleanString(passage && passage.reference, reference)}`,
+        generated,
+        activeProjectId
+      );
+      activeProjectId = cleanString(persisted && persisted.projectId);
+      if (persisted && persisted.navigated) {
+        return;
+      }
+      lastGenerated = generated;
+      result.innerHTML = `${renderPlan(passage, ai, generated.input)}${renderActions()}`;
       await wireActions();
       showNotice(`AI sermon plan generated from ${escapeHtml(passage.reference)}.`, "ok");
       await trackEvent("generation_success", { tool: "sermon-preparation" });
@@ -399,7 +428,7 @@
       }
       if (payload.passage && payload.ai) {
         lastGenerated = payload;
-        result.innerHTML = `${renderPlan(payload.passage, payload.ai)}${renderActions()}`;
+        result.innerHTML = `${renderPlan(payload.passage, payload.ai, payload.input)}${renderActions()}`;
         await wireActions();
       }
       showNotice("Loaded saved Sermon Preparation project.", "ok");

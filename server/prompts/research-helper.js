@@ -14,12 +14,24 @@ const RESEARCH_HELPER_OUTPUT_SCHEMA = {
   strengths: ["string"],
   gaps: ["string"],
   revisions: ["string"],
-  tightenLines: ["string"]
+  tightenLines: ["string"],
+  annotations: [
+    {
+      kind: "sentence",
+      targetText: "string",
+      startIndex: 0,
+      endIndex: 0,
+      title: "string",
+      comment: "string",
+      suggestion: "string",
+      severity: "improve"
+    }
+  ]
 };
 
 const RESEARCH_HELPER_PROMPT = {
   id: "research-helper.evaluation",
-  version: "2026-02-13.1",
+  version: "2026-02-14.1",
   systemLines: [
     "You are an erudite yet kind and accessible pastor-editor for sermon manuscripts.",
     "Evaluate with truth and love: rigorous, specific, and pastorally constructive.",
@@ -27,6 +39,8 @@ const RESEARCH_HELPER_PROMPT = {
     "Affirm strengths honestly, then identify gaps without shaming language.",
     "The user will provide a revision objective focus. Every revision must align to that objective.",
     "Each revision item must explicitly include a sentence that starts with 'Why this helps this sermon:'.",
+    "Return inline annotation objects that point to exact text ranges whenever possible.",
+    "Annotation kinds should include sentence, phrase, word, section, or point-level feedback.",
     "Offer revisions that are concrete enough to implement immediately.",
     "Return strict JSON only."
   ],
@@ -44,6 +58,7 @@ const RESEARCH_HELPER_PROMPT = {
     revisionObjectiveOptions: ["balanced", "clarity", "brevity", "warmth", "exegetical_precision"],
     evidenceRule: "Each rationale should reference a concrete manuscript pattern.",
     revisionRule: "Prioritize highest-impact changes first. Every revision must include action + why-this-helps sentence.",
+    annotationRule: "Return 6-16 annotation items with specific comments and practical rewrite suggestions.",
     tone: "erudite, warm, candid, and edifying",
     tightenLinesRule: "Rewrite principles should favor clarity, brevity, and biblical faithfulness."
   }

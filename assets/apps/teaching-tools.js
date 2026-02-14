@@ -9,6 +9,7 @@
     setBusy,
     saveProject,
     updateProject,
+    saveProjectAndOpen,
     appendProjectExport,
     hydrateProjectFromQuery,
     trackEvent,
@@ -182,6 +183,8 @@
         <h3 class="section-title">${escapeHtml(meta.sourceTitle)}</h3>
         <p><strong>Audience:</strong> ${escapeHtml(cleanString(meta.audienceLabel, meta.audience))} | <strong>Setting:</strong> ${escapeHtml(meta.setting)} | <strong>Group:</strong> ${escapeHtml(String(meta.groupSize))} | <strong>Length:</strong> ${escapeHtml(String(meta.length))} min</p>
         ${meta.resources ? `<p><strong>Resources:</strong> ${escapeHtml(meta.resources)}</p>` : ""}
+        ${meta.outcome ? `<p><strong>Main outcome:</strong> ${escapeHtml(meta.outcome)}</p>` : ""}
+        ${meta.notes ? `<p><strong>Notes:</strong> ${escapeHtml(meta.notes)}</p>` : ""}
         ${meta.passageText ? `<p>${escapeHtml(meta.passageText)}</p>` : ""}
       </div>
 
@@ -296,7 +299,7 @@
         resources,
         notes
       });
-      lastGenerated = {
+      const generated = {
         input: {
           sourceTitle,
           passageText,
@@ -312,6 +315,17 @@
         },
         output: ai
       };
+      const persisted = await saveProjectAndOpen(
+        "teaching-tools",
+        `Teaching Kit - ${cleanString(sourceTitle, "Lesson")}`,
+        generated,
+        activeProjectId
+      );
+      activeProjectId = cleanString(persisted && persisted.projectId);
+      if (persisted && persisted.navigated) {
+        return;
+      }
+      lastGenerated = generated;
       result.innerHTML = renderPlan({
         sourceTitle,
         passageText,
@@ -320,7 +334,9 @@
         setting,
         groupSize,
         length,
-        resources
+        resources,
+        outcome,
+        notes
       }, ai);
       if (ai && ai.multiAudience && Array.isArray(ai.comparisonSummary) && ai.comparisonSummary.length) {
         const comparisonCard = document.createElement("div");
@@ -566,7 +582,9 @@
           setting: cleanString(input.setting),
           groupSize: Number(input.groupSize || 0),
           length: Number(input.length || 0),
-          resources: cleanString(input.resources)
+          resources: cleanString(input.resources),
+          outcome: cleanString(input.outcome),
+          notes: cleanString(input.notes)
         }, payload.output);
         if (payload.output.multiAudience && Array.isArray(payload.output.comparisonSummary) && payload.output.comparisonSummary.length) {
           const comparisonCard = document.createElement("div");

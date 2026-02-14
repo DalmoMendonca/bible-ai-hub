@@ -12,6 +12,7 @@
     setBusy,
     saveProject,
     updateProject,
+    saveProjectAndOpen,
     appendProjectExport,
     hydrateProjectFromQuery,
     getHandoff,
@@ -125,12 +126,157 @@
     `;
   }
 
-  function renderAnalysis(diagnostics, ai) {
+  function resolveAnnotationRanges(manuscript, annotations) {
+    const source = String(manuscript || "");
+    const rows = Array.isArray(annotations) ? annotations : [];
+    const resolved = [];
+
+    for (const row of rows) {
+      if (!row || typeof row !== "object") {
+        continue;
+      }
+      let start = Number(row.startIndex);
+      let end = Number(row.endIndex);
+      const targetText = cleanString(row.targetText);
+      if (!(Number.isFinite(start) && Number.isFinite(end) && end > start)) {
+        if (!targetText) {
+          continue;
+        }
+        const index = source.toLowerCase().indexOf(targetText.toLowerCase());
+        if (index < 0) {
+          continue;
+        }
+        start = index;
+        end = index + targetText.length;
+      }
+      start = Math.max(0, Math.min(source.length, start));
+      end = Math.max(start + 1, Math.min(source.length, end));
+      resolved.push({
+        id: cleanString(row.id, `ann_${resolved.length + 1}`),
+        start,
+        end,
+        kind: cleanString(row.kind, "sentence"),
+        severity: cleanString(row.severity, "improve"),
+        title: cleanString(row.title, "Inline feedback"),
+        comment: cleanString(row.comment || row.feedback),
+        suggestion: cleanString(row.suggestion),
+        targetText: source.slice(start, end)
+      });
+    }
+
+    resolved.sort((a, b) => a.start - b.start);
+    const output = [];
+    let lastEnd = -1;
+    for (const row of resolved) {
+      if (row.start < lastEnd) {
+        continue;
+      }
+      output.push(row);
+      lastEnd = row.end;
+      if (output.length >= 18) {
+        break;
+      }
+    }
+    return output;
+  }
+
+  function renderInlineAnnotations(manuscript, annotations) {
+    const source = cleanString(manuscript);
+    if (!source) {
+      return `<p class="inline-hint">No manuscript text available for inline annotations.</p>`;
+    }
+    const ranges = resolveAnnotationRanges(source, annotations);
+    if (!ranges.length) {
+      return `<p class="inline-hint">Inline annotations are not available for this run.</p>`;
+    }
+
+    let cursor = 0;
+    let textHtml = "";
+    for (const row of ranges) {
+      textHtml += escapeHtml(source.slice(cursor, row.start)).replace(/\n/g, "<br />");
+      textHtml += `<mark class="eval-annot eval-annot-${escapeHtml(row.severity)}" data-eval-annot="${escapeHtml(row.id)}">${escapeHtml(source.slice(row.start, row.end))}</mark>`;
+      cursor = row.end;
+    }
+    textHtml += escapeHtml(source.slice(cursor)).replace(/\n/g, "<br />");
+
+    return `
+      <div class="eval-annotation-shell">
+        <div class="eval-annotation-doc" data-eval-annot-doc>${textHtml}</div>
+        <div class="eval-annotation-comments">
+          ${ranges.map((row, index) => `
+            <article class="eval-annotation-item" data-eval-annot-comment="${escapeHtml(row.id)}">
+              <p class="eval-annotation-meta">#${index + 1} | ${escapeHtml(row.kind)} | ${escapeHtml(row.severity)}</p>
+              <h4>${escapeHtml(row.title)}</h4>
+              <p>${escapeHtml(cleanString(row.comment, "No comment."))}</p>
+              ${row.suggestion ? `<p class="inline-hint"><strong>Suggestion:</strong> ${escapeHtml(row.suggestion)}</p>` : ""}
+            </article>
+          `).join("")}
+        </div>
+      </div>
+    `;
+  }
+
+  function wireAnnotationInteractions() {
+    const marks = Array.from(document.querySelectorAll("[data-eval-annot]"));
+    const comments = Array.from(document.querySelectorAll("[data-eval-annot-comment]"));
+    if (!marks.length || !comments.length) {
+      return;
+    }
+
+    const activate = (id) => {
+      marks.forEach((mark) => {
+        mark.classList.toggle("is-active", cleanString(mark.getAttribute("data-eval-annot")) === id);
+      });
+      comments.forEach((comment) => {
+        comment.classList.toggle("is-active", cleanString(comment.getAttribute("data-eval-annot-comment")) === id);
+      });
+    };
+
+    marks.forEach((mark) => {
+      mark.addEventListener("click", () => {
+        const id = cleanString(mark.getAttribute("data-eval-annot"));
+        if (!id) {
+          return;
+        }
+        activate(id);
+        const comment = document.querySelector(`[data-eval-annot-comment="${id}"]`);
+        if (comment) {
+          comment.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+      });
+    });
+
+    comments.forEach((comment) => {
+      comment.addEventListener("click", () => {
+        const id = cleanString(comment.getAttribute("data-eval-annot-comment"));
+        if (!id) {
+          return;
+        }
+        activate(id);
+        const mark = document.querySelector(`[data-eval-annot="${id}"]`);
+        if (mark) {
+          mark.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      });
+    });
+  }
+
+  function renderAnalysis(diagnostics, ai, inputSnapshot) {
+    const input = inputSnapshot && typeof inputSnapshot === "object" ? inputSnapshot : {};
     const refsLabel = diagnostics.references.length
       ? diagnostics.references.slice(0, 10).join(", ")
       : "No explicit references detected.";
 
     return `
+      <div class="card">
+        <span class="kicker">Project Inputs</span>
+        <p><strong>Sermon type:</strong> ${escapeHtml(cleanString(input.sermonType, "Expository"))}</p>
+        <p><strong>Target length:</strong> ${escapeHtml(String(Number(input.targetMinutes || diagnostics.targetMinutes || 35)))} min</p>
+        <p><strong>Revision objective:</strong> ${escapeHtml(cleanString(input.revisionObjective, "balanced"))}</p>
+        <p><strong>Manuscript:</strong></p>
+        <div class="eval-input-text">${escapeHtml(cleanString(input.manuscript)).replace(/\n/g, "<br />")}</div>
+      </div>
+
       <div class="card">
         <span class="kicker">Local Diagnostics</span>
         <div class="metric-grid">
@@ -156,6 +302,11 @@
       <div class="card">
         <span class="kicker">AI Scores</span>
         ${renderScores(ai.scores)}
+      </div>
+
+      <div class="card">
+        <span class="kicker">Inline Annotations</span>
+        ${renderInlineAnnotations(cleanString(input.manuscript), ai.annotations)}
       </div>
 
       ${ai && ai.trends ? `
@@ -226,11 +377,23 @@
         manuscript
       });
 
-      lastGenerated = {
+      const generated = {
         input: { sermonType, targetMinutes, revisionObjective, manuscript, diagnostics },
         output: ai
       };
-      result.innerHTML = renderAnalysis(diagnostics, ai);
+      const persisted = await saveProjectAndOpen(
+        "research-helper",
+        `Sermon Evaluation - ${sermonType}`,
+        generated,
+        activeProjectId
+      );
+      activeProjectId = cleanString(persisted && persisted.projectId);
+      if (persisted && persisted.navigated) {
+        return;
+      }
+      lastGenerated = generated;
+      result.innerHTML = renderAnalysis(diagnostics, ai, generated.input);
+      wireAnnotationInteractions();
       setActionButtonsVisible(true);
       showNotice("AI sermon evaluation complete.", "ok");
       await trackEvent("generation_success", { tool: "research-helper" });
@@ -359,7 +522,8 @@
       }
       if (payload.output && input.diagnostics) {
         lastGenerated = payload;
-        result.innerHTML = renderAnalysis(input.diagnostics, payload.output);
+        result.innerHTML = renderAnalysis(input.diagnostics, payload.output, input);
+        wireAnnotationInteractions();
         setActionButtonsVisible(true);
       }
       showNotice("Loaded saved Sermon Evaluation project.", "ok");

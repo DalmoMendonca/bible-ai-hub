@@ -10,6 +10,7 @@
     apiPatch,
     saveProject,
     updateProject,
+    saveProjectAndOpen,
     hydrateProjectFromQuery,
     createLearningPath,
     listLearningPaths,
@@ -604,15 +605,27 @@
     }
   });
 
-  async function renderSearchPayload(payload, query) {
+  async function renderSearchPayload(payload, query, sessionInput) {
     const rows = Array.isArray(payload.results) ? payload.results : [];
     const related = Array.isArray(payload.relatedContent) ? payload.relatedContent : [];
     const queryTerms = tokenize(query);
+    const input = sessionInput && typeof sessionInput === "object" ? sessionInput : { query, payload };
     renderStats(payload.stats);
     latestResultMap = new Map(rows.map((row) => [cleanString(row.id), row]));
 
     result.innerHTML = `
       ${renderIngestion(payload.ingestion)}
+      <div class="card">
+        <span class="kicker">Project Inputs</span>
+        <p><strong>Query:</strong> ${escapeHtml(cleanString(input.query, query))}</p>
+        <p><strong>Category:</strong> ${escapeHtml(cleanString(input.filters && input.filters.category, "all"))}
+        | <strong>Difficulty:</strong> ${escapeHtml(cleanString(input.filters && input.filters.difficulty, "all"))}
+        | <strong>Version:</strong> ${escapeHtml(cleanString(input.filters && input.filters.logosVersion, "all"))}
+        | <strong>Max length:</strong> ${escapeHtml(String(Number(input.filters && input.filters.maxMinutes || 0)))} min</p>
+        <p><strong>Sort:</strong> ${escapeHtml(cleanString(input.sortMode, "relevance"))}
+        | <strong>Auto-transcribe:</strong> ${input.autoTranscribe !== false ? "On" : "Off"}
+        | <strong>Personalization:</strong> ${input.disablePersonalization ? "Off" : "On"}</p>
+      </div>
       ${payload.personalization && payload.personalization.enabled ? `<div class="card"><span class="kicker">Personalized Recommendations Enabled</span><p class="inline-hint">Suggestions are influenced by your recent activity. You can disable this in the form.</p></div>` : ""}
       ${renderConfidence(payload.confidence)}
       ${payload.guidance ? `<div class="card"><span class="kicker">AI Guidance</span><p>${escapeHtml(cleanString(payload.guidance))}</p></div>` : ""}
@@ -652,7 +665,8 @@
     if (saveSearchBtn) {
       saveSearchBtn.addEventListener("click", async () => {
         const projectPayload = {
-          query,
+          ...(input && typeof input === "object" ? input : {}),
+          query: cleanString(input && input.query, query),
           payload
         };
         try {
@@ -664,7 +678,7 @@
           }
           await trackEvent("project_saved", { tool: "video-search", resultCount: rows.length });
           showNotice("Search session saved.", "ok");
-          await renderSearchPayload(payload, query);
+          await renderSearchPayload(payload, query, projectPayload);
         } catch (error) {
           showNotice(`Could not save search session: ${escapeHtml(cleanString(error.message))}`, "error");
         }
@@ -717,7 +731,31 @@
         transcribeMode: autoTranscribe ? "auto" : "skip"
       });
 
-      await renderSearchPayload(payload, query);
+      const projectPayload = {
+        query,
+        payload,
+        filters: {
+          category,
+          difficulty,
+          logosVersion,
+          maxMinutes
+        },
+        sortMode,
+        autoTranscribe,
+        disablePersonalization
+      };
+      const persisted = await saveProjectAndOpen(
+        "video-search",
+        `Video Search - ${query}`,
+        projectPayload,
+        activeProjectId
+      );
+      activeProjectId = cleanString(persisted && persisted.projectId);
+      if (persisted && persisted.navigated) {
+        return;
+      }
+
+      await renderSearchPayload(payload, query, projectPayload);
 
       const rows = Array.isArray(payload.results) ? payload.results : [];
 
@@ -797,7 +835,7 @@
         return false;
       }
       queryInput.value = query;
-      await renderSearchPayload(payload, query);
+      await renderSearchPayload(payload, query, project.payload);
       showNotice("Loaded saved video search session.", "ok");
       return true;
     } catch (error) {

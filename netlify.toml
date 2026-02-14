@@ -2,6 +2,10 @@
   publish = "."
   functions = "netlify/functions"
 
+[build.environment]
+  # Public canonical domain; safe to appear in HTML/meta/sitemaps.
+  SECRETS_SCAN_OMIT_KEYS = "PUBLIC_BASE_URL"
+
 [functions]
   node_bundler = "esbuild"
 

@@ -11,6 +11,7 @@
     setBusy,
     saveProject,
     updateProject,
+    saveProjectAndOpen,
     appendProjectExport,
     hydrateProjectFromQuery,
     createHandoff,
@@ -139,7 +140,8 @@
     }
   }
 
-  function renderStudy(passage, ai) {
+  function renderStudy(passage, ai, inputSnapshot) {
+    const input = inputSnapshot && typeof inputSnapshot === "object" ? inputSnapshot : {};
     const clear = ai && ai.clear && typeof ai.clear === "object" ? ai.clear : {};
     const tenStep = Array.isArray(ai && ai.tenStep) ? ai.tenStep : [];
     const lens = ai && ai.passageLens && typeof ai.passageLens === "object" ? ai.passageLens : {};
@@ -149,6 +151,13 @@
       .join("");
 
     return `
+      <div class="card">
+        <span class="kicker">Project Inputs</span>
+        <p><strong>Focus:</strong> ${escapeHtml(cleanString(input.focus, "Not specified"))}</p>
+        <p><strong>Question:</strong> ${escapeHtml(cleanString(input.question, "Not specified"))}</p>
+        <p><strong>Theological profile:</strong> ${escapeHtml(cleanString(input.theologicalProfile, "text-centered"))}</p>
+      </div>
+
       <div class="card">
         <span class="kicker">Passage</span>
         <h3 class="section-title">${escapeHtml(passage.reference)} (${escapeHtml(passage.translation_name)})</h3>
@@ -281,12 +290,23 @@
         question,
         theologicalProfile
       });
-      lastGenerated = {
+      const generated = {
         input: { focus, question, theologicalProfile },
         passage,
         ai: ai || {}
       };
-      result.innerHTML = `${renderStudy(passage, ai || {})}${renderActionButtons()}`;
+      const persisted = await saveProjectAndOpen(
+        "bible-study",
+        `Bible Study - ${cleanString(passage && passage.reference, reference)}`,
+        generated,
+        activeProjectId
+      );
+      activeProjectId = cleanString(persisted && persisted.projectId);
+      if (persisted && persisted.navigated) {
+        return;
+      }
+      lastGenerated = generated;
+      result.innerHTML = `${renderStudy(passage, ai || {}, generated.input)}${renderActionButtons()}`;
       await wireActionButtons();
       const copyExportBtn = $("#studyCopyExport");
       const copyDocBtn = $("#studyCopyDocExport");
@@ -372,7 +392,7 @@
 
       if (payload.passage && payload.ai) {
         lastGenerated = payload;
-        result.innerHTML = `${renderStudy(payload.passage, payload.ai)}${renderActionButtons()}`;
+        result.innerHTML = `${renderStudy(payload.passage, payload.ai, payload.input)}${renderActionButtons()}`;
         await wireActionButtons();
         const copyExportBtn = $("#studyCopyExport");
         const copyDocBtn = $("#studyCopyDocExport");

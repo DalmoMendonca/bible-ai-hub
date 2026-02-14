@@ -420,6 +420,17 @@
     featureFlagsState = null;
   }
 
+  async function signOut() {
+    try {
+      await apiPost("/api/auth/logout", {});
+    } catch (_) {
+      // Even if API logout fails, clear local session state.
+    }
+    clearStoredAuth();
+    authReadyPromise = null;
+    return true;
+  }
+
   function getMagicLinkTokenFromUrl() {
     try {
       const params = new URLSearchParams(window.location.search || "");
@@ -469,14 +480,53 @@
   }
 
   async function rawApiRequest(url, options) {
+    const requestOptions = options && typeof options === "object"
+      ? { ...options }
+      : {};
+    if (!Object.prototype.hasOwnProperty.call(requestOptions, "credentials")) {
+      requestOptions.credentials = "same-origin";
+    }
     try {
-      return await fetch(`${API_BASE}${url}`, options);
+      return await fetch(`${API_BASE}${url}`, requestOptions);
     } catch (_) {
       throw new Error("Cannot reach local AI API. Start the app with `npm start` and open http://localhost:3000/ai/.");
     }
   }
 
   async function ensureAuthSession() {
+    async function resumeSession(headers) {
+      const response = await rawApiRequest("/api/auth/session", {
+        method: "GET",
+        headers: headers || {}
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (response.ok && payload && payload.user) {
+        const sessionToken = cleanString(payload && payload.session && payload.session.token, authState.token);
+        storeAuth({
+          sessionToken,
+          user: payload.user,
+          workspaceId: payload.activeWorkspaceId || authState.workspaceId
+        });
+        return {
+          status: "ok",
+          response,
+          payload
+        };
+      }
+      if (response.status === 401 || response.status === 403) {
+        return {
+          status: "unauthorized",
+          response,
+          payload
+        };
+      }
+      return {
+        status: "error",
+        response,
+        payload
+      };
+    }
+
     const urlMagicToken = getMagicLinkTokenFromUrl();
     if (urlMagicToken) {
       try {
@@ -491,32 +541,32 @@
 
     readStoredAuth();
     if (authState.token) {
-      const existing = await rawApiRequest("/api/auth/session", {
-        method: "GET",
-        headers: authHeaders()
-      });
-      if (existing.ok) {
-        const payload = await existing.json().catch(() => ({}));
-        if (payload && payload.user) {
-          storeAuth({
-            sessionToken: authState.token,
-            user: payload.user,
-            workspaceId: payload.activeWorkspaceId || authState.workspaceId
-          });
-          return authState;
-        }
+      const tokenResume = await resumeSession(authHeaders());
+      if (tokenResume.status === "ok") {
+        return authState;
       }
-      if (existing.status === 401 || existing.status === 403) {
+      if (tokenResume.status === "unauthorized") {
         // Token existed but is not valid on the API side; avoid silently switching to a guest identity.
         clearStoredAuth();
         return authState;
       }
-      const existingPayload = await existing.json().catch(() => ({}));
       throw new Error(cleanString(
-        existingPayload && existingPayload.error,
-        `Unable to resume your session (HTTP ${existing.status}).`
+        tokenResume && tokenResume.payload && tokenResume.payload.error,
+        `Unable to resume your session (HTTP ${Number(tokenResume && tokenResume.response && tokenResume.response.status) || 500}).`
       ));
     }
+
+    const cookieResume = await resumeSession({});
+    if (cookieResume.status === "ok") {
+      return authState;
+    }
+    if (cookieResume.status === "error") {
+      throw new Error(cleanString(
+        cookieResume && cookieResume.payload && cookieResume.payload.error,
+        `Unable to initialize your session (HTTP ${Number(cookieResume && cookieResume.response && cookieResume.response.status) || 500}).`
+      ));
+    }
+
     const guestResponse = await rawApiRequest("/api/auth/guest", {
       method: "POST",
       headers: {
@@ -1022,6 +1072,33 @@
     });
   }
 
+  async function saveProjectAndOpen(tool, title, payload, existingProjectId) {
+    const safeTool = cleanString(tool);
+    let projectId = cleanString(existingProjectId);
+    if (projectId) {
+      await updateProject(projectId, payload || {});
+    } else {
+      const saved = await saveProject(safeTool, title, payload || {});
+      projectId = cleanString(saved && saved.project && saved.project.id);
+    }
+    if (!projectId) {
+      throw new Error("Project could not be saved.");
+    }
+    const currentProjectId = getQueryParam("project");
+    if (currentProjectId !== projectId) {
+      const route = routeForTool(safeTool);
+      window.location.href = `${route}?project=${encodeURIComponent(projectId)}`;
+      return {
+        projectId,
+        navigated: true
+      };
+    }
+    return {
+      projectId,
+      navigated: false
+    };
+  }
+
   async function createHandoff(fromTool, toTool, payload, sourceProjectId) {
     return apiPost("/api/handoffs", {
       workspaceId: authState.workspaceId,
@@ -1073,7 +1150,7 @@
     const userName = cleanString(state && state.user && state.user.name, "Guest");
     const guest = isGuestUser(state && state.user);
     const creditsLabel = currentCreditsLabel(state && state.user);
-    const accountLabel = guest ? "Account" : userName;
+    const accountLabel = userName;
     return `
       <div class="bah-shell" aria-label="Global navigation">
         <nav class="bah-cluster bah-cluster-primary" aria-label="Primary">
@@ -1083,8 +1160,12 @@
           <span class="bah-credit-chip" title="Remaining monthly credits">Credits <strong>${escapeHtml(creditsLabel)}</strong></span>
           ${guest
             ? `<button type="button" class="header-link bah-link-pill bah-link-pill-primary bah-auth-btn" data-bah-auth-open>Sign In</button>`
-            : `<button type="button" class="header-link bah-link-pill bah-feedback-btn" data-bah-feedback-open>Feedback</button>`}
-          <button type="button" class="header-link bah-link-pill bah-user-btn bah-account-btn" data-bah-account>${escapeHtml(accountLabel)}</button>
+            : `<button type="button" class="header-link bah-link-pill bah-feedback-btn bah-feedback-icon-btn" data-bah-feedback-open aria-label="Share feedback" title="Share feedback">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v7A2.5 2.5 0 0 1 17.5 15H11l-4.8 4.2A.8.8 0 0 1 5 18.6V15.8A2.5 2.5 0 0 1 4 13.8z"></path>
+                </svg>
+              </button>
+              <button type="button" class="header-link bah-link-pill bah-user-btn bah-account-btn" data-bah-account>${escapeHtml(accountLabel)}</button>`}
         </div>
       </div>
     `;
@@ -1503,6 +1584,7 @@
             <h4 class="section-title" style="margin:0;">Or continue with Google</h4>
             <div data-bah-google-mount></div>
             <p class="inline-hint" data-bah-google-status></p>
+            <p class="inline-hint" data-bah-auth-debug></p>
           </div>
         </div>
       </section>
@@ -1572,6 +1654,19 @@
     const requestBtn = modal.querySelector("[data-bah-magic-request]");
     const verifyBtn = modal.querySelector("[data-bah-magic-verify]");
     const statusEl = modal.querySelector("[data-bah-magic-status]");
+    const debugEl = modal.querySelector("[data-bah-auth-debug]");
+
+    if (debugEl) {
+      try {
+        const diagnostics = await publicApiGet("/api/auth/diagnostics");
+        const googleConfigured = Boolean(diagnostics && diagnostics.google && diagnostics.google.configured);
+        const resendConfigured = Boolean(diagnostics && diagnostics.magicLink && diagnostics.magicLink.resendConfigured);
+        const fromConfigured = Boolean(diagnostics && diagnostics.magicLink && diagnostics.magicLink.fromEmailConfigured);
+        debugEl.textContent = `Google OAuth: ${googleConfigured ? "configured" : "not configured"} | Magic-link email sender: ${resendConfigured && fromConfigured ? "configured" : "not configured"}`;
+      } catch (_) {
+        debugEl.textContent = "";
+      }
+    }
 
     if (emailInput && !cleanString(emailInput.value)) {
       emailInput.value = "";
@@ -1590,26 +1685,26 @@
           const response = await publicApiPost("/api/auth/magic-link/request", { email });
           const token = cleanString(response && response.magicLinkToken);
           const detail = cleanString(response && response.detail);
+          const deliveryMode = cleanString(response && response.deliveryMode, response && response.simulated ? "simulated" : "");
+          const deliverySent = Boolean(response && response.deliverySent);
           const expiresMinutes = Number(response && response.expiresInMinutes || 15);
 
           if (tokenInput && token) {
             tokenInput.value = token;
           }
 
-          if (response && response.simulated && token) {
-            if (statusEl) {
-              statusEl.textContent = `Email delivery is not configured yet. Completing sign-in directly for ${email}...`;
-            }
-            const auth = await publicApiPost("/api/auth/magic-link/verify", { token });
-            storeAuth(auth || {});
-            authReadyPromise = Promise.resolve(authState);
-            window.location.reload();
-            return;
-          }
-
           if (statusEl) {
-            const inboxMessage = `Magic link sent to ${email}. It expires in ${expiresMinutes} minutes.`;
-            statusEl.textContent = detail ? `${inboxMessage} ${detail}` : inboxMessage;
+            if (deliverySent) {
+              const inboxMessage = `Magic link sent to ${email}. It expires in ${expiresMinutes} minutes.`;
+              statusEl.textContent = detail ? `${inboxMessage} ${detail}` : inboxMessage;
+            } else if (token) {
+              const fallbackLead = deliveryMode === "resend-error"
+                ? "Email delivery failed. Use the token field below to sign in now."
+                : "Email delivery is not configured yet. Use the token field below to sign in now.";
+              statusEl.textContent = detail ? `${fallbackLead} ${detail}` : fallbackLead;
+            } else {
+              statusEl.textContent = detail || "Could not send magic link.";
+            }
           }
         } catch (error) {
           if (statusEl) {
@@ -1663,15 +1758,19 @@
           <button type="button" class="bah-project-close" data-bah-feedback-close>Close</button>
         </div>
         <div class="form-grid">
-          <div class="field">
-            <label for="bahFeedbackRating">How helpful was this page?</label>
-            <select id="bahFeedbackRating" class="select">
-              <option value="5">5 - Excellent</option>
-              <option value="4">4 - Good</option>
-              <option value="3">3 - Okay</option>
-              <option value="2">2 - Needs work</option>
-              <option value="1">1 - Poor</option>
-            </select>
+          <div class="field span-2">
+            <label>How helpful was this page?</label>
+            <div class="bah-feedback-stars" role="radiogroup" aria-label="Feedback rating">
+              <button type="button" class="bah-feedback-star" data-bah-feedback-star="1" aria-label="1 star">&#9733;</button>
+              <button type="button" class="bah-feedback-star" data-bah-feedback-star="2" aria-label="2 stars">&#9733;</button>
+              <button type="button" class="bah-feedback-star" data-bah-feedback-star="3" aria-label="3 stars">&#9733;</button>
+              <button type="button" class="bah-feedback-star" data-bah-feedback-star="4" aria-label="4 stars">&#9733;</button>
+              <button type="button" class="bah-feedback-star" data-bah-feedback-star="5" aria-label="5 stars">&#9733;</button>
+            </div>
+            <div class="bah-feedback-meter" aria-hidden="true">
+              <span class="bah-feedback-meter-fill" data-bah-feedback-meter-fill></span>
+            </div>
+            <p class="inline-hint" data-bah-feedback-rating-label>Select a rating.</p>
           </div>
           <div class="field span-2">
             <label for="bahFeedbackMessage">Feedback</label>
@@ -1704,13 +1803,56 @@
     });
     const submitBtn = modal.querySelector("[data-bah-feedback-submit]");
     const messageInput = modal.querySelector("#bahFeedbackMessage");
-    const ratingInput = modal.querySelector("#bahFeedbackRating");
+    const starButtons = $all("[data-bah-feedback-star]", modal);
+    const meterFill = modal.querySelector("[data-bah-feedback-meter-fill]");
+    const ratingLabel = modal.querySelector("[data-bah-feedback-rating-label]");
     const statusEl = modal.querySelector("[data-bah-feedback-status]");
+    const ratingWords = {
+      1: "Very rough",
+      2: "Needs work",
+      3: "Decent",
+      4: "Strong",
+      5: "Excellent"
+    };
+    let currentRating = 0;
+
+    const applyStarState = (rating) => {
+      const active = Math.max(0, Math.min(5, Number(rating || 0)));
+      starButtons.forEach((buttonEl) => {
+        const value = Number(buttonEl.getAttribute("data-bah-feedback-star") || 0);
+        buttonEl.classList.toggle("is-active", value <= active && active > 0);
+      });
+      if (meterFill) {
+        meterFill.style.width = `${active * 20}%`;
+      }
+      if (ratingLabel) {
+        ratingLabel.textContent = active ? `${active}/5 - ${ratingWords[active]}` : "Select a rating.";
+      }
+    };
+    applyStarState(currentRating);
+
+    starButtons.forEach((buttonEl) => {
+      buttonEl.onclick = () => {
+        currentRating = Number(buttonEl.getAttribute("data-bah-feedback-star") || 0);
+        applyStarState(currentRating);
+      };
+      buttonEl.onmouseenter = () => {
+        const hoverValue = Number(buttonEl.getAttribute("data-bah-feedback-star") || 0);
+        applyStarState(hoverValue);
+      };
+      buttonEl.onmouseleave = () => {
+        applyStarState(currentRating);
+      };
+    });
 
     if (submitBtn) {
       submitBtn.onclick = async () => {
         const message = cleanString(messageInput && messageInput.value);
-        const rating = Number(ratingInput && ratingInput.value || 0);
+        const rating = Number(currentRating || 0);
+        if (!rating) {
+          if (statusEl) statusEl.textContent = "Choose a star rating first.";
+          return;
+        }
         if (!message || message.length < 8) {
           if (statusEl) statusEl.textContent = "Please provide a bit more detail (at least a short sentence).";
           return;
@@ -1721,7 +1863,7 @@
             pagePath: window.location.pathname,
             message,
             rating,
-            sentiment: rating >= 4 ? "positive" : "neutral"
+            sentiment: rating >= 4 ? "positive" : rating <= 2 ? "negative" : "neutral"
           });
           if (statusEl) {
             statusEl.textContent = "Thank you. Your feedback was sent.";
@@ -1729,6 +1871,8 @@
           if (messageInput) {
             messageInput.value = "";
           }
+          currentRating = 0;
+          applyStarState(currentRating);
         } catch (error) {
           if (statusEl) {
             statusEl.textContent = cleanString(error && error.message, "Could not send feedback right now.");
@@ -1950,7 +2094,7 @@
           void openAuthModal();
           return;
         }
-        void openAccountModal();
+        window.location.href = "/account/";
       });
     }
 
@@ -1961,7 +2105,6 @@
       });
     }
 
-    ensureFeedbackFab();
     enforceIconSizing();
   }
 
@@ -2048,7 +2191,9 @@
     publicApiGet, publicApiPost,
     toggleTheme, applyTheme,
     openAuthModal, openFeedbackModal,
+    signOut,
     ensureAuthReady, trackEvent, saveProject, getProject, updateProject, listProjects, deleteProject, appendProjectExport,
+    saveProjectAndOpen,
     createHandoff, getHandoff, createLearningPath, listLearningPaths, getLearningPath, updateLearningPath, deleteLearningPath, shareLearningPath,
     hydrateProjectFromQuery, getQueryParam,
     registerToolLifecycle,
