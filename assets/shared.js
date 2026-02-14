@@ -34,6 +34,7 @@
     workspaceId: "bah_workspace_id",
     theme: "bah_theme"
   };
+  const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
   const THEME_DARK = "dark";
   const THEME_LIGHT = "light";
   const ADMIN_EMAIL = "dalmomendonca@gmail.com";
@@ -252,6 +253,9 @@
   }
 
   function isGuestUser(user) {
+    if (!user || typeof user !== "object") {
+      return true;
+    }
     const email = cleanString(user && user.email).toLowerCase();
     return Boolean(
       user
@@ -266,22 +270,93 @@
   }
 
   function currentCreditsLabel(user) {
+    if (!user || typeof user !== "object") {
+      return "--";
+    }
     const credits = user && Number.isFinite(Number(user.credits))
       ? Number(user.credits)
       : null;
     return credits === null ? "Unlimited" : String(credits);
   }
 
-  function readStoredAuth() {
-    try {
-      const token = localStorage.getItem(STORAGE_KEYS.token) || "";
-      const workspaceId = localStorage.getItem(STORAGE_KEYS.workspaceId) || "";
-      const userRaw = localStorage.getItem(STORAGE_KEYS.user) || "";
-      const user = userRaw ? JSON.parse(userRaw) : null;
-      authState = { token, workspaceId, user };
-    } catch (_) {
-      authState = { token: "", workspaceId: "", user: null };
+  function readCookie(name) {
+    const safeName = cleanString(name);
+    if (!safeName || typeof document === "undefined") {
+      return "";
     }
+    const prefix = `${safeName}=`;
+    const rows = String(document.cookie || "").split(";");
+    for (const row of rows) {
+      const trimmed = row.trim();
+      if (!trimmed.startsWith(prefix)) {
+        continue;
+      }
+      const raw = trimmed.slice(prefix.length);
+      try {
+        return decodeURIComponent(raw);
+      } catch (_) {
+        return raw;
+      }
+    }
+    return "";
+  }
+
+  function writeCookie(name, value, maxAgeSeconds = COOKIE_MAX_AGE_SECONDS) {
+    const safeName = cleanString(name);
+    if (!safeName || typeof document === "undefined") {
+      return;
+    }
+    const safeValue = encodeURIComponent(cleanString(value));
+    const attrs = [
+      "Path=/",
+      `Max-Age=${Math.max(0, Number(maxAgeSeconds) || 0)}`,
+      "SameSite=Lax"
+    ];
+    if (window.location && window.location.protocol === "https:") {
+      attrs.push("Secure");
+    }
+    document.cookie = `${safeName}=${safeValue}; ${attrs.join("; ")}`;
+  }
+
+  function deleteCookie(name) {
+    const safeName = cleanString(name);
+    if (!safeName || typeof document === "undefined") {
+      return;
+    }
+    const attrs = ["Path=/", "Max-Age=0", "SameSite=Lax"];
+    if (window.location && window.location.protocol === "https:") {
+      attrs.push("Secure");
+    }
+    document.cookie = `${safeName}=; ${attrs.join("; ")}`;
+  }
+
+  function readStoredAuth() {
+    let token = "";
+    let workspaceId = "";
+    let user = null;
+    try {
+      token = cleanString(localStorage.getItem(STORAGE_KEYS.token));
+    } catch (_) {
+      token = "";
+    }
+    try {
+      workspaceId = cleanString(localStorage.getItem(STORAGE_KEYS.workspaceId));
+    } catch (_) {
+      workspaceId = "";
+    }
+    try {
+      const userRaw = localStorage.getItem(STORAGE_KEYS.user) || "";
+      user = userRaw ? JSON.parse(userRaw) : null;
+    } catch (_) {
+      user = null;
+    }
+    if (!token) {
+      token = cleanString(readCookie(STORAGE_KEYS.token));
+    }
+    if (!workspaceId) {
+      workspaceId = cleanString(readCookie(STORAGE_KEYS.workspaceId));
+    }
+    authState = { token, workspaceId, user };
     return authState;
   }
 
@@ -297,13 +372,17 @@
     try {
       if (token) {
         localStorage.setItem(STORAGE_KEYS.token, token);
+        writeCookie(STORAGE_KEYS.token, token);
       } else {
         localStorage.removeItem(STORAGE_KEYS.token);
+        deleteCookie(STORAGE_KEYS.token);
       }
       if (workspaceId) {
         localStorage.setItem(STORAGE_KEYS.workspaceId, workspaceId);
+        writeCookie(STORAGE_KEYS.workspaceId, workspaceId);
       } else {
         localStorage.removeItem(STORAGE_KEYS.workspaceId);
+        deleteCookie(STORAGE_KEYS.workspaceId);
       }
       if (user) {
         localStorage.setItem(STORAGE_KEYS.user, JSON.stringify(user));
@@ -312,6 +391,17 @@
       }
     } catch (_) {
       // Ignore localStorage write failures.
+    }
+    // Keep cookie fallback in sync so auth survives localStorage failures.
+    if (token) {
+      writeCookie(STORAGE_KEYS.token, token);
+    } else {
+      deleteCookie(STORAGE_KEYS.token);
+    }
+    if (workspaceId) {
+      writeCookie(STORAGE_KEYS.workspaceId, workspaceId);
+    } else {
+      deleteCookie(STORAGE_KEYS.workspaceId);
     }
     featureFlagsState = null;
   }
@@ -325,6 +415,8 @@
     } catch (_) {
       // ignore
     }
+    deleteCookie(STORAGE_KEYS.token);
+    deleteCookie(STORAGE_KEYS.workspaceId);
     featureFlagsState = null;
   }
 
@@ -414,6 +506,16 @@
           return authState;
         }
       }
+      if (existing.status === 401 || existing.status === 403) {
+        // Token existed but is not valid on the API side; avoid silently switching to a guest identity.
+        clearStoredAuth();
+        return authState;
+      }
+      const existingPayload = await existing.json().catch(() => ({}));
+      throw new Error(cleanString(
+        existingPayload && existingPayload.error,
+        `Unable to resume your session (HTTP ${existing.status}).`
+      ));
     }
     const guestResponse = await rawApiRequest("/api/auth/guest", {
       method: "POST",
@@ -448,14 +550,17 @@
     await ensureAuthReady();
     const requestOptions = { ...(options || {}) };
     requestOptions.headers = authHeaders(requestOptions.headers);
+    const hadSessionToken = Boolean(authState.token);
 
     let response = await rawApiRequest(url, requestOptions);
     if (response.status === 401) {
       clearStoredAuth();
       authReadyPromise = null;
-      await ensureAuthReady();
-      requestOptions.headers = authHeaders(options.headers);
-      response = await rawApiRequest(url, requestOptions);
+      if (!hadSessionToken) {
+        await ensureAuthReady();
+        requestOptions.headers = authHeaders(options.headers);
+        response = await rawApiRequest(url, requestOptions);
+      }
     }
 
     let data = {};
@@ -972,19 +1077,13 @@
     return `
       <div class="bah-shell" aria-label="Global navigation">
         <nav class="bah-cluster bah-cluster-primary" aria-label="Primary">
-          <a class="header-link bah-link-pill" href="/#homePricing">Pricing</a>
           <button type="button" class="header-link bah-link-pill bah-projects-btn" data-bah-projects>Projects</button>
-          <button type="button" class="header-link bah-link-pill bah-notice-btn" data-bah-notices>Notices</button>
         </nav>
         <div class="bah-cluster bah-cluster-account" aria-label="Account and settings">
           <span class="bah-credit-chip" title="Remaining monthly credits">Credits <strong>${escapeHtml(creditsLabel)}</strong></span>
           ${guest
             ? `<button type="button" class="header-link bah-link-pill bah-link-pill-primary bah-auth-btn" data-bah-auth-open>Sign In</button>`
             : `<button type="button" class="header-link bah-link-pill bah-feedback-btn" data-bah-feedback-open>Feedback</button>`}
-          <label class="bah-workspace-wrap">
-            <span class="bah-workspace-label">Workspace</span>
-            <select class="select bah-workspace-select" data-bah-workspace aria-label="Active workspace"></select>
-          </label>
           <button type="button" class="header-link bah-link-pill bah-user-btn bah-account-btn" data-bah-account>${escapeHtml(accountLabel)}</button>
         </div>
       </div>
@@ -1174,76 +1273,6 @@
     wireProjectsDialog(modal);
     modal.classList.remove("hidden");
     await renderProjectsDialogList(modal);
-  }
-
-  async function populateWorkspaceSelect(selectEl) {
-    if (!selectEl) {
-      return;
-    }
-    let payload = {};
-    try {
-      payload = await apiGet("/api/workspaces");
-    } catch (_) {
-      payload = { workspaces: [] };
-    }
-    const workspaces = Array.isArray(payload.workspaces) ? payload.workspaces : [];
-    if (!workspaces.length) {
-      selectEl.innerHTML = "<option>Workspace</option>";
-      return;
-    }
-    selectEl.innerHTML = workspaces
-      .map((workspace) => `<option value="${escapeHtml(workspace.id)}">${escapeHtml(workspace.name)} (${escapeHtml(workspace.role)})</option>`)
-      .join("");
-    const active = cleanString(payload.activeWorkspaceId || authState.workspaceId || workspaces[0].id);
-    if (active) {
-      selectEl.value = active;
-      authState.workspaceId = active;
-      try {
-        localStorage.setItem(STORAGE_KEYS.workspaceId, active);
-      } catch (_) {
-        // ignore
-      }
-    }
-    selectEl.addEventListener("change", async () => {
-      const workspaceId = cleanString(selectEl.value);
-      if (!workspaceId) {
-        return;
-      }
-      await apiPost("/api/workspaces/active", { workspaceId });
-      authState.workspaceId = workspaceId;
-      try {
-        localStorage.setItem(STORAGE_KEYS.workspaceId, workspaceId);
-      } catch (_) {
-        // ignore
-      }
-      await trackEvent("workspace_switch", { workspaceId });
-      window.location.reload();
-    });
-  }
-
-  async function showNotices() {
-    let payload = { notifications: [] };
-    try {
-      payload = await apiGet("/api/notifications");
-    } catch (_) {
-      payload = { notifications: [] };
-    }
-    const items = Array.isArray(payload.notifications) ? payload.notifications : [];
-    if (!items.length) {
-      window.alert("No notifications right now.");
-      return;
-    }
-    const lines = items.slice(0, 6).map((item) => `- ${cleanString(item.title)}: ${cleanString(item.body)}`);
-    window.alert(lines.join("\n"));
-    for (const item of items.slice(0, 6)) {
-      if (!item.readAt) {
-        try {
-          await apiPost(`/api/notifications/${encodeURIComponent(cleanString(item.id))}/read`, {});
-        } catch (_) {
-          // no-op
-        }
-      }
-    }
   }
 
   async function promptOnboardingOnce() {
@@ -1900,9 +1929,6 @@
     shell.setAttribute("data-bah-shell", "1");
     headerInner.appendChild(shell);
 
-    const workspaceSelect = $("[data-bah-workspace]", shell);
-    await populateWorkspaceSelect(workspaceSelect);
-
     const authBtn = $("[data-bah-auth-open]", shell);
     if (authBtn) {
       authBtn.addEventListener("click", () => {
@@ -1925,13 +1951,6 @@
           return;
         }
         void openAccountModal();
-      });
-    }
-
-    const noticeBtn = $("[data-bah-notices]", shell);
-    if (noticeBtn) {
-      noticeBtn.addEventListener("click", () => {
-        void showNotices();
       });
     }
 
