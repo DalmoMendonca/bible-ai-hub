@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  quality-gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Syntax checks
+        run: npm run test:syntax
+
+      - name: SEO structured-data and social snapshot checks
+        run: npm run test:seo
+
+      - name: AI regression suite (test:all)
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          if [ -z "${OPENAI_API_KEY}" ]; then
+            echo "OPENAI_API_KEY secret is required for npm run test:all"
+            exit 1
+          fi
+          npm run test:all
+
+      - name: Start server for Lighthouse
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          npm run dev > /tmp/bible-ai-hub-server.log 2>&1 &
+          echo $! > /tmp/bible-ai-hub-server.pid
+
+      - name: Wait for local server
+        run: npx wait-on http://127.0.0.1:3000/api/health
+
+      - name: Lighthouse SEO thresholds
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          configPath: ./.lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: false
+
+      - name: Stop local server
+        if: always()
+        run: |
+          if [ -f /tmp/bible-ai-hub-server.pid ]; then
+            kill "$(cat /tmp/bible-ai-hub-server.pid)" || true
+          fi
+          if [ -f /tmp/bible-ai-hub-server.log ]; then
+            tail -n 120 /tmp/bible-ai-hub-server.log || true
+          fi
+

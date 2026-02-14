@@ -1,0 +1,79 @@
+{
+  "index.html": {
+    "canonical": "https://bible.hiredalmo.com/",
+    "ogTitle": "Bible AI Hub | AI Tools for Bible Study, Sermon Prep, and Teaching",
+    "ogDescription": "AI tools for Bible study, sermon preparation, teaching, sermon analysis, and timestamped video search.",
+    "ogUrl": "https://bible.hiredalmo.com/",
+    "ogImage": "https://bible.hiredalmo.com/assets/social-share.png",
+    "twitterCard": "summary_large_image",
+    "twitterTitle": "Bible AI Hub | AI Tools for Bible Study, Sermon Prep, and Teaching",
+    "twitterDescription": "AI tools for Bible study, sermon preparation, teaching, sermon analysis, and timestamped video search.",
+    "twitterImage": "https://bible.hiredalmo.com/assets/social-share.png"
+  },
+  "ai/apps/bible-study/index.html": {
+    "canonical": "https://bible.hiredalmo.com/ai/apps/bible-study/",
+    "ogTitle": "Bible Study Chat AI Tool | CLEAR Method and 10-Step Exegesis",
+    "ogDescription": "Generate a passage-specific Bible study plan with CLEAR + 10-step guidance for faithful interpretation and practical ministry application.",
+    "ogUrl": "https://bible.hiredalmo.com/ai/apps/bible-study/",
+    "ogImage": "https://bible.hiredalmo.com/assets/social-share.png",
+    "twitterCard": "summary_large_image",
+    "twitterTitle": "Bible Study Chat AI Tool | CLEAR Method and 10-Step Exegesis",
+    "twitterDescription": "Walk through CLEAR and a 10-step Bible study workflow with AI assistance for deeper Scripture study.",
+    "twitterImage": "https://bible.hiredalmo.com/assets/social-share.png"
+  },
+  "ai/apps/sermon-preparation/index.html": {
+    "canonical": "https://bible.hiredalmo.com/ai/apps/sermon-preparation/",
+    "ogTitle": "AI Sermon Preparation Tool | Build Expository Outlines Fast",
+    "ogDescription": "Turn a passage into a structured sermon workflow with big idea, outline, transitions, applications, and practical timing.",
+    "ogUrl": "https://bible.hiredalmo.com/ai/apps/sermon-preparation/",
+    "ogImage": "https://bible.hiredalmo.com/assets/social-share.png",
+    "twitterCard": "summary_large_image",
+    "twitterTitle": "AI Sermon Preparation Tool | Build Expository Outlines Fast",
+    "twitterDescription": "Generate sermon outlines, transitions, applications, and timing plans from Scripture with AI.",
+    "twitterImage": "https://bible.hiredalmo.com/assets/social-share.png"
+  },
+  "ai/apps/teaching-tools/index.html": {
+    "canonical": "https://bible.hiredalmo.com/ai/apps/teaching-tools/",
+    "ogTitle": "AI Teaching Tools for Bible Lessons | Bible AI Hub",
+    "ogDescription": "Generate classroom-ready Bible lesson plans for kids, youth, and adults with structured teaching flow and practical application.",
+    "ogUrl": "https://bible.hiredalmo.com/ai/apps/teaching-tools/",
+    "ogImage": "https://bible.hiredalmo.com/assets/social-share.png",
+    "twitterCard": "summary_large_image",
+    "twitterTitle": "AI Teaching Tools for Bible Lessons | Bible AI Hub",
+    "twitterDescription": "Create complete AI-powered Bible lesson kits with age-fit content, questions, and practical teaching plans.",
+    "twitterImage": "https://bible.hiredalmo.com/assets/social-share.png"
+  },
+  "ai/apps/research-helper/index.html": {
+    "canonical": "https://bible.hiredalmo.com/ai/apps/research-helper/",
+    "ogTitle": "AI Sermon Evaluation Tool | Manuscript Review and Coaching",
+    "ogDescription": "Get sermon manuscript analysis with diagnostic scores, editorial feedback, and high-impact revision recommendations.",
+    "ogUrl": "https://bible.hiredalmo.com/ai/apps/research-helper/",
+    "ogImage": "https://bible.hiredalmo.com/assets/social-share.png",
+    "twitterCard": "summary_large_image",
+    "twitterTitle": "AI Sermon Evaluation Tool | Manuscript Review and Coaching",
+    "twitterDescription": "Analyze sermon manuscripts and receive actionable coaching with AI-powered diagnostics and revision suggestions.",
+    "twitterImage": "https://bible.hiredalmo.com/assets/social-share.png"
+  },
+  "ai/apps/sermon-analyzer/index.html": {
+    "canonical": "https://bible.hiredalmo.com/ai/apps/sermon-analyzer/",
+    "ogTitle": "AI Sermon Analyzer | Audio Transcription, Pacing, and Coaching",
+    "ogDescription": "Analyze sermon recordings with transcription, emotional arc, pacing metrics, vocal dynamics, and actionable coaching feedback.",
+    "ogUrl": "https://bible.hiredalmo.com/ai/apps/sermon-analyzer/",
+    "ogImage": "https://bible.hiredalmo.com/assets/social-share.png",
+    "twitterCard": "summary_large_image",
+    "twitterTitle": "AI Sermon Analyzer | Audio Transcription, Pacing, and Coaching",
+    "twitterDescription": "Upload your sermon audio and receive deep AI-powered analysis plus practical next-step coaching.",
+    "twitterImage": "https://bible.hiredalmo.com/assets/social-share.png"
+  },
+  "ai/apps/video-search/index.html": {
+    "canonical": "https://bible.hiredalmo.com/ai/apps/video-search/",
+    "ogTitle": "AI Video Search for Bible Training Content | Bible AI Hub",
+    "ogDescription": "Find exact training moments with timestamped AI video search, semantic ranking, and smart follow-up query guidance.",
+    "ogUrl": "https://bible.hiredalmo.com/ai/apps/video-search/",
+    "ogImage": "https://bible.hiredalmo.com/assets/social-share.png",
+    "twitterCard": "summary_large_image",
+    "twitterTitle": "AI Video Search for Bible Training Content | Bible AI Hub",
+    "twitterDescription": "Search transcripts and metadata to jump to exact timestamps in Bible training videos.",
+    "twitterImage": "https://bible.hiredalmo.com/assets/social-share.png"
+  }
+}

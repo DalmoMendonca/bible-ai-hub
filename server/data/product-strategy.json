@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "effectiveDate": "2026-02-13",
+  "primaryICP": {
+    "segment": "solo_and_small_team_pastors",
+    "why": "Highest weekly sermon-prep pain and fastest measurable ROI from end-to-end workflow automation.",
+    "secondarySegments": [
+      "bible_teachers",
+      "multi-staff_ministry_teams"
+    ]
+  },
+  "packaging": {
+    "model": "hybrid_a_la_carte_plus_bundle",
+    "decision": "Keep app-level plans for entry, but lead with bundle plans for conversion and retention.",
+    "bundlePriorityOrder": [
+      "bundle-pro",
+      "team-growth"
+    ]
+  },
+  "analyzerFairUsePolicy": {
+    "meteredFeature": "sermon-analyzer",
+    "unit": "minutes_per_month",
+    "caps": {
+      "sermon-analyzer-pro": 600,
+      "bundle-pro": 300,
+      "team-growth": 1800
+    },
+    "overageBehavior": "hard_cap_with_monthly_reset",
+    "upgradePath": [
+      "sermon-analyzer-pro",
+      "team-growth"
+    ],
+    "customerMessage": "Sermon Analyzer minutes reset monthly. Upgrade for a higher cap when your team grows."
+  },
+  "proofContentPlan": {
+    "policy": "Only publish role-tagged testimonials and case studies with attribution metadata.",
+    "requiredAttributionFields": [
+      "source",
+      "sourceUrl",
+      "verifiedAt"
+    ],
+    "reviewCadence": "monthly",
+    "ownerRole": "growth_ops"
+  }
+}
+

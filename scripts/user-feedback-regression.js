@@ -165,48 +165,51 @@ async function testBibleStudyQuality(authHeaders) {
 }
 
 async function testSermonAnalyzerTranscriptMode(authHeaders) {
-  const payload = await fetchJsonWithRetry(`${BASE_URL}/api/ai/sermon-analyzer`, {
-    method: "POST",
-    headers: authHeaders,
-    body: JSON.stringify({
-      context: "Conference Message",
-      goal: "Stronger engagement and slower pacing",
-      notes: "Transcript-only QA scenario",
-      transcriptOverride: "Church family, today we look at Philippians 2 and the humility of Christ. We follow His example through repentance, service, and joyful obedience.",
-      localAnalysis: {}
-    })
-  });
+  const repeatRuns = 3;
+  for (let run = 1; run <= repeatRuns; run += 1) {
+    const payload = await fetchJsonWithRetry(`${BASE_URL}/api/ai/sermon-analyzer`, {
+      method: "POST",
+      headers: authHeaders,
+      body: JSON.stringify({
+        context: "Conference Message",
+        goal: "Stronger engagement and slower pacing",
+        notes: `Transcript-only QA scenario (run ${run}/${repeatRuns})`,
+        transcriptOverride: "Church family, today we look at Philippians 2 and the humility of Christ. We follow His example through repentance, service, and joyful obedience.",
+        localAnalysis: {}
+      })
+    });
 
-  const actions = payload && payload.coachingFeedback && Array.isArray(payload.coachingFeedback.priorityActions)
-    ? payload.coachingFeedback.priorityActions
-    : [];
-  assert(actions.length > 0, "Expected priority actions in coaching feedback.");
-  assert(!actions.some((item) => /\[object Object\]/i.test(String(item || ""))), "Priority actions include [object Object].");
+    const actions = payload && payload.coachingFeedback && Array.isArray(payload.coachingFeedback.priorityActions)
+      ? payload.coachingFeedback.priorityActions
+      : [];
+    assert(actions.length > 0, `Expected priority actions in coaching feedback (run ${run}/${repeatRuns}).`);
+    assert(!actions.some((item) => /\[object Object\]/i.test(String(item || ""))), `Priority actions include [object Object] (run ${run}/${repeatRuns}).`);
 
-  const pacing = payload && payload.pacingAnalysis && typeof payload.pacingAnalysis === "object" ? payload.pacingAnalysis : {};
-  const vocal = payload && payload.vocalDynamics && typeof payload.vocalDynamics === "object" ? payload.vocalDynamics : {};
-  assert(typeof pacing.source === "string" && pacing.source.length > 0, "Pacing should include metric source.");
-  assert(typeof vocal.source === "string" && vocal.source.length > 0, "Vocal dynamics should include metric source.");
+    const pacing = payload && payload.pacingAnalysis && typeof payload.pacingAnalysis === "object" ? payload.pacingAnalysis : {};
+    const vocal = payload && payload.vocalDynamics && typeof payload.vocalDynamics === "object" ? payload.vocalDynamics : {};
+    assert(typeof pacing.source === "string" && pacing.source.length > 0, `Pacing should include metric source (run ${run}/${repeatRuns}).`);
+    assert(typeof vocal.source === "string" && vocal.source.length > 0, `Vocal dynamics should include metric source (run ${run}/${repeatRuns}).`);
 
-  if (vocal.source !== "audio") {
-    const unavailableMetrics = [
-      "avgDb",
-      "peakDb",
-      "dynamicRangeDb",
-      "volumeStdDb",
-      "pitchMeanHz",
-      "pitchStdHz",
-      "pitchRangeHz",
-      "varietyScore",
-      "volumeRangeScore",
-      "pitchVariationScore",
-      "monotoneRiskScore"
-    ];
-    for (const key of unavailableMetrics) {
-      const value = vocal[key];
-      assert(value === null || typeof value === "undefined", `${key} should be null when audio provenance is unavailable.`);
+    if (vocal.source !== "audio") {
+      const unavailableMetrics = [
+        "avgDb",
+        "peakDb",
+        "dynamicRangeDb",
+        "volumeStdDb",
+        "pitchMeanHz",
+        "pitchStdHz",
+        "pitchRangeHz",
+        "varietyScore",
+        "volumeRangeScore",
+        "pitchVariationScore",
+        "monotoneRiskScore"
+      ];
+      for (const key of unavailableMetrics) {
+        const value = vocal[key];
+        assert(value === null || typeof value === "undefined", `${key} should be null when audio provenance is unavailable (run ${run}/${repeatRuns}).`);
+      }
+      assert(String(vocal.sourceNote || "").trim().length > 0, `Expected explanatory source note for transcript-only vocal metrics (run ${run}/${repeatRuns}).`);
     }
-    assert(String(vocal.sourceNote || "").trim().length > 0, "Expected explanatory source note for transcript-only vocal metrics.");
   }
 }
 

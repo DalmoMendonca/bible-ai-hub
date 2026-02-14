@@ -1,0 +1,35 @@
+{
+  "ci": {
+    "collect": {
+      "numberOfRuns": 1,
+      "url": [
+        "http://127.0.0.1:3000/",
+        "http://127.0.0.1:3000/pricing/",
+        "http://127.0.0.1:3000/ai/apps/bible-study/",
+        "http://127.0.0.1:3000/ai/apps/sermon-preparation/",
+        "http://127.0.0.1:3000/ai/apps/teaching-tools/",
+        "http://127.0.0.1:3000/ai/apps/research-helper/",
+        "http://127.0.0.1:3000/ai/apps/sermon-analyzer/",
+        "http://127.0.0.1:3000/ai/apps/video-search/"
+      ],
+      "settings": {
+        "chromeFlags": "--no-sandbox --disable-dev-shm-usage"
+      }
+    },
+    "assert": {
+      "assertions": {
+        "categories:seo": [
+          "error",
+          {
+            "minScore": 0.9
+          }
+        ],
+        "canonical": "error",
+        "document-title": "error",
+        "meta-description": "error",
+        "http-status-code": "error"
+      }
+    }
+  }
+}
+

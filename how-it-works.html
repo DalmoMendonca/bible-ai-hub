@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>How Bible AI Hub Works | Prompt and API Transparency</title>
-  <meta name="description" content="Transparent view of every Bible AI Hub app flow: API calls, full prompts, response shapes, and how outputs power final results." />
+  <meta name="description" content="Transparent view of every Bible AI Hub app flow: API calls, live prompts, and how outputs power final results." />
   <meta name="robots" content="noindex, nofollow" />
   <meta name="author" content="Bible AI Hub" />
   <meta name="theme-color" content="#0f5f9b" />
@@ -67,15 +67,36 @@
     .how-flow-row {
       display: flex;
       align-items: stretch;
-      gap: 0.46rem;
-      min-width: min(100%, 840px);
+      gap: 0.5rem;
+      min-width: min(100%, 920px);
     }
     .how-node {
-      min-width: 180px;
+      min-width: 196px;
       border: 1px solid #d5e4f1;
       border-radius: 11px;
       background: #fff;
       padding: 0.5rem 0.55rem;
+    }
+    .how-node-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.35rem;
+      margin-bottom: 0.2rem;
+    }
+    .how-step-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      border: 1px solid #bfd6ea;
+      background: #f0f7ff;
+      color: #24517a;
+      font-size: 0.68rem;
+      font-weight: 700;
+      line-height: 1;
+      padding: 0.14rem 0.46rem;
+      white-space: nowrap;
     }
     .how-node p { margin: 0.12rem 0 0; color: #4f6b85; font-size: 0.79rem; line-height: 1.3; }
     .how-node .k {
@@ -96,7 +117,6 @@
     .how-node.prompt { border-color: #c7ddf0; background: linear-gradient(180deg, #f5fbff, #fff); }
     .how-node.ai { border-color: #c9e4d7; background: linear-gradient(180deg, #f5fff9, #fff); }
     .how-node.data { border-color: #e1d9c6; background: linear-gradient(180deg, #fffbf3, #fff); }
-    .how-arrow { align-self: center; color: #7c93ab; font-size: 0.98rem; font-weight: 700; }
     .how-sections {
       display: grid;
       grid-template-columns: minmax(0, 1fr);
@@ -161,6 +181,139 @@
       display: none;
       content: "";
     }
+    .how-editor {
+      margin-top: 0.45rem;
+      padding: 0.58rem;
+      border: 1px solid #dce8f3;
+      border-radius: 10px;
+      background: linear-gradient(180deg, #f9fcff, #fff);
+    }
+    .how-editor h5 {
+      margin: 0 0 0.4rem;
+      color: #1f415f;
+      font-size: 0.79rem;
+      font-family: "Space Grotesk", "Segoe UI", sans-serif;
+    }
+    .how-editor-grid {
+      display: grid;
+      gap: 0.42rem;
+    }
+    .how-editor-label {
+      color: #456483;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .how-editor textarea {
+      width: 100%;
+      min-height: 140px;
+      border-radius: 10px;
+      border: 1px solid #cfe1f0;
+      background: #fff;
+      color: #1f415f;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size: 0.74rem;
+      line-height: 1.35;
+      padding: 0.5rem;
+      resize: vertical;
+    }
+    .how-editor-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      margin-top: 0.45rem;
+      flex-wrap: wrap;
+    }
+    .how-btn {
+      border: 1px solid #c8daeb;
+      border-radius: 10px;
+      background: #fff;
+      color: #24547f;
+      font-size: 0.76rem;
+      font-weight: 700;
+      padding: 0.34rem 0.6rem;
+      cursor: pointer;
+    }
+    .how-btn:hover { background: #f1f7ff; }
+    .how-btn:disabled {
+      opacity: 0.58;
+      cursor: wait;
+    }
+    .how-btn.primary {
+      border-color: #7ab0d9;
+      background: linear-gradient(180deg, #2f9ed2, #2b67c7);
+      color: #fff;
+    }
+    .how-tree {
+      margin-top: 0.4rem;
+      border: 1px solid #d7e5f2;
+      border-radius: 10px;
+      background:
+        linear-gradient(180deg, #f8fbff, #fff),
+        repeating-linear-gradient(0deg, rgba(174, 200, 224, 0.12), rgba(174, 200, 224, 0.12) 1px, transparent 1px, transparent 22px);
+      padding: 0.58rem;
+      max-height: 360px;
+      overflow: auto;
+      font-size: 0.77rem;
+    }
+    .how-tree-list,
+    .how-tree-list ul {
+      list-style: none;
+      margin: 0;
+      padding-left: 0.95rem;
+      position: relative;
+    }
+    .how-tree-list ul::before {
+      content: "";
+      position: absolute;
+      left: 0.36rem;
+      top: 0;
+      bottom: 0.15rem;
+      border-left: 1px dashed #bfd5e8;
+    }
+    .how-tree-node {
+      position: relative;
+      margin: 0.16rem 0;
+    }
+    .how-tree-node::before {
+      content: "";
+      position: absolute;
+      left: -0.6rem;
+      top: 0.7rem;
+      width: 0.56rem;
+      border-top: 1px dashed #bfd5e8;
+    }
+    .how-tree-row {
+      display: inline-flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.28rem;
+      border: 1px solid #d2e2ef;
+      border-radius: 8px;
+      background: #fff;
+      padding: 0.2rem 0.42rem;
+      min-height: 1.5rem;
+    }
+    .how-tree-key {
+      color: #1f415f;
+      font-weight: 700;
+    }
+    .how-tree-type {
+      border-radius: 999px;
+      border: 1px solid #d2deea;
+      background: #f4f8fd;
+      color: #527192;
+      font-size: 0.66rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      padding: 0.04rem 0.35rem;
+    }
+    .how-tree-value {
+      color: #355979;
+      overflow-wrap: anywhere;
+    }
     .how-note {
       margin-top: 0.7rem;
       border: 1px solid #dce8f3;
@@ -181,6 +334,12 @@
         flex-direction: column;
         align-items: flex-start;
       }
+      .how-flow-row {
+        min-width: 100%;
+      }
+      .how-node {
+        min-width: 170px;
+      }
     }
   </style>
 </head>
@@ -196,7 +355,7 @@
       <div class="how-wrap">
         <section class="how-hero">
           <h1>How Bible AI Hub Works</h1>
-          <p>This page is generated from the live API map. For each app, you can see the complete prompt text, response patterns, and how each response is used in final output.</p>
+          <p>This page is generated from the live API map. For each app, you can see the complete prompts, a sample response tree, and how each response is used in final output.</p>
         </section>
         <div id="howMount" class="how-grid">
           <div class="card">
@@ -215,10 +374,17 @@
   <script>
     (function () {
       const mount = document.getElementById("howMount");
-      const { publicApiGet, cleanString, escapeHtml } = window.AIBible || {};
-      if (!mount || !publicApiGet) {
+      const {
+        apiGet,
+        apiPatch,
+        ensureAuthReady,
+        cleanString,
+        escapeHtml
+      } = window.AIBible || {};
+      if (!mount || !apiGet || !apiPatch || !ensureAuthReady) {
         return;
       }
+      let canEditPrompts = false;
 
       function promptRoleLabel(type) {
         const key = cleanString(type).toLowerCase();
@@ -235,6 +401,89 @@
         if (key === "audio" || key === "embedding") return "how-node ai";
         if (key === "passage") return "how-node data";
         return "how-node";
+      }
+
+      function renderLeafValue(value) {
+        if (typeof value === "string") return `"${value}"`;
+        if (typeof value === "number" || typeof value === "boolean") return String(value);
+        if (value === null) return "null";
+        return cleanString(value);
+      }
+
+      function nodeTypeLabel(value) {
+        if (Array.isArray(value)) return "array";
+        if (value === null) return "null";
+        return typeof value;
+      }
+
+      function renderTreeNode(key, value) {
+        const keyLabel = escapeHtml(cleanString(key, "item"));
+        if (Array.isArray(value)) {
+          const childNodes = value.length
+            ? `<ul>${value.map((item, index) => renderTreeNode(`[${index}]`, item)).join("")}</ul>`
+            : "";
+          return `
+            <li class="how-tree-node">
+              <div class="how-tree-row">
+                <span class="how-tree-key">${keyLabel}</span>
+                <span class="how-tree-type">array</span>
+                ${value.length ? `<span class="how-tree-value">${value.length} item${value.length === 1 ? "" : "s"}</span>` : `<span class="how-tree-value">empty</span>`}
+              </div>
+              ${childNodes}
+            </li>
+          `;
+        }
+        if (value && typeof value === "object") {
+          const entries = Object.entries(value);
+          const childNodes = entries.length
+            ? `<ul>${entries.map(([childKey, childValue]) => renderTreeNode(childKey, childValue)).join("")}</ul>`
+            : "";
+          return `
+            <li class="how-tree-node">
+              <div class="how-tree-row">
+                <span class="how-tree-key">${keyLabel}</span>
+                <span class="how-tree-type">object</span>
+                ${entries.length ? "" : `<span class="how-tree-value">empty</span>`}
+              </div>
+              ${childNodes}
+            </li>
+          `;
+        }
+        return `
+          <li class="how-tree-node">
+            <div class="how-tree-row">
+              <span class="how-tree-key">${keyLabel}</span>
+              <span class="how-tree-type">${escapeHtml(nodeTypeLabel(value))}</span>
+              <span class="how-tree-value">${escapeHtml(renderLeafValue(value))}</span>
+            </div>
+          </li>
+        `;
+      }
+
+      function renderExampleTree(example) {
+        const root = example && typeof example === "object" ? example : {};
+        return `
+          <div class="how-tree">
+            <ul class="how-tree-list">
+              ${renderTreeNode("Example Response", root)}
+            </ul>
+          </div>
+        `;
+      }
+
+      function buildOverrideLabel(prompt) {
+        const override = prompt && prompt.override && typeof prompt.override === "object"
+          ? prompt.override
+          : {};
+        const active = Boolean(override.active);
+        if (!active) {
+          return "Using default server prompt text.";
+        }
+        const by = cleanString(override.updatedByEmail);
+        const at = cleanString(override.updatedAt);
+        const byLine = by ? ` by ${by}` : "";
+        const atLine = at ? ` on ${at}` : "";
+        return `Custom prompt override is active${byLine}${atLine}.`;
       }
 
       function renderFlowNodes(appRow) {
@@ -260,11 +509,13 @@
             <div class="how-flow-row">
               ${nodes.map((node, index) => `
                 <div class="${escapeHtml(nodeClassForCall(node.type))}">
-                  <p class="k">${escapeHtml(promptRoleLabel(node.type))}</p>
+                  <div class="how-node-head">
+                    <p class="k">${escapeHtml(promptRoleLabel(node.type))}</p>
+                    <span class="how-step-chip">Step ${index + 1}</span>
+                  </div>
                   <p class="v">${escapeHtml(node.title)}</p>
                   <p>${escapeHtml(node.detail)}</p>
                 </div>
-                ${index < nodes.length - 1 ? '<div class="how-arrow">-&gt;</div>' : ""}
               `).join("")}
             </div>
           </div>
@@ -275,39 +526,54 @@
         const prompt = promptCall && promptCall.prompt && typeof promptCall.prompt === "object"
           ? promptCall.prompt
           : {};
-        const responseShape = prompt.responseShape && typeof prompt.responseShape === "object"
-          ? JSON.stringify(prompt.responseShape, null, 2)
-          : "{}";
+        const promptId = cleanString(prompt.id || promptCall.promptId, "Prompt");
         const responseExample = prompt.responseExample && typeof prompt.responseExample === "object"
-          ? JSON.stringify(prompt.responseExample, null, 2)
-          : "{}";
+          ? prompt.responseExample
+          : {};
         const systemText = cleanString(prompt.system);
         const userText = cleanString(prompt.user);
+        const overrideLabel = buildOverrideLabel(prompt);
 
         return `
           <article class="how-prompt">
-            <h4>${escapeHtml(cleanString(prompt.id || promptCall.promptId, "Prompt"))} ${cleanString(prompt.version) ? `(${escapeHtml(cleanString(prompt.version))})` : ""}</h4>
+            <h4>${escapeHtml(promptId)} ${cleanString(prompt.version) ? `(${escapeHtml(cleanString(prompt.version))})` : ""}</h4>
             <p class="inline-hint">${escapeHtml(cleanString(prompt.task, cleanString(promptCall.role)))}</p>
+            <p class="inline-hint">${escapeHtml(overrideLabel)}</p>
 
             <details class="how-details" ${index === 0 ? "open" : ""}>
               <summary>System Prompt (full text)</summary>
-              <pre class="how-pre">${escapeHtml(systemText || "No system prompt text available.")}</pre>
+              <pre class="how-pre" data-preview-system>${escapeHtml(systemText || "No system prompt text available.")}</pre>
             </details>
 
             <details class="how-details">
               <summary>User Prompt Template (full text)</summary>
-              <pre class="how-pre">${escapeHtml(userText || "No user prompt template available.")}</pre>
+              <pre class="how-pre" data-preview-user>${escapeHtml(userText || "No user prompt template available.")}</pre>
             </details>
 
             <details class="how-details">
-              <summary>Expected Response Shape</summary>
-              <pre class="how-pre">${escapeHtml(responseShape)}</pre>
+              <summary>Example Response</summary>
+              ${renderExampleTree(responseExample)}
             </details>
 
-            <details class="how-details">
-              <summary>Example Response Object</summary>
-              <pre class="how-pre">${escapeHtml(responseExample)}</pre>
-            </details>
+            ${canEditPrompts
+              ? `
+                <section class="how-editor" data-prompt-editor data-prompt-id="${escapeHtml(promptId)}">
+                  <h5>Admin Prompt Editor</h5>
+                  <div class="how-editor-grid">
+                    <span class="how-editor-label">System Prompt</span>
+                    <textarea data-prompt-system>${escapeHtml(systemText)}</textarea>
+                    <span class="how-editor-label">User Prompt Template</span>
+                    <textarea data-prompt-user>${escapeHtml(userText)}</textarea>
+                  </div>
+                  <div class="how-editor-actions">
+                    <button type="button" class="how-btn primary" data-prompt-save>Save for all users</button>
+                    <button type="button" class="how-btn" data-prompt-reset>Reset to default</button>
+                    <span class="inline-hint" data-prompt-status>${escapeHtml(overrideLabel)}</span>
+                  </div>
+                </section>
+              `
+              : ""
+            }
           </article>
         `;
       }
@@ -349,13 +615,125 @@
         `;
       }
 
+      function setEditorStatus(statusEl, message, isError) {
+        if (!statusEl) {
+          return;
+        }
+        statusEl.textContent = cleanString(message);
+        statusEl.style.color = isError ? "#8a2b2b" : "#4a6580";
+      }
+
+      function bindPromptEditors() {
+        if (!canEditPrompts) {
+          return;
+        }
+        const editors = Array.from(mount.querySelectorAll("[data-prompt-editor]"));
+        editors.forEach((editor) => {
+          const promptId = cleanString(editor.getAttribute("data-prompt-id"));
+          const systemInput = editor.querySelector("[data-prompt-system]");
+          const userInput = editor.querySelector("[data-prompt-user]");
+          const saveButton = editor.querySelector("[data-prompt-save]");
+          const resetButton = editor.querySelector("[data-prompt-reset]");
+          const statusEl = editor.querySelector("[data-prompt-status]");
+          const promptCard = editor.closest(".how-prompt");
+          const systemPreview = promptCard ? promptCard.querySelector("[data-preview-system]") : null;
+          const userPreview = promptCard ? promptCard.querySelector("[data-preview-user]") : null;
+
+          if (!promptId || !systemInput || !userInput || !saveButton || !resetButton) {
+            return;
+          }
+
+          async function savePrompt() {
+            const system = cleanString(systemInput.value);
+            const user = cleanString(userInput.value);
+            if (!system || !user) {
+              setEditorStatus(statusEl, "System and user prompt text are both required.", true);
+              return;
+            }
+            saveButton.disabled = true;
+            resetButton.disabled = true;
+            setEditorStatus(statusEl, "Saving prompt override...", false);
+            try {
+              const response = await apiPatch(`/api/how-it-works/prompts/${encodeURIComponent(promptId)}`, {
+                system,
+                user
+              });
+              const updatedPrompt = response && response.prompt && typeof response.prompt === "object"
+                ? response.prompt
+                : {};
+              const nextSystem = cleanString(updatedPrompt.system, system);
+              const nextUser = cleanString(updatedPrompt.user, user);
+              systemInput.value = nextSystem;
+              userInput.value = nextUser;
+              if (systemPreview) {
+                systemPreview.textContent = nextSystem || "No system prompt text available.";
+              }
+              if (userPreview) {
+                userPreview.textContent = nextUser || "No user prompt template available.";
+              }
+              setEditorStatus(statusEl, "Saved. This prompt now applies to all users.", false);
+            } catch (error) {
+              setEditorStatus(statusEl, cleanString(error && error.message, "Could not save prompt override."), true);
+            } finally {
+              saveButton.disabled = false;
+              resetButton.disabled = false;
+            }
+          }
+
+          async function resetPrompt() {
+            saveButton.disabled = true;
+            resetButton.disabled = true;
+            setEditorStatus(statusEl, "Resetting to default prompt text...", false);
+            try {
+              const response = await apiPatch(`/api/how-it-works/prompts/${encodeURIComponent(promptId)}`, {
+                resetToDefault: true
+              });
+              const updatedPrompt = response && response.prompt && typeof response.prompt === "object"
+                ? response.prompt
+                : {};
+              const nextSystem = cleanString(updatedPrompt.system);
+              const nextUser = cleanString(updatedPrompt.user);
+              systemInput.value = nextSystem;
+              userInput.value = nextUser;
+              if (systemPreview) {
+                systemPreview.textContent = nextSystem || "No system prompt text available.";
+              }
+              if (userPreview) {
+                userPreview.textContent = nextUser || "No user prompt template available.";
+              }
+              setEditorStatus(statusEl, "Reset complete. Default prompt text is active.", false);
+            } catch (error) {
+              setEditorStatus(statusEl, cleanString(error && error.message, "Could not reset prompt override."), true);
+            } finally {
+              saveButton.disabled = false;
+              resetButton.disabled = false;
+            }
+          }
+
+          saveButton.addEventListener("click", () => {
+            void savePrompt();
+          });
+          resetButton.addEventListener("click", () => {
+            void resetPrompt();
+          });
+        });
+      }
+
       async function loadMap() {
         try {
-          const payload = await publicApiGet("/api/how-it-works");
+          await ensureAuthReady();
+          const payload = await apiGet("/api/how-it-works");
           const apps = Array.isArray(payload && payload.apps) ? payload.apps : [];
           const models = payload && payload.modelDefaults && typeof payload.modelDefaults === "object"
             ? payload.modelDefaults
             : {};
+          const viewer = payload && payload.viewer && typeof payload.viewer === "object"
+            ? payload.viewer
+            : {};
+          canEditPrompts = Boolean(viewer.canEditPrompts);
+          const modeLine = canEditPrompts
+            ? "Admin mode is enabled. Saving edits here updates live prompts for every user."
+            : "Read-only mode. Only the admin account can edit prompts from this page.";
 
           mount.innerHTML = `
             <article class="card">
@@ -367,12 +745,14 @@
                 <li><strong>Embeddings:</strong> ${escapeHtml(cleanString(models.embeddingModel, "n/a"))}</li>
                 <li><strong>Transcription:</strong> ${escapeHtml(cleanString(models.transcriptionModel, "n/a"))}</li>
               </ul>
+              <p class="inline-hint" style="margin-top:0.5rem;">${escapeHtml(modeLine)}</p>
             </article>
             ${apps.map((appRow) => renderApp(appRow)).join("")}
             <div class="how-note">
-              This page is generated from <code>/api/how-it-works</code> so prompt text and response maps stay aligned with current server code.
+              This page is generated from <code>/api/how-it-works</code> so live prompt text and flow maps stay aligned with current server code.
             </div>
           `;
+          bindPromptEditors();
         } catch (error) {
           mount.innerHTML = `
             <article class="card">

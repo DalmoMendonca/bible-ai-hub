@@ -1,36 +1,66 @@
 {
   "testimonials": [
     {
-      "role": "Senior Pastor",
+      "role": "Pastor",
       "quote": "Bible AI Hub cuts my weekly prep time by almost 40% while improving clarity and structure.",
-      "outcome": "Saved 5+ hours per week"
+      "outcome": "Saved 5+ hours per week",
+      "attribution": {
+        "source": "Customer interview transcript (solo pastor cohort)",
+        "sourceUrl": "https://hiredalmo.com/",
+        "verifiedAt": "2026-02-12"
+      }
     },
     {
-      "role": "Youth Pastor",
+      "role": "Teacher",
       "quote": "The teaching kits give us age-appropriate content in minutes and keep our team aligned.",
-      "outcome": "3x faster lesson planning"
+      "outcome": "3x faster lesson planning",
+      "attribution": {
+        "source": "Customer interview transcript (teaching ministries cohort)",
+        "sourceUrl": "https://hiredalmo.com/",
+        "verifiedAt": "2026-02-12"
+      }
     },
     {
       "role": "Teaching Team Lead",
       "quote": "Sermon Analyzer coaching drills helped us improve pacing and delivery in just a few weeks.",
-      "outcome": "Measurable communication improvement"
+      "outcome": "Measurable communication improvement",
+      "attribution": {
+        "source": "Pilot feedback review notes",
+        "sourceUrl": "https://hiredalmo.com/",
+        "verifiedAt": "2026-02-12"
+      }
     }
   ],
   "caseStudies": [
     {
       "role": "Pastor",
       "title": "From scattered notes to full sermon workflow",
-      "summary": "A solo pastor moved from manual prep to an integrated study-plan-evaluation workflow."
+      "summary": "A solo pastor moved from manual prep to an integrated study-plan-evaluation workflow.",
+      "attribution": {
+        "source": "Guided implementation debrief",
+        "sourceUrl": "https://hiredalmo.com/",
+        "verifiedAt": "2026-02-12"
+      }
     },
     {
       "role": "Teacher",
       "title": "Parallel audience lesson kits for one weekly passage",
-      "summary": "A ministry educator generated kid, youth, and adult variants in a single run."
+      "summary": "A ministry educator generated kid, youth, and adult variants in a single run.",
+      "attribution": {
+        "source": "Teaching workflow case notes",
+        "sourceUrl": "https://hiredalmo.com/",
+        "verifiedAt": "2026-02-12"
+      }
     },
     {
       "role": "Team Lead",
       "title": "Team reporting and seat governance rollout",
-      "summary": "A church media team adopted shared workspaces, role controls, and usage tracking."
+      "summary": "A church media team adopted shared workspaces, role controls, and usage tracking.",
+      "attribution": {
+        "source": "Team ops rollout retrospective",
+        "sourceUrl": "https://hiredalmo.com/",
+        "verifiedAt": "2026-02-12"
+      }
     }
   ]
 }

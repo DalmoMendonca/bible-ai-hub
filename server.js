@@ -24,6 +24,7 @@ const { createVideoSearchConfidenceTools } = require("./server/video-search-conf
 const { createFeatureFlagService } = require("./server/feature-flags");
 const {
   PROMPT_REGISTRY,
+  setPromptOverrideResolver,
   buildBibleStudyPrompt,
   buildBibleStudyRefinementPrompt,
   buildSermonPreparationPrompt,
@@ -70,16 +71,32 @@ const DEFAULT_ALLOWED_ORIGIN_PATTERNS = [
   /^https:\/\/(?:[a-z0-9-]+\.)?hiredalmo\.com$/i
 ];
 const PORT = Number(process.env.PORT || 3000);
+const PRICING_ANCHOR_URL = "/#homePricing";
+
+function pricingAnchorUrl(feature) {
+  const safeFeature = cleanString(feature);
+  if (!safeFeature) {
+    return PRICING_ANCHOR_URL;
+  }
+  return `/?feature=${encodeURIComponent(safeFeature)}#homePricing`;
+}
 const GOOGLE_CLIENT_ID = cleanString(process.env.GOOGLE_CLIENT_ID);
 const ADMIN_DASHBOARD_PASSWORD = cleanString(process.env.ADMIN_DASHBOARD_PASSWORD);
 const GA_MEASUREMENT_ID = cleanString(process.env.GA_MEASUREMENT_ID);
 const FEEDBACK_EMAIL = "dalmomendonca@gmail.com";
+const PROMPT_EDITOR_EMAIL = "dalmomendonca@gmail.com";
+const RESEND_API_KEY = cleanString(process.env.RESEND_API_KEY);
+const MAGIC_LINK_FROM_EMAIL = cleanString(process.env.MAGIC_LINK_FROM_EMAIL);
+const PUBLIC_BASE_URL = cleanString(process.env.PUBLIC_BASE_URL, "https://bible.hiredalmo.com");
 const platform = createPlatformStore({
   rootDir: ROOT_DIR,
   trialDays: Number.isFinite(PLATFORM_TRIAL_DAYS) ? PLATFORM_TRIAL_DAYS : 14
 });
 const featureFlags = createFeatureFlagService({ rootDir: ROOT_DIR });
 const EVENT_TAXONOMY_PATH = path.join(ROOT_DIR, "server", "event-taxonomy.json");
+const PROMPT_OVERRIDES_PATH = resolveWritableAppDataPath("prompt-overrides.json");
+let promptOverridesState = loadPromptOverridesState();
+setPromptOverrideResolver(resolvePromptOverride);
 let EVENT_TAXONOMY_CACHE = null;
 
 const app = express();
@@ -281,15 +298,33 @@ app.post("/api/auth/google/token", asyncHandler(async (req, res) => {
 app.post("/api/auth/magic-link/request", asyncHandler(async (req, res) => {
   const input = req.body || {};
   const result = platform.requestMagicLink(cleanString(input.email));
+  const origin = deriveRequestOrigin(req);
+  const magicLinkUrl = buildMagicLinkUrl(origin, cleanString(result.magicLinkToken));
+  const mailResult = await sendMagicLinkEmail({
+    toEmail: cleanString(result.email),
+    magicLinkUrl,
+    expiresInMinutes: Number(result.expiresInMinutes || 15)
+  });
   platform.trackEvent({
     name: "auth_magic_link_requested",
     userId: "",
     workspaceId: "",
     properties: {
-      email: cleanString(input.email).toLowerCase()
+      email: cleanString(input.email).toLowerCase(),
+      deliveryMode: mailResult.mode,
+      deliverySent: mailResult.sent
     }
   });
-  res.status(201).json(result);
+  res.status(201).json({
+    ok: true,
+    email: cleanString(result.email),
+    expiresInMinutes: Number(result.expiresInMinutes || 15),
+    expiresAt: cleanString(result.expiresAt),
+    simulated: !mailResult.sent,
+    magicLinkToken: mailResult.sent ? "" : cleanString(result.magicLinkToken),
+    magicLinkUrl: mailResult.sent ? "" : magicLinkUrl,
+    detail: mailResult.detail
+  });
 }));
 
 app.post("/api/auth/magic-link/verify", asyncHandler(async (req, res) => {
@@ -788,8 +823,76 @@ app.post("/api/feedback", asyncHandler(async (req, res) => {
   });
 }));
 
-app.get("/api/how-it-works", (_req, res) => {
-  res.json(buildHowItWorksPayload());
+app.patch("/api/how-it-works/prompts/:promptId", asyncHandler(async (req, res) => {
+  if (!requireAuth(req, res)) {
+    return;
+  }
+
+  const actor = platform.getUserById(req.auth.user.id);
+  if (!canEditPromptOverrides(actor)) {
+    res.status(403).json({ error: "Admin access required." });
+    return;
+  }
+
+  const promptId = cleanString(req.params.promptId);
+  if (!PROMPT_REGISTRY[promptId]) {
+    res.status(404).json({ error: "Unknown prompt id." });
+    return;
+  }
+
+  const input = req.body && typeof req.body === "object" ? req.body : {};
+  const resetToDefault = Boolean(input.resetToDefault);
+  const hasSystem = Object.prototype.hasOwnProperty.call(input, "system");
+  const hasUser = Object.prototype.hasOwnProperty.call(input, "user");
+  if (!resetToDefault && !hasSystem && !hasUser) {
+    res.status(400).json({ error: "Provide system and/or user prompt text, or set resetToDefault." });
+    return;
+  }
+
+  const existing = promptOverridesState.prompts[promptId] && typeof promptOverridesState.prompts[promptId] === "object"
+    ? { ...promptOverridesState.prompts[promptId] }
+    : {};
+
+  if (resetToDefault) {
+    delete promptOverridesState.prompts[promptId];
+  } else {
+    if (hasSystem) {
+      const nextSystem = cleanString(input.system);
+      if (!nextSystem) {
+        res.status(400).json({ error: "System prompt text cannot be empty." });
+        return;
+      }
+      existing.system = nextSystem;
+    }
+    if (hasUser) {
+      const nextUser = cleanString(input.user);
+      if (!nextUser) {
+        res.status(400).json({ error: "User prompt text cannot be empty." });
+        return;
+      }
+      existing.user = nextUser;
+    }
+    existing.updatedAt = new Date().toISOString();
+    existing.updatedByUserId = cleanString(actor && actor.id);
+    existing.updatedByEmail = cleanString(actor && actor.email).toLowerCase();
+    promptOverridesState.prompts[promptId] = existing;
+  }
+
+  persistPromptOverrides();
+  const templates = buildPromptTransparencyTemplates();
+  res.json({
+    ok: true,
+    promptId,
+    prompt: templates[promptId] || null,
+    override: getPromptOverrideInfo(promptId)
+  });
+}));
+
+app.get("/api/how-it-works", (req, res) => {
+  const actor = req.auth && req.auth.user
+    ? (platform.getUserById(req.auth.user.id) || req.auth.user)
+    : null;
+  res.json(buildHowItWorksPayload({ actor }));
 });
 
 app.post("/api/onboarding", asyncHandler(async (req, res) => {
@@ -2339,7 +2442,7 @@ app.post("/api/ai/video-search", requireOpenAIKey, requireFeatureAccess("video-s
       accessTier: videoAccess.tier,
       locked: !canPlay,
       accessReasonCode: cleanString(videoAccess.reasonCode),
-      url: canPlay ? buildTimestampedPlaybackUrl(playbackBaseUrl, row.start) : "/pricing/?feature=premium-video",
+      url: canPlay ? buildTimestampedPlaybackUrl(playbackBaseUrl, row.start) : pricingAnchorUrl("premium-video"),
       why: cleanString(buildMatchReason(row, queryTerms)),
       score: Number((row.score * 100).toFixed(2))
     });
@@ -2377,7 +2480,7 @@ app.post("/api/ai/video-search", requireOpenAIKey, requireFeatureAccess("video-s
         accessTier: videoAccess.tier,
         locked: !canPlay,
         accessReasonCode: cleanString(videoAccess.reasonCode),
-        url: canPlay ? buildTimestampedPlaybackUrl(playbackBaseUrl, 0) : "/pricing/?feature=premium-video",
+        url: canPlay ? buildTimestampedPlaybackUrl(playbackBaseUrl, 0) : pricingAnchorUrl("premium-video"),
         why: "Matched by title/tags metadata while transcript indexing is still in progress.",
         score: Number((video.score * 100).toFixed(2))
       });
@@ -2556,6 +2659,12 @@ app.get("/index.html", (_req, res) => {
 });
 app.get("/ai/index.html", (_req, res) => {
   res.redirect(301, "/");
+});
+app.get("/pricing", (_req, res) => {
+  res.redirect(301, PRICING_ANCHOR_URL);
+});
+app.get("/pricing/", (_req, res) => {
+  res.redirect(301, PRICING_ANCHOR_URL);
 });
 app.get("/ai/apps/:slug/index.html", (req, res) => {
   const slug = cleanString(req.params && req.params.slug);
@@ -2785,7 +2894,7 @@ function requireFeatureAccess(feature) {
         feature,
         upgrade: {
           cta: "Upgrade to access this feature",
-          url: `/pricing/?feature=${encodeURIComponent(feature)}`,
+          url: pricingAnchorUrl(feature),
           plans: upgradePlans
         }
       });
@@ -2822,7 +2931,7 @@ function enforceQuota(feature, unitsResolver) {
         },
         upgrade: {
           cta: "Upgrade your plan to continue",
-          url: `/pricing/?feature=${encodeURIComponent(feature)}`,
+          url: pricingAnchorUrl(feature),
           plans: quota.upgradePlans || []
         }
       });
@@ -2842,7 +2951,7 @@ function enforceQuota(feature, unitsResolver) {
         },
         upgrade: {
           cta: "View plans",
-          url: "/pricing/"
+          url: PRICING_ANCHOR_URL
         }
       });
       return;
@@ -3566,10 +3675,130 @@ function readJsonFile(filePath, fallback = {}) {
   }
 }
 
-function buildHowItWorksPayload() {
+function normalizePromptOverrideEntry(entry) {
+  if (!entry || typeof entry !== "object") {
+    return null;
+  }
+  const normalized = {};
+  if (typeof entry.system === "string") {
+    const system = cleanString(entry.system);
+    if (system) {
+      normalized.system = system;
+    }
+  }
+  if (typeof entry.user === "string") {
+    const user = cleanString(entry.user);
+    if (user) {
+      normalized.user = user;
+    }
+  }
+  if (!normalized.system && !normalized.user) {
+    return null;
+  }
+  normalized.updatedAt = cleanString(entry.updatedAt);
+  normalized.updatedByUserId = cleanString(entry.updatedByUserId);
+  normalized.updatedByEmail = cleanString(entry.updatedByEmail).toLowerCase();
+  return normalized;
+}
+
+function normalizePromptOverridesState(payload) {
+  const source = payload && typeof payload === "object" ? payload : {};
+  const promptsRaw = source.prompts && typeof source.prompts === "object" ? source.prompts : {};
+  const prompts = {};
+
+  for (const [promptId, entry] of Object.entries(promptsRaw)) {
+    if (!PROMPT_REGISTRY[promptId]) {
+      continue;
+    }
+    const normalizedEntry = normalizePromptOverrideEntry(entry);
+    if (normalizedEntry) {
+      prompts[promptId] = normalizedEntry;
+    }
+  }
+
+  return {
+    version: 1,
+    updatedAt: cleanString(source.updatedAt),
+    prompts
+  };
+}
+
+function loadPromptOverridesState() {
+  const payload = readJsonFile(PROMPT_OVERRIDES_PATH, {
+    version: 1,
+    updatedAt: "",
+    prompts: {}
+  });
+  return normalizePromptOverridesState(payload);
+}
+
+function persistPromptOverrides() {
+  promptOverridesState = normalizePromptOverridesState({
+    ...(promptOverridesState && typeof promptOverridesState === "object" ? promptOverridesState : {}),
+    updatedAt: new Date().toISOString(),
+    prompts: promptOverridesState && promptOverridesState.prompts
+  });
+  fs.writeFileSync(PROMPT_OVERRIDES_PATH, `${JSON.stringify(promptOverridesState, null, 2)}\n`, "utf8");
+  return promptOverridesState;
+}
+
+function canEditPromptOverrides(actor) {
+  const email = cleanString(actor && actor.email).toLowerCase();
+  return cleanString(actor && actor.role).toLowerCase() === "admin"
+    || email === cleanString(PROMPT_EDITOR_EMAIL).toLowerCase();
+}
+
+function resolvePromptOverride(promptId, builtPrompt) {
+  const safePromptId = cleanString(promptId);
+  const base = builtPrompt && typeof builtPrompt === "object"
+    ? builtPrompt
+    : {};
+  const entry = promptOverridesState && promptOverridesState.prompts
+    ? promptOverridesState.prompts[safePromptId]
+    : null;
+  if (!entry || typeof entry !== "object") {
+    return base;
+  }
+  return {
+    ...base,
+    system: cleanString(entry.system, cleanString(base.system)),
+    user: cleanString(entry.user, cleanString(base.user))
+  };
+}
+
+function getPromptOverrideInfo(promptId) {
+  const safePromptId = cleanString(promptId);
+  const entry = promptOverridesState && promptOverridesState.prompts
+    ? promptOverridesState.prompts[safePromptId]
+    : null;
+  if (!entry || typeof entry !== "object") {
+    return {
+      active: false,
+      updatedAt: "",
+      updatedByEmail: ""
+    };
+  }
+  return {
+    active: true,
+    updatedAt: cleanString(entry.updatedAt),
+    updatedByEmail: cleanString(entry.updatedByEmail),
+    updatedByUserId: cleanString(entry.updatedByUserId)
+  };
+}
+
+function buildHowItWorksPayload(options = {}) {
+  const actor = options && options.actor && typeof options.actor === "object"
+    ? options.actor
+    : null;
+  const canEdit = canEditPromptOverrides(actor);
   const promptTemplates = buildPromptTransparencyTemplates();
   return {
     generatedAt: new Date().toISOString(),
+    viewer: {
+      email: cleanString(actor && actor.email).toLowerCase(),
+      role: cleanString(actor && actor.role),
+      canEditPrompts: canEdit
+    },
     modelDefaults: {
       primaryChatModel: OPENAI_CHAT_MODEL,
       longFormModel: OPENAI_LONG_FORM_MODEL,
@@ -3925,6 +4154,7 @@ function buildPromptTemplateEntry(promptId, builtPrompt) {
   const outputSchema = meta && meta.outputSchema && typeof meta.outputSchema === "object"
     ? meta.outputSchema
     : {};
+  const override = getPromptOverrideInfo(promptId);
   return {
     id: cleanString(promptId),
     version: cleanString(meta.version),
@@ -3932,7 +4162,8 @@ function buildPromptTemplateEntry(promptId, builtPrompt) {
     system: cleanString(builtPrompt && builtPrompt.system),
     user: cleanString(builtPrompt && builtPrompt.user),
     responseShape: outputSchema,
-    responseExample: buildSchemaExample(outputSchema)
+    responseExample: buildSchemaExample(outputSchema),
+    override
   };
 }
 
@@ -5645,6 +5876,87 @@ async function verifyGoogleIdToken(idToken, expectedAudience) {
     email,
     name: cleanString(payload.name, cleanString(payload.given_name)),
     sub: cleanString(payload.sub)
+  };
+}
+
+function deriveRequestOrigin(req) {
+  const configured = cleanString(PUBLIC_BASE_URL).replace(/\/+$/, "");
+  if (configured && /^https?:\/\//i.test(configured)) {
+    return configured;
+  }
+
+  const forwardedProto = cleanString(req && req.headers && req.headers["x-forwarded-proto"], "");
+  const forwardedHost = cleanString(req && req.headers && req.headers["x-forwarded-host"], "");
+  if (forwardedProto && forwardedHost) {
+    return `${forwardedProto}://${forwardedHost}`.replace(/\/+$/, "");
+  }
+
+  const protocol = cleanString(req && req.protocol, "http");
+  const host = cleanString(req && req.get && req.get("host"), "localhost:3000");
+  return `${protocol}://${host}`.replace(/\/+$/, "");
+}
+
+function buildMagicLinkUrl(origin, token) {
+  const safeOrigin = cleanString(origin, "https://bible.hiredalmo.com").replace(/\/+$/, "");
+  const safeToken = cleanString(token);
+  if (!safeToken) {
+    return `${safeOrigin}/`;
+  }
+  return `${safeOrigin}/?magicLinkToken=${encodeURIComponent(safeToken)}`;
+}
+
+async function sendMagicLinkEmail({ toEmail, magicLinkUrl, expiresInMinutes }) {
+  const recipient = cleanString(toEmail).toLowerCase();
+  if (!recipient || !recipient.includes("@")) {
+    return {
+      sent: false,
+      mode: "invalid-recipient",
+      detail: "A valid email is required for magic-link delivery."
+    };
+  }
+
+  if (!RESEND_API_KEY || !MAGIC_LINK_FROM_EMAIL) {
+    return {
+      sent: false,
+      mode: "simulated",
+      detail: "Email delivery is not configured yet; token-based sign-in is enabled for now."
+    };
+  }
+
+  const minutes = clampNumber(Number(expiresInMinutes || 15), 1, 60, 15);
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${RESEND_API_KEY}`
+    },
+    body: JSON.stringify({
+      from: MAGIC_LINK_FROM_EMAIL,
+      to: [recipient],
+      subject: "Your Bible AI Hub magic sign-in link",
+      text: `Use this sign-in link within ${minutes} minutes:\n\n${magicLinkUrl}`,
+      html: `<p>Use this sign-in link within <strong>${minutes} minutes</strong>:</p><p><a href="${escapeHtml(magicLinkUrl)}">${escapeHtml(magicLinkUrl)}</a></p>`
+    })
+  });
+
+  if (!response.ok) {
+    let payload = {};
+    try {
+      payload = await response.json();
+    } catch (_) {
+      payload = {};
+    }
+    return {
+      sent: false,
+      mode: "resend-error",
+      detail: cleanString(payload && payload.message, `Email delivery failed (HTTP ${response.status}).`)
+    };
+  }
+
+  return {
+    sent: true,
+    mode: "resend",
+    detail: "Check your inbox for your sign-in link."
   };
 }
 

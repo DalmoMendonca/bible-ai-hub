@@ -328,6 +328,40 @@
     featureFlagsState = null;
   }
 
+  function getMagicLinkTokenFromUrl() {
+    try {
+      const params = new URLSearchParams(window.location.search || "");
+      return cleanString(
+        params.get("magicLinkToken")
+        || params.get("magic_link_token")
+        || params.get("token")
+      );
+    } catch (_) {
+      return "";
+    }
+  }
+
+  function stripMagicLinkTokenFromUrl() {
+    try {
+      const url = new URL(window.location.href);
+      let changed = false;
+      ["magicLinkToken", "magic_link_token", "token"].forEach((key) => {
+        if (url.searchParams.has(key)) {
+          url.searchParams.delete(key);
+          changed = true;
+        }
+      });
+      if (!changed) {
+        return;
+      }
+      const search = url.searchParams.toString();
+      const cleaned = `${url.pathname}${search ? `?${search}` : ""}${url.hash || ""}`;
+      window.history.replaceState({}, "", cleaned);
+    } catch (_) {
+      // best effort only
+    }
+  }
+
   function authHeaders(extraHeaders) {
     const headers = {
       ...(extraHeaders || {})
@@ -351,6 +385,18 @@
   }
 
   async function ensureAuthSession() {
+    const urlMagicToken = getMagicLinkTokenFromUrl();
+    if (urlMagicToken) {
+      try {
+        const auth = await publicApiPost("/api/auth/magic-link/verify", { token: urlMagicToken });
+        storeAuth(auth || {});
+      } catch (_) {
+        // if token is invalid, continue with regular auth bootstrap
+      } finally {
+        stripMagicLinkTokenFromUrl();
+      }
+    }
+
     readStoredAuth();
     if (authState.token) {
       const existing = await rawApiRequest("/api/auth/session", {
@@ -921,18 +967,26 @@
   function headerShellHtml(state) {
     const userName = cleanString(state && state.user && state.user.name, "Guest");
     const guest = isGuestUser(state && state.user);
-    const themeToggleLabel = themeState === THEME_DARK ? "Light" : "Dark";
     const creditsLabel = currentCreditsLabel(state && state.user);
+    const accountLabel = guest ? "Account" : userName;
     return `
-      <div class="bah-shell">
-        <a class="header-link" href="/pricing/">Pricing</a>
-        <button type="button" class="header-link bah-theme-btn" data-bah-theme-toggle>${escapeHtml(themeToggleLabel)}</button>
-        <span class="bah-credit-chip">Credits: ${escapeHtml(creditsLabel)}</span>
-        ${guest ? `<button type="button" class="header-link bah-auth-btn" data-bah-auth-open>Sign In</button>` : `<button type="button" class="header-link bah-feedback-btn" data-bah-feedback-open>Feedback</button>`}
-        <button type="button" class="header-link bah-projects-btn" data-bah-projects>Projects</button>
-        <button type="button" class="header-link bah-notice-btn" data-bah-notices>Notices</button>
-        <select class="select bah-workspace-select" data-bah-workspace></select>
-        <button type="button" class="header-link bah-user-btn" data-bah-account>${escapeHtml(userName)}</button>
+      <div class="bah-shell" aria-label="Global navigation">
+        <nav class="bah-cluster bah-cluster-primary" aria-label="Primary">
+          <a class="header-link bah-link-pill" href="/#homePricing">Pricing</a>
+          <button type="button" class="header-link bah-link-pill bah-projects-btn" data-bah-projects>Projects</button>
+          <button type="button" class="header-link bah-link-pill bah-notice-btn" data-bah-notices>Notices</button>
+        </nav>
+        <div class="bah-cluster bah-cluster-account" aria-label="Account and settings">
+          <span class="bah-credit-chip" title="Remaining monthly credits">Credits <strong>${escapeHtml(creditsLabel)}</strong></span>
+          ${guest
+            ? `<button type="button" class="header-link bah-link-pill bah-link-pill-primary bah-auth-btn" data-bah-auth-open>Sign In</button>`
+            : `<button type="button" class="header-link bah-link-pill bah-feedback-btn" data-bah-feedback-open>Feedback</button>`}
+          <label class="bah-workspace-wrap">
+            <span class="bah-workspace-label">Workspace</span>
+            <select class="select bah-workspace-select" data-bah-workspace aria-label="Active workspace"></select>
+          </label>
+          <button type="button" class="header-link bah-link-pill bah-user-btn bah-account-btn" data-bah-account>${escapeHtml(accountLabel)}</button>
+        </div>
       </div>
     `;
   }
@@ -1505,11 +1559,28 @@
         try {
           setBusy(requestBtn, "Sending...", true);
           const response = await publicApiPost("/api/auth/magic-link/request", { email });
-          if (statusEl) {
-            statusEl.textContent = `Magic link issued for ${email}. Expires in ${Number(response.expiresInMinutes || 15)} minutes.`;
+          const token = cleanString(response && response.magicLinkToken);
+          const detail = cleanString(response && response.detail);
+          const expiresMinutes = Number(response && response.expiresInMinutes || 15);
+
+          if (tokenInput && token) {
+            tokenInput.value = token;
           }
-          if (tokenInput && response && response.magicLinkToken) {
-            tokenInput.value = cleanString(response.magicLinkToken);
+
+          if (response && response.simulated && token) {
+            if (statusEl) {
+              statusEl.textContent = `Email delivery is not configured yet. Completing sign-in directly for ${email}...`;
+            }
+            const auth = await publicApiPost("/api/auth/magic-link/verify", { token });
+            storeAuth(auth || {});
+            authReadyPromise = Promise.resolve(authState);
+            window.location.reload();
+            return;
+          }
+
+          if (statusEl) {
+            const inboxMessage = `Magic link sent to ${email}. It expires in ${expiresMinutes} minutes.`;
+            statusEl.textContent = detail ? `${inboxMessage} ${detail}` : inboxMessage;
           }
         } catch (error) {
           if (statusEl) {
@@ -1698,6 +1769,10 @@
         </div>
         <div class="form-grid">
           <div class="field span-2">
+            <label class="check-row"><input type="checkbox" data-bah-setting-dark-mode /> Use dark mode</label>
+            <p class="inline-hint">Theme is saved in this browser profile.</p>
+          </div>
+          <div class="field span-2">
             <label class="check-row"><input type="checkbox" data-bah-setting-lifecycle /> Email lifecycle reminders</label>
           </div>
           <div class="field span-2">
@@ -1731,6 +1806,7 @@
   async function openAccountModal() {
     const modal = getAccountModal();
     modal.classList.remove("hidden");
+    const themeInput = modal.querySelector("[data-bah-setting-dark-mode]");
     const lifecycleInput = modal.querySelector("[data-bah-setting-lifecycle]");
     const personalizationInput = modal.querySelector("[data-bah-setting-personalization]");
     const theologyInput = modal.querySelector("[data-bah-setting-theology]");
@@ -1742,6 +1818,10 @@
     $all("[data-bah-account-close]", modal).forEach((buttonEl) => {
       buttonEl.onclick = close;
     });
+
+    if (themeInput) {
+      themeInput.checked = themeState === THEME_DARK;
+    }
 
     try {
       const settings = await apiGet("/api/user/settings");
@@ -1765,6 +1845,8 @@
 
     if (saveBtn) {
       saveBtn.onclick = async () => {
+        const nextTheme = themeInput && themeInput.checked ? THEME_DARK : THEME_LIGHT;
+        applyTheme(nextTheme, true);
         try {
           setBusy(saveBtn, "Saving...", true);
           await apiPatch("/api/user/settings", {
@@ -1820,14 +1902,6 @@
 
     const workspaceSelect = $("[data-bah-workspace]", shell);
     await populateWorkspaceSelect(workspaceSelect);
-
-    const themeBtn = $("[data-bah-theme-toggle]", shell);
-    if (themeBtn) {
-      themeBtn.addEventListener("click", () => {
-        toggleTheme();
-        themeBtn.textContent = themeState === THEME_DARK ? "Light" : "Dark";
-      });
-    }
 
     const authBtn = $("[data-bah-auth-open]", shell);
     if (authBtn) {

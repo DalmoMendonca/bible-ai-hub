@@ -3,11 +3,27 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
+const os = require("node:os");
 
 const MONTH_MS = 30 * 24 * 60 * 60 * 1000;
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const RESET_TTL_MS = 60 * 60 * 1000;
+const MAGIC_LINK_TTL_MS = 15 * 60 * 1000;
 const TRIAL_DAYS_DEFAULT = 14;
+const ADMIN_EMAIL = "dalmomendonca@gmail.com";
+const GUEST_EMAIL_DOMAIN = "@local.bibleaihub";
+const GUEST_DEFAULT_CREDITS = 10;
+const ADMIN_DEFAULT_CREDITS = 10_000;
+const DEFAULT_OVERAGE_POLICY = Object.freeze({
+  mode: "hard_cap",
+  resetCadence: "monthly",
+  message: "Usage limits reset monthly. Upgrade your plan to continue immediately after reaching your cap."
+});
+const ANALYZER_OVERAGE_POLICY = Object.freeze({
+  mode: "hard_cap",
+  resetCadence: "monthly",
+  message: "Sermon Analyzer minutes are capped monthly to protect reliability and compute quality. Upgrade for a higher cap."
+});
 
 const PLAN_CATALOG = [
   {
@@ -22,7 +38,11 @@ const PLAN_CATALOG = [
       sermonAnalyzerMinutesPerMonth: 0,
       sermonEvaluationRunsPerMonth: 3
     },
-    seatLimit: 1
+    seatLimit: 1,
+    overagePolicy: {
+      default: DEFAULT_OVERAGE_POLICY,
+      "sermon-analyzer": ANALYZER_OVERAGE_POLICY
+    }
   },
   {
     id: "bible-study-pro",
@@ -34,7 +54,10 @@ const PLAN_CATALOG = [
     limits: {
       bibleStudyRunsPerMonth: 200
     },
-    seatLimit: 1
+    seatLimit: 1,
+    overagePolicy: {
+      default: DEFAULT_OVERAGE_POLICY
+    }
   },
   {
     id: "sermon-preparation-pro",
@@ -46,7 +69,10 @@ const PLAN_CATALOG = [
     limits: {
       sermonPrepRunsPerMonth: 200
     },
-    seatLimit: 1
+    seatLimit: 1,
+    overagePolicy: {
+      default: DEFAULT_OVERAGE_POLICY
+    }
   },
   {
     id: "teaching-tools-credits",
@@ -58,7 +84,10 @@ const PLAN_CATALOG = [
     limits: {
       teachingKitsPerMonth: 10
     },
-    seatLimit: 1
+    seatLimit: 1,
+    overagePolicy: {
+      default: DEFAULT_OVERAGE_POLICY
+    }
   },
   {
     id: "teaching-tools-unlimited",
@@ -70,7 +99,10 @@ const PLAN_CATALOG = [
     limits: {
       teachingKitsPerMonth: null
     },
-    seatLimit: 1
+    seatLimit: 1,
+    overagePolicy: {
+      default: DEFAULT_OVERAGE_POLICY
+    }
   },
   {
     id: "sermon-evaluation-pro",
@@ -82,7 +114,10 @@ const PLAN_CATALOG = [
     limits: {
       sermonEvaluationRunsPerMonth: null
     },
-    seatLimit: 1
+    seatLimit: 1,
+    overagePolicy: {
+      default: DEFAULT_OVERAGE_POLICY
+    }
   },
   {
     id: "sermon-analyzer-pro",
@@ -92,9 +127,13 @@ const PLAN_CATALOG = [
       "sermon-analyzer": true
     },
     limits: {
-      sermonAnalyzerMinutesPerMonth: null
+      sermonAnalyzerMinutesPerMonth: 600
     },
-    seatLimit: 1
+    seatLimit: 1,
+    overagePolicy: {
+      default: DEFAULT_OVERAGE_POLICY,
+      "sermon-analyzer": ANALYZER_OVERAGE_POLICY
+    }
   },
   {
     id: "bundle-pro",
@@ -112,12 +151,16 @@ const PLAN_CATALOG = [
     },
     limits: {
       teachingKitsPerMonth: null,
-      sermonAnalyzerMinutesPerMonth: null,
+      sermonAnalyzerMinutesPerMonth: 300,
       sermonEvaluationRunsPerMonth: null,
       bibleStudyRunsPerMonth: null,
       sermonPrepRunsPerMonth: null
     },
-    seatLimit: 5
+    seatLimit: 5,
+    overagePolicy: {
+      default: DEFAULT_OVERAGE_POLICY,
+      "sermon-analyzer": ANALYZER_OVERAGE_POLICY
+    }
   },
   {
     id: "team-growth",
@@ -135,12 +178,16 @@ const PLAN_CATALOG = [
     },
     limits: {
       teachingKitsPerMonth: null,
-      sermonAnalyzerMinutesPerMonth: null,
+      sermonAnalyzerMinutesPerMonth: 1800,
       sermonEvaluationRunsPerMonth: null,
       bibleStudyRunsPerMonth: null,
       sermonPrepRunsPerMonth: null
     },
-    seatLimit: 25
+    seatLimit: 25,
+    overagePolicy: {
+      default: DEFAULT_OVERAGE_POLICY,
+      "sermon-analyzer": ANALYZER_OVERAGE_POLICY
+    }
   }
 ];
 
@@ -156,10 +203,20 @@ const FEATURE_LIMIT_KEYS = {
 };
 
 function createPlatformStore({ rootDir, trialDays = TRIAL_DAYS_DEFAULT } = {}) {
-  const dataPath = path.join(rootDir || process.cwd(), "server", "data", "platform-state.json");
+  const preferredDataPath = path.join(rootDir || process.cwd(), "server", "data", "platform-state.json");
+  const dataPath = resolveWritableDataPath(preferredDataPath);
   ensureDir(path.dirname(dataPath));
 
   const state = loadState(dataPath);
+  let hydrationMutations = false;
+  for (const user of ensureArray(state.users)) {
+    if (applyAccountDefaults(user)) {
+      hydrationMutations = true;
+    }
+  }
+  if (hydrationMutations) {
+    fs.writeFileSync(dataPath, `${JSON.stringify(state, null, 2)}\n`, "utf8");
+  }
   const rateLimiter = new Map();
 
   function persist() {
@@ -253,11 +310,15 @@ function createPlatformStore({ rootDir, trialDays = TRIAL_DAYS_DEFAULT } = {}) {
     if (!user) {
       return null;
     }
+    const credits = Number.isFinite(Number(user.credits)) ? Number(user.credits) : null;
+    const safeEmail = normalizeEmail(user.email);
     return {
       id: user.id,
       email: user.email,
       name: user.name,
       role: user.role,
+      credits,
+      isGuest: isGuestEmail(safeEmail),
       disabled: Boolean(user.disabled),
       deletedAt: user.deletedAt || null,
       activeWorkspaceId: user.activeWorkspaceId || "",
@@ -281,11 +342,13 @@ function createPlatformStore({ rootDir, trialDays = TRIAL_DAYS_DEFAULT } = {}) {
       throw createError(409, "An account with this email already exists.");
     }
     const now = nowIso();
+    const normalizedRole = (role === "admin" || isAdminEmail(safeEmail)) ? "admin" : "user";
     const user = {
       id: createId("usr"),
       email: safeEmail,
       name: cleanString(name, safeEmail.split("@")[0]),
-      role: role === "admin" ? "admin" : "user",
+      role: normalizedRole,
+      credits: defaultCreditsForEmail(safeEmail),
       passwordHash: hashPassword(password),
       googleSub: "",
       disabled: false,
@@ -296,6 +359,7 @@ function createPlatformStore({ rootDir, trialDays = TRIAL_DAYS_DEFAULT } = {}) {
       createdAt: now,
       updatedAt: now
     };
+    applyAccountDefaults(user);
     state.users.push(user);
     createPersonalWorkspace(user);
     persist();
@@ -316,6 +380,9 @@ function createPlatformStore({ rootDir, trialDays = TRIAL_DAYS_DEFAULT } = {}) {
     if (user.disabled) {
       throw createError(403, "Account is disabled. Contact support.");
     }
+    if (applyAccountDefaults(user)) {
+      persist();
+    }
     const session = createSession(user.id);
     return {
       user: sanitizeUser(user),
@@ -332,11 +399,13 @@ function createPlatformStore({ rootDir, trialDays = TRIAL_DAYS_DEFAULT } = {}) {
     let user = state.users.find((row) => row.email === safeEmail && !row.deletedAt) || null;
     const now = nowIso();
     if (!user) {
+      const normalizedRole = isAdminEmail(safeEmail) ? "admin" : "user";
       user = {
         id: createId("usr"),
         email: safeEmail,
         name: cleanString(name, safeEmail.split("@")[0]),
-        role: "user",
+        role: normalizedRole,
+        credits: defaultCreditsForEmail(safeEmail),
         passwordHash: "",
         googleSub: cleanString(sub),
         disabled: false,
@@ -347,13 +416,17 @@ function createPlatformStore({ rootDir, trialDays = TRIAL_DAYS_DEFAULT } = {}) {
         createdAt: now,
         updatedAt: now
       };
+      applyAccountDefaults(user);
       state.users.push(user);
       createPersonalWorkspace(user);
       persist();
     } else {
+      const didMutateDefaults = applyAccountDefaults(user);
       user.googleSub = cleanString(sub, user.googleSub);
       user.updatedAt = now;
-      persist();
+      if (didMutateDefaults || cleanString(sub)) {
+        persist();
+      }
     }
     const session = createSession(user.id);
     return {
@@ -486,6 +559,158 @@ function createPlatformStore({ rootDir, trialDays = TRIAL_DAYS_DEFAULT } = {}) {
     return {
       user: sanitizeUser(user),
       session
+    };
+  }
+
+  function requestMagicLink(email) {
+    const safeEmail = normalizeEmail(email);
+    if (!safeEmail) {
+      throw createError(400, "Email is required.");
+    }
+    let user = state.users.find((row) => row.email === safeEmail && !row.deletedAt) || null;
+    const now = nowIso();
+    if (!user) {
+      user = {
+        id: createId("usr"),
+        email: safeEmail,
+        name: cleanString(safeEmail.split("@")[0]),
+        role: isAdminEmail(safeEmail) ? "admin" : "user",
+        credits: defaultCreditsForEmail(safeEmail),
+        passwordHash: "",
+        googleSub: "",
+        disabled: false,
+        deletedAt: null,
+        activeWorkspaceId: "",
+        onboarding: null,
+        emailPrefs: { lifecycle: true },
+        createdAt: now,
+        updatedAt: now
+      };
+      applyAccountDefaults(user);
+      state.users.push(user);
+      createPersonalWorkspace(user);
+    } else {
+      if (user.disabled) {
+        throw createError(403, "Account is disabled. Contact support.");
+      }
+      if (applyAccountDefaults(user)) {
+        user.updatedAt = nowIso();
+      }
+    }
+
+    const token = createToken();
+    state.magicLinks.push({
+      id: createId("mlink"),
+      token,
+      userId: user.id,
+      email: safeEmail,
+      createdAt: nowIso(),
+      expiresAt: new Date(Date.now() + MAGIC_LINK_TTL_MS).toISOString(),
+      usedAt: null
+    });
+    persist();
+
+    return {
+      ok: true,
+      email: safeEmail,
+      expiresInMinutes: Math.round(MAGIC_LINK_TTL_MS / 60000),
+      expiresAt: new Date(Date.now() + MAGIC_LINK_TTL_MS).toISOString(),
+      simulated: true,
+      magicLinkToken: token
+    };
+  }
+
+  function verifyMagicLink(token) {
+    const safeToken = cleanString(token);
+    if (!safeToken) {
+      throw createError(400, "Magic link token is required.");
+    }
+    const link = state.magicLinks.find((row) => row.token === safeToken && !row.usedAt) || null;
+    if (!link || Date.parse(link.expiresAt) <= Date.now()) {
+      throw createError(400, "Magic link is invalid or expired.");
+    }
+    const user = getUserById(link.userId);
+    if (!user || user.deletedAt || user.disabled) {
+      throw createError(404, "User not found.");
+    }
+    const changed = applyAccountDefaults(user);
+    link.usedAt = nowIso();
+    if (changed) {
+      user.updatedAt = nowIso();
+    }
+    persist();
+    const session = createSession(user.id);
+    return {
+      user: sanitizeUser(user),
+      sessionToken: session.token,
+      workspaceId: getPrimaryWorkspaceIdForUser(user.id)
+    };
+  }
+
+  function getCreditStatus(userId) {
+    const user = getUserById(userId);
+    if (!user || user.deletedAt) {
+      throw createError(404, "User not found.");
+    }
+    const credits = Number.isFinite(Number(user.credits)) ? Number(user.credits) : null;
+    return {
+      credits,
+      unlimited: credits === null,
+      isGuest: isGuestEmail(normalizeEmail(user.email))
+    };
+  }
+
+  function checkCredits(userId, requestedUnits = 1) {
+    const user = getUserById(userId);
+    if (!user || user.deletedAt) {
+      throw createError(404, "User not found.");
+    }
+    const requested = Math.max(1, Number(requestedUnits || 1));
+    const credits = Number.isFinite(Number(user.credits)) ? Number(user.credits) : null;
+    if (credits === null) {
+      return {
+        allowed: true,
+        unlimited: true,
+        remaining: null,
+        requested
+      };
+    }
+    return {
+      allowed: credits >= requested,
+      unlimited: false,
+      remaining: credits,
+      requested
+    };
+  }
+
+  function consumeCredits(userId, units = 1) {
+    const user = getUserById(userId);
+    if (!user || user.deletedAt) {
+      throw createError(404, "User not found.");
+    }
+    const requested = Math.max(1, Number(units || 1));
+    const credits = Number.isFinite(Number(user.credits)) ? Number(user.credits) : null;
+    if (credits === null) {
+      return {
+        consumed: 0,
+        remaining: null,
+        unlimited: true
+      };
+    }
+    if (credits < requested) {
+      throw createError(403, "Insufficient credits.", {
+        reasonCode: "credits_exhausted",
+        creditsRemaining: credits,
+        creditsRequested: requested
+      });
+    }
+    user.credits = Math.max(0, credits - requested);
+    user.updatedAt = nowIso();
+    persist();
+    return {
+      consumed: requested,
+      remaining: user.credits,
+      unlimited: false
     };
   }
 
@@ -824,6 +1049,7 @@ function createPlatformStore({ rootDir, trialDays = TRIAL_DAYS_DEFAULT } = {}) {
     const subscription = getActiveSubscription(workspaceId);
     const features = { ...plan.features };
     const limits = { ...plan.limits };
+    const overagePolicy = normalizeOveragePolicy(plan.overagePolicy);
     const now = Date.now();
     const overrides = state.entitlementOverrides.filter((row) =>
       row.workspaceId === workspaceId
@@ -843,6 +1069,7 @@ function createPlatformStore({ rootDir, trialDays = TRIAL_DAYS_DEFAULT } = {}) {
       subscriptionStatus: subscription ? subscription.status : "none",
       features,
       limits,
+      overagePolicy,
       overrides
     };
   }
@@ -1058,13 +1285,15 @@ function createPlatformStore({ rootDir, trialDays = TRIAL_DAYS_DEFAULT } = {}) {
 
   function checkQuota(workspaceId, feature, unitsRequested = 1) {
     const entitlements = getWorkspaceEntitlements(workspaceId);
+    const featureOveragePolicy = resolveFeatureOveragePolicy(entitlements.overagePolicy, feature);
     const limitKey = FEATURE_LIMIT_KEYS[feature];
     if (!entitlements.features[feature]) {
       return {
         allowed: false,
         reasonCode: "feature_not_in_plan",
         resetAt: getUsageWindowStart(),
-        upgradePlans: PLAN_CATALOG.filter((plan) => plan.features[feature]).map((plan) => plan.id)
+        upgradePlans: PLAN_CATALOG.filter((plan) => plan.features[feature]).map((plan) => plan.id),
+        overagePolicy: featureOveragePolicy
       };
     }
     if (!limitKey) {
@@ -1072,7 +1301,8 @@ function createPlatformStore({ rootDir, trialDays = TRIAL_DAYS_DEFAULT } = {}) {
         allowed: true,
         reasonCode: "ok",
         resetAt: getUsageWindowStart(),
-        usage: usageSummary(workspaceId)
+        usage: usageSummary(workspaceId),
+        overagePolicy: featureOveragePolicy
       };
     }
     const limitValue = entitlements.limits[limitKey];
@@ -1081,7 +1311,8 @@ function createPlatformStore({ rootDir, trialDays = TRIAL_DAYS_DEFAULT } = {}) {
         allowed: true,
         reasonCode: "ok",
         resetAt: getUsageWindowStart(),
-        usage: usageSummary(workspaceId)
+        usage: usageSummary(workspaceId),
+        overagePolicy: featureOveragePolicy
       };
     }
     const summary = usageSummary(workspaceId);
@@ -1096,7 +1327,8 @@ function createPlatformStore({ rootDir, trialDays = TRIAL_DAYS_DEFAULT } = {}) {
       limit: Number(limitValue),
       resetAt: getUsageWindowStart(),
       upgradePlans: PLAN_CATALOG.filter((plan) => plan.features[feature]).map((plan) => plan.id),
-      usage: summary
+      usage: summary,
+      overagePolicy: featureOveragePolicy
     };
   }
 
@@ -1488,7 +1720,7 @@ function createPlatformStore({ rootDir, trialDays = TRIAL_DAYS_DEFAULT } = {}) {
           type: "trial-reminder",
           title: `Trial expires in ${daysLeft} day${daysLeft === 1 ? "" : "s"}`,
           body: "Upgrade now to keep premium workflows active.",
-          cta: "/pricing/",
+          cta: "/#homePricing",
           createdAt: nowIso(),
           readAt: null,
           payload: { daysLeft, workspaceId: subscription.workspaceId }
@@ -1827,6 +2059,8 @@ function createPlatformStore({ rootDir, trialDays = TRIAL_DAYS_DEFAULT } = {}) {
     signup,
     login,
     loginGoogle,
+    requestMagicLink,
+    verifyMagicLink,
     logout,
     refreshSession,
     requestPasswordReset,
@@ -1887,6 +2121,9 @@ function createPlatformStore({ rootDir, trialDays = TRIAL_DAYS_DEFAULT } = {}) {
     updateSeries,
     upsertVideoGovernance,
     canAccessVideo,
+    getCreditStatus,
+    checkCredits,
+    consumeCredits,
     getSeatStats,
     updateSeatCount,
     getTeamDashboard,
@@ -1901,6 +2138,7 @@ function loadState(dataPath) {
       users: [],
       sessions: [],
       passwordResets: [],
+      magicLinks: [],
       workspaces: [],
       subscriptions: [],
       webhookEvents: [],
@@ -1927,6 +2165,7 @@ function loadState(dataPath) {
       users: ensureArray(parsed.users),
       sessions: ensureArray(parsed.sessions),
       passwordResets: ensureArray(parsed.passwordResets),
+      magicLinks: ensureArray(parsed.magicLinks),
       workspaces: ensureArray(parsed.workspaces),
       subscriptions: ensureArray(parsed.subscriptions),
       webhookEvents: ensureArray(parsed.webhookEvents),
@@ -1959,6 +2198,7 @@ function loadStateWithBackup(dataPath) {
     users: [],
     sessions: [],
     passwordResets: [],
+    magicLinks: [],
     workspaces: [],
     subscriptions: [],
     webhookEvents: [],
@@ -1988,8 +2228,74 @@ function ensureDir(dir) {
   }
 }
 
+function resolveWritableDataPath(preferredPath) {
+  const preferredDir = path.dirname(preferredPath);
+  try {
+    ensureDir(preferredDir);
+    fs.accessSync(preferredDir, fs.constants.W_OK);
+    return preferredPath;
+  } catch (_) {
+    const fallbackDir = path.join(os.tmpdir(), "bible-ai-hub", "server", "data");
+    ensureDir(fallbackDir);
+    return path.join(fallbackDir, "platform-state.json");
+  }
+}
+
 function createId(prefix) {
   return `${prefix}_${crypto.randomBytes(9).toString("hex")}`;
+}
+
+function isAdminEmail(email) {
+  return normalizeEmail(email) === normalizeEmail(ADMIN_EMAIL);
+}
+
+function isGuestEmail(email) {
+  return normalizeEmail(email).endsWith(GUEST_EMAIL_DOMAIN);
+}
+
+function defaultCreditsForEmail(email) {
+  const safeEmail = normalizeEmail(email);
+  if (isAdminEmail(safeEmail)) {
+    return ADMIN_DEFAULT_CREDITS;
+  }
+  if (isGuestEmail(safeEmail)) {
+    return GUEST_DEFAULT_CREDITS;
+  }
+  return null;
+}
+
+function applyAccountDefaults(user) {
+  if (!user || typeof user !== "object") {
+    return false;
+  }
+  const safeEmail = normalizeEmail(user.email);
+  let changed = false;
+
+  if (isAdminEmail(safeEmail) && user.role !== "admin") {
+    user.role = "admin";
+    changed = true;
+  }
+  if (!cleanString(user.role)) {
+    user.role = "user";
+    changed = true;
+  }
+
+  if (isAdminEmail(safeEmail)) {
+    if (!Number.isFinite(Number(user.credits)) || Number(user.credits) < ADMIN_DEFAULT_CREDITS) {
+      user.credits = ADMIN_DEFAULT_CREDITS;
+      changed = true;
+    }
+  } else if (isGuestEmail(safeEmail)) {
+    if (!Number.isFinite(Number(user.credits))) {
+      user.credits = GUEST_DEFAULT_CREDITS;
+      changed = true;
+    }
+  } else if (typeof user.credits === "undefined") {
+    user.credits = null;
+    changed = true;
+  }
+
+  return changed;
 }
 
 function createToken() {
@@ -2047,6 +2353,40 @@ function normalizeRole(role) {
     return safe;
   }
   return "viewer";
+}
+
+function normalizeOveragePolicy(value) {
+  const safe = value && typeof value === "object" ? value : {};
+  const defaultPolicy = safe.default && typeof safe.default === "object"
+    ? safe.default
+    : DEFAULT_OVERAGE_POLICY;
+  const normalized = {
+    default: {
+      mode: cleanString(defaultPolicy.mode, cleanString(DEFAULT_OVERAGE_POLICY.mode)),
+      resetCadence: cleanString(defaultPolicy.resetCadence, cleanString(DEFAULT_OVERAGE_POLICY.resetCadence)),
+      message: cleanString(defaultPolicy.message, cleanString(DEFAULT_OVERAGE_POLICY.message))
+    }
+  };
+
+  for (const [featureKey, row] of Object.entries(safe)) {
+    if (featureKey === "default") {
+      continue;
+    }
+    const source = row && typeof row === "object" ? row : {};
+    normalized[featureKey] = {
+      mode: cleanString(source.mode, normalized.default.mode),
+      resetCadence: cleanString(source.resetCadence, normalized.default.resetCadence),
+      message: cleanString(source.message, normalized.default.message)
+    };
+  }
+
+  return normalized;
+}
+
+function resolveFeatureOveragePolicy(overagePolicy, feature) {
+  const normalized = normalizeOveragePolicy(overagePolicy);
+  const specific = normalized[cleanString(feature)];
+  return specific || normalized.default;
 }
 
 function countBy(rows, key) {

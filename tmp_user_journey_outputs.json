@@ -1,0 +1,2316 @@
+{
+  "generatedAt": "2026-02-13T05:51:58.701Z",
+  "scenarios": {
+    "bibleStudy": {
+      "summary": "Text-centered study plan for James 1:19-27.",
+      "passageLens": {
+        "contextSummary": "",
+        "textualHorizon": [
+          "Immediate literary flow and argument.",
+          "Key repeated terms, contrasts, and progression.",
+          "Canonical connections worth testing."
+        ],
+        "interpretiveRisks": [
+          "Reading assumptions into the text.",
+          "Skipping grammatical or structural observation.",
+          "Applying conclusions before verifying meaning."
+        ],
+        "pastoralAim": ""
+      },
+      "clear": {
+        "confess": {
+          "code": "C",
+          "label": "Confess",
+          "definition": "Prepare the interpreter through prayer and initial observation, orienting heart and mind toward the biblical text.",
+          "stageSummary": "Use Confess to advance disciplined interpretation of the passage.",
+          "actions": [
+            "Read the passage slowly at least three times.",
+            "Record observations before conclusions.",
+            "Flag assumptions that require verification."
+          ],
+          "aiFindings": [
+            "No AI findings were produced for this stage.",
+            "Continue with the 10-step method while verifying claims."
+          ],
+          "diagnosticQuestions": [
+            "What textual evidence supports this claim?",
+            "Where do I still need verification?"
+          ],
+          "microPrompts": [
+            "Help me execute C (Confess) on this passage.",
+            "Surface the highest-priority next move."
+          ],
+          "deliverables": [
+            "A concise worksheet for this stage.",
+            "A short list of unresolved questions."
+          ],
+          "qualityChecks": [
+            "Interpretive claims are text-anchored.",
+            "Speculative conclusions are marked provisional."
+          ],
+          "cautions": [
+            "Avoid importing assumptions into the text.",
+            "Avoid unverified historical or lexical claims."
+          ],
+          "evidence": {
+            "confidence": "medium",
+            "rationale": "Stage includes usable guidance, but some claims may need tighter verification.",
+            "citations": [
+              {
+                "reference": "James 1:19-27",
+                "source": "primary-passage"
+              }
+            ]
+          }
+        },
+        "list": {
+          "code": "L",
+          "label": "List",
+          "definition": "Survey words, phrases, and sentence relationships to form a preliminary preaching structure.",
+          "stageSummary": "Use List to advance disciplined interpretation of the passage.",
+          "actions": [
+            "Read the passage slowly at least three times.",
+            "Record observations before conclusions.",
+            "Flag assumptions that require verification."
+          ],
+          "aiFindings": [
+            "No AI findings were produced for this stage.",
+            "Continue with the 10-step method while verifying claims."
+          ],
+          "diagnosticQuestions": [
+            "What textual evidence supports this claim?",
+            "Where do I still need verification?"
+          ],
+          "microPrompts": [
+            "Help me execute L (List) on this passage.",
+            "Surface the highest-priority next move."
+          ],
+          "deliverables": [
+            "A concise worksheet for this stage.",
+            "A short list of unresolved questions."
+          ],
+          "qualityChecks": [
+            "Interpretive claims are text-anchored.",
+            "Speculative conclusions are marked provisional."
+          ],
+          "cautions": [
+            "Avoid importing assumptions into the text.",
+            "Avoid unverified historical or lexical claims."
+          ],
+          "evidence": {
+            "confidence": "medium",
+            "rationale": "Stage includes usable guidance, but some claims may need tighter verification.",
+            "citations": [
+              {
+                "reference": "James 1:19-27",
+                "source": "primary-passage"
+              }
+            ]
+          }
+        },
+        "exegete": {
+          "code": "E",
+          "label": "Exegete",
+          "definition": "Conduct detailed textual, lexical, morphological, grammatical, syntactical, and discourse-level analysis to discern authorial intent.",
+          "stageSummary": "Use Exegete to advance disciplined interpretation of the passage.",
+          "actions": [
+            "Read the passage slowly at least three times.",
+            "Record observations before conclusions.",
+            "Flag assumptions that require verification."
+          ],
+          "aiFindings": [
+            "No AI findings were produced for this stage.",
+            "Continue with the 10-step method while verifying claims."
+          ],
+          "diagnosticQuestions": [
+            "What textual evidence supports this claim?",
+            "Where do I still need verification?"
+          ],
+          "microPrompts": [
+            "Help me execute E (Exegete) on this passage.",
+            "Surface the highest-priority next move."
+          ],
+          "deliverables": [
+            "A concise worksheet for this stage.",
+            "A short list of unresolved questions."
+          ],
+          "qualityChecks": [
+            "Interpretive claims are text-anchored.",
+            "Speculative conclusions are marked provisional."
+          ],
+          "cautions": [
+            "Avoid importing assumptions into the text.",
+            "Avoid unverified historical or lexical claims."
+          ],
+          "evidence": {
+            "confidence": "medium",
+            "rationale": "Stage includes usable guidance, but some claims may need tighter verification.",
+            "citations": [
+              {
+                "reference": "James 1:19-27",
+                "source": "primary-passage"
+              }
+            ]
+          }
+        },
+        "analyze": {
+          "code": "A",
+          "label": "Analyze",
+          "definition": "Synthesize and verify findings through Scripture cross-references, historical/theological context, and evaluation of key interpretations.",
+          "stageSummary": "Use Analyze to advance disciplined interpretation of the passage.",
+          "actions": [
+            "Read the passage slowly at least three times.",
+            "Record observations before conclusions.",
+            "Flag assumptions that require verification."
+          ],
+          "aiFindings": [
+            "No AI findings were produced for this stage.",
+            "Continue with the 10-step method while verifying claims."
+          ],
+          "diagnosticQuestions": [
+            "What textual evidence supports this claim?",
+            "Where do I still need verification?"
+          ],
+          "microPrompts": [
+            "Help me execute A (Analyze) on this passage.",
+            "Surface the highest-priority next move."
+          ],
+          "deliverables": [
+            "A concise worksheet for this stage.",
+            "A short list of unresolved questions."
+          ],
+          "qualityChecks": [
+            "Interpretive claims are text-anchored.",
+            "Speculative conclusions are marked provisional."
+          ],
+          "cautions": [
+            "Avoid importing assumptions into the text.",
+            "Avoid unverified historical or lexical claims."
+          ],
+          "evidence": {
+            "confidence": "medium",
+            "rationale": "Stage includes usable guidance, but some claims may need tighter verification.",
+            "citations": [
+              {
+                "reference": "James 1:19-27",
+                "source": "primary-passage"
+              }
+            ]
+          }
+        },
+        "relate": {
+          "code": "R",
+          "label": "Relate",
+          "definition": "Bridge the ancient text to today's audience through clear exposition, faithful application, illustration, and rhetorical strategy.",
+          "stageSummary": "Use Relate to advance disciplined interpretation of the passage.",
+          "actions": [
+            "Read the passage slowly at least three times.",
+            "Record observations before conclusions.",
+            "Flag assumptions that require verification."
+          ],
+          "aiFindings": [
+            "No AI findings were produced for this stage.",
+            "Continue with the 10-step method while verifying claims."
+          ],
+          "diagnosticQuestions": [
+            "What textual evidence supports this claim?",
+            "Where do I still need verification?"
+          ],
+          "microPrompts": [
+            "Help me execute R (Relate) on this passage.",
+            "Surface the highest-priority next move."
+          ],
+          "deliverables": [
+            "A concise worksheet for this stage.",
+            "A short list of unresolved questions."
+          ],
+          "qualityChecks": [
+            "Interpretive claims are text-anchored.",
+            "Speculative conclusions are marked provisional."
+          ],
+          "cautions": [
+            "Avoid importing assumptions into the text.",
+            "Avoid unverified historical or lexical claims."
+          ],
+          "evidence": {
+            "confidence": "medium",
+            "rationale": "Stage includes usable guidance, but some claims may need tighter verification.",
+            "citations": [
+              {
+                "reference": "James 1:19-27",
+                "source": "primary-passage"
+              }
+            ]
+          }
+        }
+      },
+      "tenStep": [
+        {
+          "stepNumber": 1,
+          "stepName": "Observation",
+          "objective": "Complete observation with textual discipline.",
+          "whatToDo": [
+            "Start with direct observations from the passage.",
+            "List ambiguities and assumptions for later verification.",
+            "Document concrete outputs for this step."
+          ],
+          "aiHelps": [
+            "Coach me through Step 1: Observation.",
+            "Challenge weak inferences and suggest stronger text anchors."
+          ],
+          "outputArtifact": "Observation worksheet",
+          "qualityChecks": [
+            "Major claims are traceable to passage evidence.",
+            "Uncertain claims are explicitly marked as provisional."
+          ]
+        },
+        {
+          "stepNumber": 2,
+          "stepName": "Outlining",
+          "objective": "Complete outlining with textual discipline.",
+          "whatToDo": [
+            "Start with direct observations from the passage.",
+            "List ambiguities and assumptions for later verification.",
+            "Document concrete outputs for this step."
+          ],
+          "aiHelps": [
+            "Coach me through Step 2: Outlining.",
+            "Challenge weak inferences and suggest stronger text anchors."
+          ],
+          "outputArtifact": "Outlining worksheet",
+          "qualityChecks": [
+            "Major claims are traceable to passage evidence.",
+            "Uncertain claims are explicitly marked as provisional."
+          ]
+        },
+        {
+          "stepNumber": 3,
+          "stepName": "Word Studies",
+          "objective": "Complete word studies with textual discipline.",
+          "whatToDo": [
+            "Start with direct observations from the passage.",
+            "List ambiguities and assumptions for later verification.",
+            "Document concrete outputs for this step."
+          ],
+          "aiHelps": [
+            "Coach me through Step 3: Word Studies.",
+            "Challenge weak inferences and suggest stronger text anchors."
+          ],
+          "outputArtifact": "Word Studies worksheet",
+          "qualityChecks": [
+            "Major claims are traceable to passage evidence.",
+            "Uncertain claims are explicitly marked as provisional."
+          ]
+        },
+        {
+          "stepNumber": 4,
+          "stepName": "Grammar Studies",
+          "objective": "Complete grammar studies with textual discipline.",
+          "whatToDo": [
+            "Start with direct observations from the passage.",
+            "List ambiguities and assumptions for later verification.",
+            "Document concrete outputs for this step."
+          ],
+          "aiHelps": [
+            "Coach me through Step 4: Grammar Studies.",
+            "Challenge weak inferences and suggest stronger text anchors."
+          ],
+          "outputArtifact": "Grammar Studies worksheet",
+          "qualityChecks": [
+            "Major claims are traceable to passage evidence.",
+            "Uncertain claims are explicitly marked as provisional."
+          ]
+        },
+        {
+          "stepNumber": 5,
+          "stepName": "Cross-References",
+          "objective": "Complete cross-references with textual discipline.",
+          "whatToDo": [
+            "Start with direct observations from the passage.",
+            "List ambiguities and assumptions for later verification.",
+            "Document concrete outputs for this step."
+          ],
+          "aiHelps": [
+            "Coach me through Step 5: Cross-References.",
+            "Challenge weak inferences and suggest stronger text anchors."
+          ],
+          "outputArtifact": "Cross-References worksheet",
+          "qualityChecks": [
+            "Major claims are traceable to passage evidence.",
+            "Uncertain claims are explicitly marked as provisional."
+          ]
+        },
+        {
+          "stepNumber": 6,
+          "stepName": "Historical Background",
+          "objective": "Complete historical background with textual discipline.",
+          "whatToDo": [
+            "Start with direct observations from the passage.",
+            "List ambiguities and assumptions for later verification.",
+            "Document concrete outputs for this step."
+          ],
+          "aiHelps": [
+            "Coach me through Step 6: Historical Background.",
+            "Challenge weak inferences and suggest stronger text anchors."
+          ],
+          "outputArtifact": "Historical Background worksheet",
+          "qualityChecks": [
+            "Major claims are traceable to passage evidence.",
+            "Uncertain claims are explicitly marked as provisional."
+          ]
+        },
+        {
+          "stepNumber": 7,
+          "stepName": "Theological Background",
+          "objective": "Complete theological background with textual discipline.",
+          "whatToDo": [
+            "Start with direct observations from the passage.",
+            "List ambiguities and assumptions for later verification.",
+            "Document concrete outputs for this step."
+          ],
+          "aiHelps": [
+            "Coach me through Step 7: Theological Background.",
+            "Challenge weak inferences and suggest stronger text anchors."
+          ],
+          "outputArtifact": "Theological Background worksheet",
+          "qualityChecks": [
+            "Major claims are traceable to passage evidence.",
+            "Uncertain claims are explicitly marked as provisional."
+          ]
+        },
+        {
+          "stepNumber": 8,
+          "stepName": "Cross-Checking",
+          "objective": "Complete cross-checking with textual discipline.",
+          "whatToDo": [
+            "Start with direct observations from the passage.",
+            "List ambiguities and assumptions for later verification.",
+            "Document concrete outputs for this step."
+          ],
+          "aiHelps": [
+            "Coach me through Step 8: Cross-Checking.",
+            "Challenge weak inferences and suggest stronger text anchors."
+          ],
+          "outputArtifact": "Cross-Checking worksheet",
+          "qualityChecks": [
+            "Major claims are traceable to passage evidence.",
+            "Uncertain claims are explicitly marked as provisional."
+          ]
+        },
+        {
+          "stepNumber": 9,
+          "stepName": "Illustration",
+          "objective": "Complete illustration with textual discipline.",
+          "whatToDo": [
+            "Start with direct observations from the passage.",
+            "List ambiguities and assumptions for later verification.",
+            "Document concrete outputs for this step."
+          ],
+          "aiHelps": [
+            "Coach me through Step 9: Illustration.",
+            "Challenge weak inferences and suggest stronger text anchors."
+          ],
+          "outputArtifact": "Illustration worksheet",
+          "qualityChecks": [
+            "Major claims are traceable to passage evidence.",
+            "Uncertain claims are explicitly marked as provisional."
+          ]
+        },
+        {
+          "stepNumber": 10,
+          "stepName": "Application",
+          "objective": "Complete application with textual discipline.",
+          "whatToDo": [
+            "Start with direct observations from the passage.",
+            "List ambiguities and assumptions for later verification.",
+            "Document concrete outputs for this step."
+          ],
+          "aiHelps": [
+            "Coach me through Step 10: Application.",
+            "Challenge weak inferences and suggest stronger text anchors."
+          ],
+          "outputArtifact": "Application worksheet",
+          "qualityChecks": [
+            "Major claims are traceable to passage evidence.",
+            "Uncertain claims are explicitly marked as provisional."
+          ]
+        }
+      ],
+      "studyWorkflow": {
+        "assistantResponse": [
+          "Begin with a focused reading of James 1:19-27 before external research.",
+          "Document textual observations first, then move into interpretation.",
+          "Track unresolved questions for verification in later steps."
+        ],
+        "nextActions": [
+          "Complete CLEAR stage notes in order: Confess, List, Exegete, Analyze, Relate.",
+          "Work through all ten study steps before final sermon/application synthesis.",
+          "Mark uncertain claims as provisional and verify with trusted resources."
+        ],
+        "prayerPrompts": [
+          "Pray for humility, clarity, and obedience while handling the text.",
+          "Ask the Lord to expose assumptions that distort interpretation.",
+          "Pray for faithful application that serves your people."
+        ],
+        "integrationNotes": [
+          "Move sequentially through all ten steps before final application.",
+          "Treat unresolved claims as research questions, not conclusions."
+        ]
+      },
+      "theologicalProfile": "text-centered",
+      "evidencePanel": {
+        "exportReady": true,
+        "notes": [
+          "Citations are generated from explicit references in the output and the primary passage.",
+          "Confidence labels are heuristic and should be validated through direct textual study."
+        ]
+      },
+      "exportPack": {
+        "markdown": "# Bible Study Pack: James 1:19-27\n\n- Theological profile: text-centered\n- Generated: 2026-02-13T05:52:46.035Z\n\n## Summary\nText-centered study plan for James 1:19-27.\n\n## Confess\nUse Confess to advance disciplined interpretation of the passage.\n- Confidence: unknown\n\n## List\nUse List to advance disciplined interpretation of the passage.\n- Confidence: unknown\n\n## Exegete\nUse Exegete to advance disciplined interpretation of the passage.\n- Confidence: unknown\n\n## Analyze\nUse Analyze to advance disciplined interpretation of the passage.\n- Confidence: unknown\n\n## Relate\nUse Relate to advance disciplined interpretation of the passage.\n- Confidence: unknown\n",
+        "html": "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\" /><title>Bible Study Pack: James 1:19-27</title><style>body{font-family:Arial,sans-serif;line-height:1.5;padding:24px;color:#10243a}h1,h2{color:#16385d}section{margin-bottom:20px}small{color:#5b738c}</style></head><body><h1>Bible Study Pack: James 1:19-27</h1><p><strong>Theological Profile:</strong> text-centered</p><p><small>Generated 2026-02-13T05:52:46.035Z</small></p><section><h2>Summary</h2><p>Text-centered study plan for James 1:19-27.</p></section>\n      <section>\n        <h2>Confess</h2>\n        <p>Use Confess to advance disciplined interpretation of the passage.</p>\n        <p><strong>Confidence:</strong> unknown</p>\n        <p><strong>Citations:</strong> </p>\n      </section>\n    \n      <section>\n        <h2>List</h2>\n        <p>Use List to advance disciplined interpretation of the passage.</p>\n        <p><strong>Confidence:</strong> unknown</p>\n        <p><strong>Citations:</strong> </p>\n      </section>\n    \n      <section>\n        <h2>Exegete</h2>\n        <p>Use Exegete to advance disciplined interpretation of the passage.</p>\n        <p><strong>Confidence:</strong> unknown</p>\n        <p><strong>Citations:</strong> </p>\n      </section>\n    \n      <section>\n        <h2>Analyze</h2>\n        <p>Use Analyze to advance disciplined interpretation of the passage.</p>\n        <p><strong>Confidence:</strong> unknown</p>\n        <p><strong>Citations:</strong> </p>\n      </section>\n    \n      <section>\n        <h2>Relate</h2>\n        <p>Use Relate to advance disciplined interpretation of the passage.</p>\n        <p><strong>Confidence:</strong> unknown</p>\n        <p><strong>Citations:</strong> </p>\n      </section>\n    </body></html>",
+        "docText": "Bible Study Pack: James 1:19-27\nTheological Profile: text-centered\nGenerated: 2026-02-13T05:52:46.036Z\n\nSummary\nText-centered study plan for James 1:19-27.\n\nCLEAR Stages\nConfess: Use Confess to advance disciplined interpretation of the passage.\nConfidence: unknown\nCitations: \n\nList: Use List to advance disciplined interpretation of the passage.\nConfidence: unknown\nCitations: \n\nExegete: Use Exegete to advance disciplined interpretation of the passage.\nConfidence: unknown\nCitations: \n\nAnalyze: Use Analyze to advance disciplined interpretation of the passage.\nConfidence: unknown\nCitations: \n\nRelate: Use Relate to advance disciplined interpretation of the passage.\nConfidence: unknown\nCitations: \n",
+        "generatedAt": "2026-02-13T05:52:46.036Z"
+      }
+    },
+    "sermonPreparation": {
+      "styleMode": "expository",
+      "continuityMemory": {
+        "enabled": false,
+        "summary": ""
+      },
+      "preachabilityScore": {
+        "overall": 8.29,
+        "rubric": [
+          {
+            "dimension": "Structure",
+            "score": 6.6,
+            "rationale": "Counts coherent movement and explanatory depth."
+          },
+          {
+            "dimension": "Transitions",
+            "score": 5.4,
+            "rationale": "Measures movement continuity across sections."
+          },
+          {
+            "dimension": "Application",
+            "score": 10,
+            "rationale": "Measures concrete congregational response pathways."
+          },
+          {
+            "dimension": "Illustration",
+            "score": 9,
+            "rationale": "Measures imagination and listener connection points."
+          },
+          {
+            "dimension": "Timing",
+            "score": 10,
+            "rationale": "Measures fit between target length and segment plan."
+          }
+        ]
+      },
+      "tighteningPass": {
+        "applied": false,
+        "before": [],
+        "after": [],
+        "notes": []
+      },
+      "bigIdea": "God’s pursuing grace relentlessly calls sinners home and invites His people to respond with mercy, transforming both the prodigal and the older brother.",
+      "titleOptions": [
+        "The Father’s Pursuing Grace: Coming Home and Showing Mercy",
+        "Running to Embrace: The Heart of the Father in Luke 15",
+        "From Far Off to Close: Experiencing and Extending God’s Grace",
+        "Prodigal Grace and Merciful Hearts: Lessons from the Father’s Love",
+        "Home at Last: The Pursuing Love of God and Our Response"
+      ],
+      "outline": [
+        {
+          "heading": "The Prodigal’s Departure and the Depth of Sin (vv. 11-16)",
+          "explanation": "The younger son demands his inheritance and leaves home, symbolizing a willful rejection of the father’s provision and presence. His journey leads to wastefulness and desperate need, illustrating the ruin that results from turning away from God’s grace.",
+          "application": "Recognize the reality of sin’s destructive power when we choose our own way apart from God. Examine areas where we may be living as ‘prodigals’—seeking fulfillment outside of God’s provision—and repent.",
+          "supportingReferences": [
+            "Luke 15:11-16",
+            "Romans 3:23",
+            "Psalm 51:3"
+          ]
+        },
+        {
+          "heading": "The Father’s Compassionate Pursuit (vv. 17-20a)",
+          "explanation": "While the son is still ‘far off,’ the father sees him, is moved with compassion, runs to him, embraces, and kisses him. This vividly portrays God’s initiating and relentless grace toward sinners, not waiting for them to reach Him but coming to meet them.",
+          "application": "Trust in God’s active pursuit of you even when you feel distant. Rest in His compassion and allow His grace to draw you back. For believers, imitate this grace by pursuing those who have wandered away with compassion and urgency.",
+          "supportingReferences": [
+            "Luke 15:17-20a",
+            "2 Corinthians 5:18",
+            "Ephesians 2:4-5"
+          ]
+        },
+        {
+          "heading": "The Call to Mercy: The Older Brother’s Heart (vv. 20b-24 and implied)",
+          "explanation": "Though the passage ends with the father’s restoration of the son, the narrative context includes the older brother’s resentment and refusal to join the celebration. This challenges believers to examine their own hearts toward mercy and forgiveness, reflecting God’s grace in community.",
+          "application": "Evaluate your response to God’s grace extended to others, especially those who have sinned or strayed. Commit to cultivating a merciful, forgiving heart that rejoices in restoration rather than harboring bitterness or self-righteousness.",
+          "supportingReferences": [
+            "Luke 15:20b-24",
+            "Matthew 18:21-22",
+            "Colossians 3:12-13"
+          ]
+        }
+      ],
+      "transitions": [
+        "Having seen the younger son’s tragic departure and the ruin it brought, we now turn to the heart of the story—the father’s compassionate pursuit.",
+        "The father’s running embrace reveals the nature of God’s grace: it goes out to meet us even when we are far off. But this grace also calls us to respond rightly.",
+        "Finally, the story challenges not only those who have wandered but also those who remain at home, prompting us to examine our hearts toward mercy and forgiveness."
+      ],
+      "applications": [
+        "Confess any areas where you have turned away from God’s provision and ask for His restoring grace.",
+        "Rest in the assurance that God actively pursues you with compassion, even when you feel distant.",
+        "Reach out with compassion to someone who has strayed from faith or fellowship, initiating reconciliation.",
+        "Examine your heart for resentment or bitterness toward others who have received grace, and ask God to cultivate mercy in you.",
+        "Celebrate and participate joyfully in the restoration of those who return to God, resisting self-righteous attitudes.",
+        "Memorize Luke 15:20 to remind yourself of God’s compassionate pursuit."
+      ],
+      "illustrations": [
+        "A father running to embrace a returning child after a long absence, illustrating the urgency and compassion of the father in the story.",
+        "A personal testimony or story of someone who felt far from God but experienced His pursuing grace and forgiveness.",
+        "An example from church life where a community member returned after a season of wandering and was warmly welcomed, highlighting the call to mercy.",
+        "A brief historical or cultural note on inheritance and family honor in first-century Palestine to ground the son’s departure in real social consequences.",
+        "A modern analogy of someone squandering resources but being restored by a generous benefactor, emphasizing grace rather than justice."
+      ],
+      "timingPlan": [
+        {
+          "segment": "Introduction and setting the context",
+          "minutes": 5,
+          "purpose": "Introduce the passage, its context, and the theme of the Father’s pursuing grace; connect with the congregation’s experience."
+        },
+        {
+          "segment": "Point 1: The Prodigal’s Departure and the Depth of Sin",
+          "minutes": 8,
+          "purpose": "Explain the younger son’s rebellion and its consequences; call for self-examination and repentance."
+        },
+        {
+          "segment": "Point 2: The Father’s Compassionate Pursuit",
+          "minutes": 10,
+          "purpose": "Unpack the father’s grace-filled response; encourage trust in God’s pursuit and motivate compassionate outreach."
+        },
+        {
+          "segment": "Point 3: The Call to Mercy: The Older Brother’s Heart",
+          "minutes": 7,
+          "purpose": "Challenge listeners to examine their hearts toward mercy and forgiveness; call for joyful participation in restoration."
+        },
+        {
+          "segment": "Conclusion and practical application",
+          "minutes": 5,
+          "purpose": "Summarize the big idea; offer specific, measurable applications; close with prayer and invitation."
+        }
+      ]
+    },
+    "teachingToolsTopic": {
+      "audience": "Kids (7-11)",
+      "overview": "This lesson explores the Parable of the Sower (Matthew 13:3-9, 18-23) with children aged 7-11. It helps them understand how their hearts can be like different soils and encourages reflection on how to be good soil for God's Word. The session combines storytelling, discussion, and visual activities designed to engage children with varying literacy levels and short attention spans, guiding them from understanding biblical truth to practical application in daily life.",
+      "centralTruth": "Our hearts are like soil, and how we listen to God's Word depends on what kind of heart we have. When we keep our hearts soft and open, God's Word can grow and change us for good.",
+      "lessonPlan": {
+        "title": "Growing Good Soil: Listening to God's Word",
+        "keyVerse": "Matthew 13:8 - 'But other seeds fell on good soil, where it produced a crop—a hundred, sixty or thirty times what was sown.'",
+        "objectives": [
+          "Children will identify the different types of soil in the parable and relate them to their hearts.",
+          "Children will understand that a soft, open heart allows God's Word to grow in them.",
+          "Children will think of one practical way to keep their hearts good soil for God's Word."
+        ],
+        "sessionTimeline": [
+          {
+            "segment": "Introduction & Icebreaker",
+            "minutes": 5,
+            "plan": "Teacher greets children warmly, then asks: 'Have you ever planted a seed? What did it need to grow?' Kids share briefly. Teacher connects this to how our hearts need care to grow good things from God's Word, emphasizing that just like seeds need good soil, our hearts need to be soft and open."
+          },
+          {
+            "segment": "Storytelling & Explanation",
+            "minutes": 10,
+            "plan": "Teacher shows a short animated video or uses a visual story to introduce the Parable of the Sower. Explains each soil type simply: hard path, rocky ground, thorny ground, and good soil, using visuals or real objects to illustrate each one clearly."
+          },
+          {
+            "segment": "Interactive Soil Sorting Activity",
+            "minutes": 10,
+            "plan": "Prepare four large mats labeled with each soil type. Distribute small cards with behaviors or feelings (e.g., 'I forget quickly,' 'I get distracted,' 'I listen carefully,' 'I pray and ask God to help me'). Kids place cards on the matching soil mats. Teacher facilitates discussion on how each behavior reflects the condition of the heart and what that means for listening to God's Word."
+          },
+          {
+            "segment": "Reflection & Personal Application",
+            "minutes": 10,
+            "plan": "Guide children to quietly reflect on what kind of soil their heart might be today. Provide a simple worksheet with a heart diagram divided into four sections, where they can draw or write one way to keep their heart good soil (e.g., pray, listen, forgive, trust God). Encourage sharing if comfortable."
+          },
+          {
+            "segment": "Prayer & Closing",
+            "minutes": 5,
+            "plan": "Lead a heartfelt prayer asking God to help each child keep their heart soft and open to His Word. Remind them to practice their 'good soil' habit during the week and trust God's help."
+          }
+        ]
+      },
+      "ageAppropriateContent": {
+        "chosenAudienceExplanation": "Children aged 7-11 are developing their understanding of spiritual truths but have varying literacy skills and shorter attention spans. The lesson uses simple language, engaging visuals, and hands-on activities to make the parable memorable and meaningful, ensuring all children can participate and grasp the message.",
+        "simplifiedExplanation": "Jesus told a story about seeds and soil to show us that our hearts can be like different kinds of soil. When our hearts are soft and open, God's Word can grow in us and help us become better and kinder.",
+        "vocabularyToExplain": [
+          "parable",
+          "soil",
+          "seed",
+          "grow",
+          "heart"
+        ],
+        "differentiationTips": [
+          "Use colorful visuals and physical activities for children who learn best through movement.",
+          "Provide simplified sentence strips or picture cues for children needing extra support with reading.",
+          "Encourage children to share personal examples in a safe, supportive environment to foster understanding."
+        ]
+      },
+      "discussionQuestions": {
+        "icebreakers": [
+          "What is something you planted or grew at home or school?",
+          "Have you ever seen a seed grow into a plant? What did it need?"
+        ],
+        "observation": [
+          "What did you notice about the different soils in the story?",
+          "How do you think the different soils affected the seeds?"
+        ],
+        "interpretation": [
+          "What do you think Jesus was teaching us with this story?",
+          "Why is it important to have a soft, open heart?"
+        ],
+        "application": [
+          "How can you keep your heart soft and ready to listen to God?",
+          "What is one thing you can do this week to be good soil for God's Word?"
+        ],
+        "challenge": [
+          "This week, try to pray every day and ask God to help your heart be soft and open.",
+          "Share one good thing you learned today with a family member or friend."
+        ]
+      },
+      "illustrationIdeas": [
+        {
+          "title": "Seed Growing in Different Soils",
+          "description": "Create a large poster divided into four sections: hard path, rocky ground, thorny ground, and good soil. Use real seeds, drawings, or photos to show how each soil type affects seed growth. Illustrate a seed in each section with outcomes: no growth, stunted growth, choked growth, and healthy growth.",
+          "connection": "Visually demonstrates how the condition of our hearts influences whether God's Word can grow in us."
+        },
+        {
+          "title": "Heart as Soil",
+          "description": "Use a transparent heart-shaped container filled with different materials: sand, small rocks, weeds, and healthy soil. Explain how each material represents different heart conditions—hard, rocky, thorny, or receptive.",
+          "connection": "Provides a physical, visual way for children to see how their hearts can be open or closed to God's Word."
+        },
+        {
+          "title": "Seeds and Growth",
+          "description": "Show real or paper seeds alongside pictures of plants at various stages of growth. Connect the process to listening and caring for our hearts, emphasizing that spiritual growth takes time and care.",
+          "connection": "Encourages children to see spiritual growth as a process similar to planting and nurturing seeds."
+        }
+      ],
+      "applicationPathways": {
+        "personal": [
+          "Pray daily, asking God to help keep your heart soft and open to His Word."
+        ],
+        "family": [
+          "Share the story of the sower with your family and discuss how everyone can be good soil for God's Word."
+        ],
+        "church": [
+          "Participate in small groups or prayer times focused on growing in faith and listening to God's Word."
+        ],
+        "mission": [
+          "Invite friends to hear about Jesus and His Word, showing kindness and patience like good soil."
+        ]
+      },
+      "visualsAndMedia": [
+        "Animated video of the Parable of the Sower",
+        "Colorful posters illustrating each soil type",
+        "Slides with key points and discussion questions"
+      ],
+      "printableHandout": [
+        "Heart diagram with sections for drawing or writing ways to keep good soil",
+        "Matching worksheet linking behaviors to soil types"
+      ],
+      "leaderCoaching": [
+        "Use clear, simple language; check for understanding often.",
+        "Encourage children to share personal thoughts and questions.",
+        "Be patient and supportive, especially with varied literacy levels—use visuals and physical activities to reinforce learning.",
+        "Maintain a warm, pastoral tone that invites reflection, prayer, and spiritual growth."
+      ],
+      "closingPrayerPrompt": "Dear God, thank You for Your Word. Help us to keep our hearts soft and open so Your Word can grow in us. Please guide us to be good soil this week. Amen.",
+      "takeHomeChallenge": "This week, pray each day asking God to help your heart be soft and ready to listen. Share one thing you learned today with someone at home.",
+      "exports": {
+        "markdown": "# Teaching Kit: The Parable of the Sower\n\nAudience: Kids (7-11)\n\n## Overview\nThis lesson explores the Parable of the Sower (Matthew 13:3-9, 18-23) with children aged 7-11. It helps them understand how their hearts can be like different soils and encourages reflection on how to be good soil for God's Word. The session combines storytelling, discussion, and visual activities designed to engage children with varying literacy levels and short attention spans, guiding them from understanding biblical truth to practical application in daily life.\n\n## Central Truth\nOur hearts are like soil, and how we listen to God's Word depends on what kind of heart we have. When we keep our hearts soft and open, God's Word can grow and change us for good.\n\n## Objectives\n- Children will identify the different types of soil in the parable and relate them to their hearts.\n- Children will understand that a soft, open heart allows God's Word to grow in them.\n- Children will think of one practical way to keep their hearts good soil for God's Word.",
+        "handouts": {
+          "leader": "Facilitator notes:\nKey verse: Matthew 13:8 - 'But other seeds fell on good soil, where it produced a crop—a hundred, sixty or thirty times what was sown.'\n1. Children will identify the different types of soil in the parable and relate them to their hearts.\n2. Children will understand that a soft, open heart allows God's Word to grow in them.\n3. Children will think of one practical way to keep their hearts good soil for God's Word.\nChallenge: This week, pray each day asking God to help your heart be soft and ready to listen. Share one thing you learned today with someone at home.",
+          "student": "Student handout:\nKey verse: Matthew 13:8 - 'But other seeds fell on good soil, where it produced a crop—a hundred, sixty or thirty times what was sown.'\n1. Children will identify the different types of soil in the parable and relate them to their hearts.\n2. Children will understand that a soft, open heart allows God's Word to grow in them.\n3. Children will think of one practical way to keep their hearts good soil for God's Word.\nChallenge: This week, pray each day asking God to help your heart be soft and ready to listen. Share one thing you learned today with someone at home.",
+          "parent": "Family follow-up:\nKey verse: Matthew 13:8 - 'But other seeds fell on good soil, where it produced a crop—a hundred, sixty or thirty times what was sown.'\n1. Children will identify the different types of soil in the parable and relate them to their hearts.\n2. Children will understand that a soft, open heart allows God's Word to grow in them.\n3. Children will think of one practical way to keep their hearts good soil for God's Word.\nChallenge: This week, pray each day asking God to help your heart be soft and ready to listen. Share one thing you learned today with someone at home."
+        },
+        "slideOutline": {
+          "title": "Growing Good Soil: Listening to God's Word",
+          "slides": [
+            {
+              "title": "Introduction & Icebreaker",
+              "subtitle": "Teacher greets children warmly, then asks: 'Have you ever planted a seed? What did it need to grow?' Kids share briefly. Teacher connects this to how our hearts need care to grow good things from God's Word, emphasizing that just like seeds need good soil, our hearts need to be soft and open.",
+              "minutes": 5
+            },
+            {
+              "title": "Storytelling & Explanation",
+              "subtitle": "Teacher shows a short animated video or uses a visual story to introduce the Parable of the Sower. Explains each soil type simply: hard path, rocky ground, thorny ground, and good soil, using visuals or real objects to illustrate each one clearly.",
+              "minutes": 10
+            },
+            {
+              "title": "Interactive Soil Sorting Activity",
+              "subtitle": "Prepare four large mats labeled with each soil type. Distribute small cards with behaviors or feelings (e.g., 'I forget quickly,' 'I get distracted,' 'I listen carefully,' 'I pray and ask God to help me'). Kids place cards on the matching soil mats. Teacher facilitates discussion on how each behavior reflects the condition of the heart and what that means for listening to God's Word.",
+              "minutes": 10
+            },
+            {
+              "title": "Reflection & Personal Application",
+              "subtitle": "Guide children to quietly reflect on what kind of soil their heart might be today. Provide a simple worksheet with a heart diagram divided into four sections, where they can draw or write one way to keep their heart good soil (e.g., pray, listen, forgive, trust God). Encourage sharing if comfortable.",
+              "minutes": 10
+            },
+            {
+              "title": "Prayer & Closing",
+              "subtitle": "Lead a heartfelt prayer asking God to help each child keep their heart soft and open to His Word. Remind them to practice their 'good soil' habit during the week and trust God's help.",
+              "minutes": 5
+            }
+          ]
+        }
+      },
+      "multiAudience": true,
+      "selectedAudiences": [
+        "Kids (7-11)",
+        "Youth (12-18)"
+      ],
+      "comparisonSummary": [
+        {
+          "audience": "Kids (7-11)",
+          "objectiveCount": 3,
+          "discussionQuestionCount": 10
+        },
+        {
+          "audience": "Youth (12-18)",
+          "objectiveCount": 4,
+          "discussionQuestionCount": 10
+        }
+      ],
+      "multiAudienceKits": {
+        "Kids (7-11)": {
+          "audience": "Kids (7-11)",
+          "overview": "This lesson explores the Parable of the Sower (Matthew 13:3-9, 18-23) with children aged 7-11. It helps them understand how their hearts can be like different soils and encourages reflection on how to be good soil for God's Word. The session combines storytelling, discussion, and visual activities designed to engage children with varying literacy levels and short attention spans, guiding them from understanding biblical truth to practical application in daily life.",
+          "centralTruth": "Our hearts are like soil, and how we listen to God's Word depends on what kind of heart we have. When we keep our hearts soft and open, God's Word can grow and change us for good.",
+          "lessonPlan": {
+            "title": "Growing Good Soil: Listening to God's Word",
+            "keyVerse": "Matthew 13:8 - 'But other seeds fell on good soil, where it produced a crop—a hundred, sixty or thirty times what was sown.'",
+            "objectives": [
+              "Children will identify the different types of soil in the parable and relate them to their hearts.",
+              "Children will understand that a soft, open heart allows God's Word to grow in them.",
+              "Children will think of one practical way to keep their hearts good soil for God's Word."
+            ],
+            "sessionTimeline": [
+              {
+                "segment": "Introduction & Icebreaker",
+                "minutes": 5,
+                "plan": "Teacher greets children warmly, then asks: 'Have you ever planted a seed? What did it need to grow?' Kids share briefly. Teacher connects this to how our hearts need care to grow good things from God's Word, emphasizing that just like seeds need good soil, our hearts need to be soft and open."
+              },
+              {
+                "segment": "Storytelling & Explanation",
+                "minutes": 10,
+                "plan": "Teacher shows a short animated video or uses a visual story to introduce the Parable of the Sower. Explains each soil type simply: hard path, rocky ground, thorny ground, and good soil, using visuals or real objects to illustrate each one clearly."
+              },
+              {
+                "segment": "Interactive Soil Sorting Activity",
+                "minutes": 10,
+                "plan": "Prepare four large mats labeled with each soil type. Distribute small cards with behaviors or feelings (e.g., 'I forget quickly,' 'I get distracted,' 'I listen carefully,' 'I pray and ask God to help me'). Kids place cards on the matching soil mats. Teacher facilitates discussion on how each behavior reflects the condition of the heart and what that means for listening to God's Word."
+              },
+              {
+                "segment": "Reflection & Personal Application",
+                "minutes": 10,
+                "plan": "Guide children to quietly reflect on what kind of soil their heart might be today. Provide a simple worksheet with a heart diagram divided into four sections, where they can draw or write one way to keep their heart good soil (e.g., pray, listen, forgive, trust God). Encourage sharing if comfortable."
+              },
+              {
+                "segment": "Prayer & Closing",
+                "minutes": 5,
+                "plan": "Lead a heartfelt prayer asking God to help each child keep their heart soft and open to His Word. Remind them to practice their 'good soil' habit during the week and trust God's help."
+              }
+            ]
+          },
+          "ageAppropriateContent": {
+            "chosenAudienceExplanation": "Children aged 7-11 are developing their understanding of spiritual truths but have varying literacy skills and shorter attention spans. The lesson uses simple language, engaging visuals, and hands-on activities to make the parable memorable and meaningful, ensuring all children can participate and grasp the message.",
+            "simplifiedExplanation": "Jesus told a story about seeds and soil to show us that our hearts can be like different kinds of soil. When our hearts are soft and open, God's Word can grow in us and help us become better and kinder.",
+            "vocabularyToExplain": [
+              "parable",
+              "soil",
+              "seed",
+              "grow",
+              "heart"
+            ],
+            "differentiationTips": [
+              "Use colorful visuals and physical activities for children who learn best through movement.",
+              "Provide simplified sentence strips or picture cues for children needing extra support with reading.",
+              "Encourage children to share personal examples in a safe, supportive environment to foster understanding."
+            ]
+          },
+          "discussionQuestions": {
+            "icebreakers": [
+              "What is something you planted or grew at home or school?",
+              "Have you ever seen a seed grow into a plant? What did it need?"
+            ],
+            "observation": [
+              "What did you notice about the different soils in the story?",
+              "How do you think the different soils affected the seeds?"
+            ],
+            "interpretation": [
+              "What do you think Jesus was teaching us with this story?",
+              "Why is it important to have a soft, open heart?"
+            ],
+            "application": [
+              "How can you keep your heart soft and ready to listen to God?",
+              "What is one thing you can do this week to be good soil for God's Word?"
+            ],
+            "challenge": [
+              "This week, try to pray every day and ask God to help your heart be soft and open.",
+              "Share one good thing you learned today with a family member or friend."
+            ]
+          },
+          "illustrationIdeas": [
+            {
+              "title": "Seed Growing in Different Soils",
+              "description": "Create a large poster divided into four sections: hard path, rocky ground, thorny ground, and good soil. Use real seeds, drawings, or photos to show how each soil type affects seed growth. Illustrate a seed in each section with outcomes: no growth, stunted growth, choked growth, and healthy growth.",
+              "connection": "Visually demonstrates how the condition of our hearts influences whether God's Word can grow in us."
+            },
+            {
+              "title": "Heart as Soil",
+              "description": "Use a transparent heart-shaped container filled with different materials: sand, small rocks, weeds, and healthy soil. Explain how each material represents different heart conditions—hard, rocky, thorny, or receptive.",
+              "connection": "Provides a physical, visual way for children to see how their hearts can be open or closed to God's Word."
+            },
+            {
+              "title": "Seeds and Growth",
+              "description": "Show real or paper seeds alongside pictures of plants at various stages of growth. Connect the process to listening and caring for our hearts, emphasizing that spiritual growth takes time and care.",
+              "connection": "Encourages children to see spiritual growth as a process similar to planting and nurturing seeds."
+            }
+          ],
+          "applicationPathways": {
+            "personal": [
+              "Pray daily, asking God to help keep your heart soft and open to His Word."
+            ],
+            "family": [
+              "Share the story of the sower with your family and discuss how everyone can be good soil for God's Word."
+            ],
+            "church": [
+              "Participate in small groups or prayer times focused on growing in faith and listening to God's Word."
+            ],
+            "mission": [
+              "Invite friends to hear about Jesus and His Word, showing kindness and patience like good soil."
+            ]
+          },
+          "visualsAndMedia": [
+            "Animated video of the Parable of the Sower",
+            "Colorful posters illustrating each soil type",
+            "Slides with key points and discussion questions"
+          ],
+          "printableHandout": [
+            "Heart diagram with sections for drawing or writing ways to keep good soil",
+            "Matching worksheet linking behaviors to soil types"
+          ],
+          "leaderCoaching": [
+            "Use clear, simple language; check for understanding often.",
+            "Encourage children to share personal thoughts and questions.",
+            "Be patient and supportive, especially with varied literacy levels—use visuals and physical activities to reinforce learning.",
+            "Maintain a warm, pastoral tone that invites reflection, prayer, and spiritual growth."
+          ],
+          "closingPrayerPrompt": "Dear God, thank You for Your Word. Help us to keep our hearts soft and open so Your Word can grow in us. Please guide us to be good soil this week. Amen.",
+          "takeHomeChallenge": "This week, pray each day asking God to help your heart be soft and ready to listen. Share one thing you learned today with someone at home.",
+          "exports": {
+            "markdown": "# Teaching Kit: The Parable of the Sower\n\nAudience: Kids (7-11)\n\n## Overview\nThis lesson explores the Parable of the Sower (Matthew 13:3-9, 18-23) with children aged 7-11. It helps them understand how their hearts can be like different soils and encourages reflection on how to be good soil for God's Word. The session combines storytelling, discussion, and visual activities designed to engage children with varying literacy levels and short attention spans, guiding them from understanding biblical truth to practical application in daily life.\n\n## Central Truth\nOur hearts are like soil, and how we listen to God's Word depends on what kind of heart we have. When we keep our hearts soft and open, God's Word can grow and change us for good.\n\n## Objectives\n- Children will identify the different types of soil in the parable and relate them to their hearts.\n- Children will understand that a soft, open heart allows God's Word to grow in them.\n- Children will think of one practical way to keep their hearts good soil for God's Word.",
+            "handouts": {
+              "leader": "Facilitator notes:\nKey verse: Matthew 13:8 - 'But other seeds fell on good soil, where it produced a crop—a hundred, sixty or thirty times what was sown.'\n1. Children will identify the different types of soil in the parable and relate them to their hearts.\n2. Children will understand that a soft, open heart allows God's Word to grow in them.\n3. Children will think of one practical way to keep their hearts good soil for God's Word.\nChallenge: This week, pray each day asking God to help your heart be soft and ready to listen. Share one thing you learned today with someone at home.",
+              "student": "Student handout:\nKey verse: Matthew 13:8 - 'But other seeds fell on good soil, where it produced a crop—a hundred, sixty or thirty times what was sown.'\n1. Children will identify the different types of soil in the parable and relate them to their hearts.\n2. Children will understand that a soft, open heart allows God's Word to grow in them.\n3. Children will think of one practical way to keep their hearts good soil for God's Word.\nChallenge: This week, pray each day asking God to help your heart be soft and ready to listen. Share one thing you learned today with someone at home.",
+              "parent": "Family follow-up:\nKey verse: Matthew 13:8 - 'But other seeds fell on good soil, where it produced a crop—a hundred, sixty or thirty times what was sown.'\n1. Children will identify the different types of soil in the parable and relate them to their hearts.\n2. Children will understand that a soft, open heart allows God's Word to grow in them.\n3. Children will think of one practical way to keep their hearts good soil for God's Word.\nChallenge: This week, pray each day asking God to help your heart be soft and ready to listen. Share one thing you learned today with someone at home."
+            },
+            "slideOutline": {
+              "title": "Growing Good Soil: Listening to God's Word",
+              "slides": [
+                {
+                  "title": "Introduction & Icebreaker",
+                  "subtitle": "Teacher greets children warmly, then asks: 'Have you ever planted a seed? What did it need to grow?' Kids share briefly. Teacher connects this to how our hearts need care to grow good things from God's Word, emphasizing that just like seeds need good soil, our hearts need to be soft and open.",
+                  "minutes": 5
+                },
+                {
+                  "title": "Storytelling & Explanation",
+                  "subtitle": "Teacher shows a short animated video or uses a visual story to introduce the Parable of the Sower. Explains each soil type simply: hard path, rocky ground, thorny ground, and good soil, using visuals or real objects to illustrate each one clearly.",
+                  "minutes": 10
+                },
+                {
+                  "title": "Interactive Soil Sorting Activity",
+                  "subtitle": "Prepare four large mats labeled with each soil type. Distribute small cards with behaviors or feelings (e.g., 'I forget quickly,' 'I get distracted,' 'I listen carefully,' 'I pray and ask God to help me'). Kids place cards on the matching soil mats. Teacher facilitates discussion on how each behavior reflects the condition of the heart and what that means for listening to God's Word.",
+                  "minutes": 10
+                },
+                {
+                  "title": "Reflection & Personal Application",
+                  "subtitle": "Guide children to quietly reflect on what kind of soil their heart might be today. Provide a simple worksheet with a heart diagram divided into four sections, where they can draw or write one way to keep their heart good soil (e.g., pray, listen, forgive, trust God). Encourage sharing if comfortable.",
+                  "minutes": 10
+                },
+                {
+                  "title": "Prayer & Closing",
+                  "subtitle": "Lead a heartfelt prayer asking God to help each child keep their heart soft and open to His Word. Remind them to practice their 'good soil' habit during the week and trust God's help.",
+                  "minutes": 5
+                }
+              ]
+            }
+          }
+        },
+        "Youth (12-18)": {
+          "audience": "Youth (12-18)",
+          "overview": "This lesson explores the Parable of the Sower (Matthew 13:3-9, 18-23) to help youth examine the condition of their hearts and learn how to cultivate good soil for God's Word to grow in them. The session balances biblical interpretation with practical steps for spiritual growth, encouraging self-awareness and intentional faith practices. It uses engaging activities and visuals suitable for 12-18-year-olds, addressing their short attention spans and varying literacy levels.",
+          "centralTruth": "Our hearts determine how we receive God's Word; cultivating good soil in our hearts allows His truth to grow and transform us.",
+          "lessonPlan": {
+            "title": "Growing Good Soil: Understanding and Applying the Parable of the Sower",
+            "keyVerse": "Matthew 13:8 - 'But other seed fell on good soil and produced a crop, some a hundred times more, some sixty, some thirty.'",
+            "objectives": [
+              "Identify the different types of soil described in the parable.",
+              "Understand what each soil type represents about our hearts.",
+              "Reflect on the condition of their own hearts and how to nurture good soil.",
+              "Learn one practical way to care for their spiritual growth."
+            ],
+            "sessionTimeline": [
+              {
+                "segment": "Introduction & Icebreaker",
+                "minutes": 5,
+                "plan": "Teacher greets students warmly, introduces the topic with a relatable question: 'Have you ever planted something? What did you need to do to help it grow?' Students share briefly to activate prior knowledge and set a personal tone."
+              },
+              {
+                "segment": "Read and Contextualize the Parable",
+                "minutes": 8,
+                "plan": "Teacher reads Matthew 13:3-9, 18-23 aloud with enthusiasm. Briefly explain that Jesus used farming stories to teach about how people receive God's Word. Clarify terms like 'seed' and 'soil' with simple, relatable language and visuals if possible."
+              },
+              {
+                "segment": "Identify Soil Types & Their Meanings",
+                "minutes": 8,
+                "plan": "Display a clear, colorful diagram of the four soils. Discuss each: path, rocky ground, thorny ground, and good soil. Engage students with questions: 'What might each soil represent about a person's heart?' Use examples they can relate to, like being distracted or worried."
+              },
+              {
+                "segment": "Self-Reflection & Heart Check",
+                "minutes": 8,
+                "plan": "Distribute a simple, visually appealing worksheet describing each soil type. Guide students to silently reflect and honestly identify which soil best describes their heart. Encourage them to write a brief sentence explaining why, fostering personal connection."
+              },
+              {
+                "segment": "Practical Steps for Good Soil",
+                "minutes": 8,
+                "plan": "Lead a discussion on practical ways to nurture good soil—such as daily Bible reading, prayer, and avoiding distractions. Invite students to share one specific action they will try this week. Emphasize that spiritual growth is a process requiring ongoing effort."
+              },
+              {
+                "segment": "Wrap-up & Prayer",
+                "minutes": 6,
+                "plan": "Summarize key points, emphasizing that they can choose to prepare their hearts. Close with a heartfelt prayer asking God to help each student cultivate good soil for His Word to grow and produce fruit in their lives."
+              }
+            ]
+          },
+          "ageAppropriateContent": {
+            "chosenAudienceExplanation": "Youth aged 12-18 often face distractions, peer pressure, and varying maturity levels. The lesson uses simple language, relatable examples, and interactive activities to keep them engaged and help them understand spiritual truths practically.",
+            "simplifiedExplanation": "The parable talks about different kinds of soil where seeds fall. The soil shows how open or closed our hearts are to God's Word. Good soil helps us grow closer to Jesus and become more like Him.",
+            "vocabularyToExplain": [
+              "parable",
+              "seed",
+              "soil",
+              "crop",
+              "transform"
+            ],
+            "differentiationTips": [
+              "Use visual diagrams, real planting examples, and hands-on activities to engage visual and kinesthetic learners.",
+              "Provide written summaries or visual aids for students who process information better visually or need reinforcement.",
+              "Encourage quieter students to share their thoughts in writing if speaking is challenging.",
+              "Ask open-ended questions to stimulate different thinking styles and deepen understanding."
+            ]
+          },
+          "discussionQuestions": {
+            "icebreakers": [
+              "What’s the most interesting plant or garden you’ve seen or helped with?",
+              "Have you ever planted something? What did you learn from that experience?"
+            ],
+            "observation": [
+              "What did the different soils in the story look like? Can you describe them?",
+              "How do you think each soil type affects the plant’s growth?"
+            ],
+            "interpretation": [
+              "What do you think Jesus meant by the different soils?",
+              "Why do you think some seeds didn’t grow well?"
+            ],
+            "application": [
+              "Which soil type do you think describes your heart right now?",
+              "What is one thing you can do to make your heart more like good soil?"
+            ],
+            "challenge": [
+              "This week, try to read a Bible verse daily and think about how it can help your heart grow.",
+              "Share with a friend or family member one way you want to improve your heart’s condition."
+            ]
+          },
+          "illustrationIdeas": [
+            {
+              "title": "Planting Seeds in Different Soils",
+              "description": "Use small pots filled with different soil types (path, rocky, thorny, good) and plant seeds in each. Observe how each seed grows or struggles, then discuss how this relates to heart conditions.",
+              "connection": "A visual, hands-on activity that concretely demonstrates the parable, making it memorable and engaging."
+            },
+            {
+              "title": "The Heart as Garden",
+              "description": "Draw or display a garden divided into sections representing each soil type. Invite students to mark areas that reflect their hearts and discuss what needs to be added or removed to improve their spiritual health.",
+              "connection": "Helps students visualize their spiritual condition and identify practical steps for growth."
+            },
+            {
+              "title": "Growth Timeline",
+              "description": "Create a simple chart showing steps from planting a seed to harvest, emphasizing patience and ongoing care. Relate this to spiritual growth over time, encouraging perseverance.",
+              "connection": "Reinforces that nurturing good soil is a process that takes time and consistent effort."
+            }
+          ],
+          "applicationPathways": {
+            "personal": [
+              "Commit to reading a Bible verse daily and reflecting on how it applies to your heart."
+            ],
+            "family": [
+              "Share what you learned today with a family member and pray together for good soil."
+            ],
+            "church": [
+              "Join or start a small group focused on spiritual growth practices like Bible reading and prayer."
+            ],
+            "mission": [
+              "Look for opportunities to share the message of good soil with friends or neighbors who need encouragement."
+            ]
+          },
+          "visualsAndMedia": [
+            "Projector slides showing the soil diagram and key points",
+            "Short video clip illustrating planting and growth (optional but helpful)",
+            "Printable worksheet for self-reflection and personal application"
+          ],
+          "printableHandout": [
+            "Summary of the parable with simplified meanings and key points",
+            "Heart reflection worksheet with prompts for honest self-assessment",
+            "Practical action plan template to help students set spiritual growth goals"
+          ],
+          "leaderCoaching": [
+            "Encourage teachers to share personal stories of spiritual growth to model vulnerability.",
+            "Remind leaders to keep explanations simple, check for understanding often, and be patient with questions.",
+            "Use open-ended questions to foster discussion and deeper engagement.",
+            "Be attentive to different literacy levels; provide visual aids, written summaries, or additional support as needed."
+          ],
+          "closingPrayerPrompt": "Ask God to help each student prepare good soil in their hearts so His Word can grow and produce fruit in their lives.",
+          "takeHomeChallenge": "Choose one practical step—like reading a Bible verse daily or praying more intentionally—and commit to doing it this week.",
+          "exports": {
+            "markdown": "# Teaching Kit: The Parable of the Sower\n\nAudience: Youth (12-18)\n\n## Overview\nThis lesson explores the Parable of the Sower (Matthew 13:3-9, 18-23) to help youth examine the condition of their hearts and learn how to cultivate good soil for God's Word to grow in them. The session balances biblical interpretation with practical steps for spiritual growth, encouraging self-awareness and intentional faith practices. It uses engaging activities and visuals suitable for 12-18-year-olds, addressing their short attention spans and varying literacy levels.\n\n## Central Truth\nOur hearts determine how we receive God's Word; cultivating good soil in our hearts allows His truth to grow and transform us.\n\n## Objectives\n- Identify the different types of soil described in the parable.\n- Understand what each soil type represents about our hearts.\n- Reflect on the condition of their own hearts and how to nurture good soil.\n- Learn one practical way to care for their spiritual growth.",
+            "handouts": {
+              "leader": "Facilitator notes:\nKey verse: Matthew 13:8 - 'But other seed fell on good soil and produced a crop, some a hundred times more, some sixty, some thirty.'\n1. Identify the different types of soil described in the parable.\n2. Understand what each soil type represents about our hearts.\n3. Reflect on the condition of their own hearts and how to nurture good soil.\n4. Learn one practical way to care for their spiritual growth.\nChallenge: Choose one practical step—like reading a Bible verse daily or praying more intentionally—and commit to doing it this week.",
+              "student": "Student handout:\nKey verse: Matthew 13:8 - 'But other seed fell on good soil and produced a crop, some a hundred times more, some sixty, some thirty.'\n1. Identify the different types of soil described in the parable.\n2. Understand what each soil type represents about our hearts.\n3. Reflect on the condition of their own hearts and how to nurture good soil.\n4. Learn one practical way to care for their spiritual growth.\nChallenge: Choose one practical step—like reading a Bible verse daily or praying more intentionally—and commit to doing it this week.",
+              "parent": "Family follow-up:\nKey verse: Matthew 13:8 - 'But other seed fell on good soil and produced a crop, some a hundred times more, some sixty, some thirty.'\n1. Identify the different types of soil described in the parable.\n2. Understand what each soil type represents about our hearts.\n3. Reflect on the condition of their own hearts and how to nurture good soil.\n4. Learn one practical way to care for their spiritual growth.\nChallenge: Choose one practical step—like reading a Bible verse daily or praying more intentionally—and commit to doing it this week."
+            },
+            "slideOutline": {
+              "title": "Growing Good Soil: Understanding and Applying the Parable of the Sower",
+              "slides": [
+                {
+                  "title": "Introduction & Icebreaker",
+                  "subtitle": "Teacher greets students warmly, introduces the topic with a relatable question: 'Have you ever planted something? What did you need to do to help it grow?' Students share briefly to activate prior knowledge and set a personal tone.",
+                  "minutes": 5
+                },
+                {
+                  "title": "Read and Contextualize the Parable",
+                  "subtitle": "Teacher reads Matthew 13:3-9, 18-23 aloud with enthusiasm. Briefly explain that Jesus used farming stories to teach about how people receive God's Word. Clarify terms like 'seed' and 'soil' with simple, relatable language and visuals if possible.",
+                  "minutes": 8
+                },
+                {
+                  "title": "Identify Soil Types & Their Meanings",
+                  "subtitle": "Display a clear, colorful diagram of the four soils. Discuss each: path, rocky ground, thorny ground, and good soil. Engage students with questions: 'What might each soil represent about a person's heart?' Use examples they can relate to, like being distracted or worried.",
+                  "minutes": 8
+                },
+                {
+                  "title": "Self-Reflection & Heart Check",
+                  "subtitle": "Distribute a simple, visually appealing worksheet describing each soil type. Guide students to silently reflect and honestly identify which soil best describes their heart. Encourage them to write a brief sentence explaining why, fostering personal connection.",
+                  "minutes": 8
+                },
+                {
+                  "title": "Practical Steps for Good Soil",
+                  "subtitle": "Lead a discussion on practical ways to nurture good soil—such as daily Bible reading, prayer, and avoiding distractions. Invite students to share one specific action they will try this week. Emphasize that spiritual growth is a process requiring ongoing effort.",
+                  "minutes": 8
+                },
+                {
+                  "title": "Wrap-up & Prayer",
+                  "subtitle": "Summarize key points, emphasizing that they can choose to prepare their hearts. Close with a heartfelt prayer asking God to help each student cultivate good soil for His Word to grow and produce fruit in their lives.",
+                  "minutes": 6
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "researchHelper": {
+      "overallVerdict": "This manuscript offers a theologically sound and warmly pastoral exposition of Ephesians 2, clearly emphasizing salvation by grace and its practical implications. It effectively calls the congregation to repentance and reliance on Christ alone. However, the message would benefit from expanded development, clearer structural signposting, and more vivid illustrations to deepen engagement and application within the 34-minute target.",
+      "scores": [
+        {
+          "label": "Theological Clarity",
+          "score": 9,
+          "rationale": "The manuscript accurately and succinctly presents key doctrines from Ephesians 2, such as justification by grace through faith and the resulting transformation. The phrase 'salvation is by grace through faith, not by works, so that no one may boast' precisely captures the apostolic teaching."
+        },
+        {
+          "label": "Structure and Flow",
+          "score": 6,
+          "rationale": "While the manuscript has a logical progression from gospel truth to practical response, it reads more like an outline or summary than a fully developed sermon. Transitions between ideas are abrupt, and the call to repentance and rejoicing could be more clearly framed as a concluding application section."
+        },
+        {
+          "label": "Communication Quality",
+          "score": 7,
+          "rationale": "The language is warm and accessible, with a good balance of erudition and pastoral tone. The readability score of 57 and average sentence length of 22 words are appropriate, but the passive voice ratio of 18% slightly weakens immediacy. The rhetorical question at the end is engaging but could be preceded by more vivid illustrations or examples."
+        }
+      ],
+      "strengths": [
+        "Theologically rich and faithful to the biblical text, emphasizing grace and mercy.",
+        "Pastoral warmth shines through in the direct address and exhortation to the church family.",
+        "Concise and clear articulation of the gospel's implications for forgiveness, service, and suffering."
+      ],
+      "gaps": [
+        "The manuscript is too brief and underdeveloped for a 34-minute sermon, lacking expanded explanation, illustrations, and application.",
+        "Transitions between theological points and practical calls feel abrupt and could be smoothed for better flow.",
+        "Limited use of vivid imagery or concrete examples to engage listeners’ hearts and minds more deeply.",
+        "The concluding call to repentance and rest in grace would benefit from clearer framing and stronger emotional appeal.",
+        "Some passive constructions reduce the immediacy and impact of key statements."
+      ],
+      "revisions": [
+        "Expand each theological point with biblical explanation, historical context, or theological reflection to deepen understanding.",
+        "Incorporate at least two vivid illustrations or stories that connect the doctrine of grace to everyday Christian living.",
+        "Add clear transitional phrases to guide listeners through the sermon’s flow, e.g., 'Now that we understand...', 'Therefore, let us consider...'.",
+        "Develop the concluding call to repentance and rejoicing into a distinct application section with a warm invitation and assurance.",
+        "Reduce passive voice by revising sentences such as 'being rich in mercy' to more active constructions like 'God richly showed mercy'.",
+        "Include a brief summary or restatement of the main gospel truth before the final application to reinforce retention.",
+        "Consider opening with a brief contextual introduction to Ephesians 2 to orient listeners to the passage’s setting and significance."
+      ],
+      "tightenLines": [
+        "Change 'God, being rich in mercy, made us alive together with Christ' to 'God richly showed mercy by making us alive with Christ.'",
+        "Replace 'Salvation is by grace through faith, not by works, so that no one may boast' with 'We are saved by grace through faith, not by works, so no one can boast.'",
+        "Shorten 'Therefore, if grace has saved us, grace must shape how we forgive, serve, and suffer' to 'If grace saves us, it must shape our forgiveness, service, and suffering.'",
+        "Revise 'I want to call us to repent of pride and rejoice in Christ alone' to 'Let us repent of pride and rejoice solely in Christ.'"
+      ],
+      "trends": {
+        "window": 10,
+        "averageScore": 7.33,
+        "previousAverage": 0,
+        "delta": 7.33,
+        "series": [
+          7.33
+        ]
+      },
+      "revisionDelta": {
+        "scoreDelta": 7.33,
+        "manuscriptLengthDelta": 528
+      }
+    },
+    "sermonAnalyzerTranscript": {
+      "meta": {
+        "fileName": "manual-transcript",
+        "durationSeconds": 144,
+        "transcriptionModel": "whisper-1",
+        "generatedAt": "2026-02-13T05:55:02.390Z",
+        "totalPipelineMs": 19947
+      },
+      "orchestration": [
+        {
+          "agent": "transcription_agent",
+          "status": "completed",
+          "durationMs": 0,
+          "note": "Used manual transcript override"
+        },
+        {
+          "agent": "insights_agent",
+          "status": "completed",
+          "durationMs": 19946,
+          "note": "Generated emotional arc, content analysis, and coaching feedback"
+        }
+      ],
+      "transcript": {
+        "text": "Good morning church family. Please open with me to Mark chapter four. Jesus tells us that the same seed can produce very different outcomes depending on the soil. Some hearts are hard, some are shallow, some are crowded, and some are ready. If we are honest, each of us has known seasons of all four. The hard heart hears truth but dismisses it. The shallow heart responds with emotion but has no root when suffering comes. The crowded heart welcomes Jesus but refuses to uproot rival loves. But the good soil receives the word, holds it fast, and bears fruit with patience. So the question today is not whether the seed is powerful. It is. The question is whether we will repent of whatever is hard, shallow, or crowded in us. Parents, what is your home being planted with this week? Students, what voice has your attention? Leaders, are we cultivating performance or transformation? Christ is not only inviting decisions. He is forming disciples. Let us ask the Spirit to break hard ground, deepen roots, clear thorns, and produce lasting fruit for the glory of God and the good of our city.",
+        "language": "manual",
+        "wordCount": 192,
+        "segments": [
+          {
+            "start": 0,
+            "end": 8,
+            "text": "Good morning church family."
+          },
+          {
+            "start": 8,
+            "end": 16,
+            "text": "Please open with me to Mark chapter four."
+          },
+          {
+            "start": 16,
+            "end": 24,
+            "text": "Jesus tells us that the same seed can produce very different outcomes depending on the soil."
+          },
+          {
+            "start": 24,
+            "end": 32,
+            "text": "Some hearts are hard, some are shallow, some are crowded, and some are ready."
+          },
+          {
+            "start": 32,
+            "end": 40,
+            "text": "If we are honest, each of us has known seasons of all four."
+          },
+          {
+            "start": 40,
+            "end": 48,
+            "text": "The hard heart hears truth but dismisses it."
+          },
+          {
+            "start": 48,
+            "end": 56,
+            "text": "The shallow heart responds with emotion but has no root when suffering comes."
+          },
+          {
+            "start": 56,
+            "end": 64,
+            "text": "The crowded heart welcomes Jesus but refuses to uproot rival loves."
+          },
+          {
+            "start": 64,
+            "end": 72,
+            "text": "But the good soil receives the word, holds it fast, and bears fruit with patience."
+          },
+          {
+            "start": 72,
+            "end": 80,
+            "text": "So the question today is not whether the seed is powerful."
+          },
+          {
+            "start": 80,
+            "end": 88,
+            "text": "It is."
+          },
+          {
+            "start": 88,
+            "end": 96,
+            "text": "The question is whether we will repent of whatever is hard, shallow, or crowded in us."
+          },
+          {
+            "start": 96,
+            "end": 104,
+            "text": "Parents, what is your home being planted with this week?"
+          },
+          {
+            "start": 104,
+            "end": 112,
+            "text": "Students, what voice has your attention?"
+          },
+          {
+            "start": 112,
+            "end": 120,
+            "text": "Leaders, are we cultivating performance or transformation?"
+          },
+          {
+            "start": 120,
+            "end": 128,
+            "text": "Christ is not only inviting decisions."
+          },
+          {
+            "start": 128,
+            "end": 136,
+            "text": "He is forming disciples."
+          },
+          {
+            "start": 136,
+            "end": 144,
+            "text": "Let us ask the Spirit to break hard ground, deepen roots, clear thorns, and produce lasting fruit for the glory of God and the good of our city."
+          }
+        ]
+      },
+      "emotionalArc": {
+        "points": [
+          {
+            "bucketId": 1,
+            "start": 0,
+            "end": 16,
+            "timeSec": 8,
+            "label": "Introduction and Opening",
+            "intensity": 20,
+            "valence": 10,
+            "note": "Warm and inviting start establishes connection."
+          },
+          {
+            "bucketId": 2,
+            "start": 16,
+            "end": 32,
+            "timeSec": 24,
+            "label": "Teaching on Soil Types",
+            "intensity": 30,
+            "valence": 15,
+            "note": "Engages listeners with relatable imagery, fostering reflection."
+          },
+          {
+            "bucketId": 3,
+            "start": 32,
+            "end": 48,
+            "timeSec": 40,
+            "label": "Personal Reflection on Seasons",
+            "intensity": 40,
+            "valence": 0,
+            "note": "Encourages honesty and vulnerability, deepening emotional connection."
+          },
+          {
+            "bucketId": 4,
+            "start": 48,
+            "end": 64,
+            "timeSec": 56,
+            "label": "Call to Repentance and Transformation",
+            "intensity": 50,
+            "valence": 20,
+            "note": "Inspires hope and motivation for change."
+          },
+          {
+            "bucketId": 5,
+            "start": 64,
+            "end": 80,
+            "timeSec": 72,
+            "label": "Practical Application and Challenge",
+            "intensity": 60,
+            "valence": 25,
+            "note": "Fosters a sense of purpose and action."
+          },
+          {
+            "bucketId": 6,
+            "start": 80,
+            "end": 96,
+            "timeSec": 88,
+            "label": "Closing and Prayer",
+            "intensity": 30,
+            "valence": 15,
+            "note": "Calm and contemplative, inviting reflection."
+          },
+          {
+            "bucketId": 7,
+            "start": 96,
+            "end": 112,
+            "timeSec": 104,
+            "label": "Neutral",
+            "intensity": 50,
+            "valence": 0,
+            "note": ""
+          },
+          {
+            "bucketId": 8,
+            "start": 112,
+            "end": 128,
+            "timeSec": 120,
+            "label": "Neutral",
+            "intensity": 50,
+            "valence": 0,
+            "note": ""
+          },
+          {
+            "bucketId": 9,
+            "start": 128,
+            "end": 144,
+            "timeSec": 136,
+            "label": "Neutral",
+            "intensity": 50,
+            "valence": 0,
+            "note": ""
+          }
+        ],
+        "summary": "The sermon begins with a calm, welcoming tone, gradually building in emotional engagement as it explores personal reflection and spiritual growth, reaching a peak of motivation and hope at the call to discipleship, then gently settling into a reflective conclusion."
+      },
+      "pacingAnalysis": {
+        "avgWpm": 80,
+        "targetBandWpm": "120-150",
+        "sectionWpm": [
+          {
+            "start": 0,
+            "end": 8,
+            "wpm": 30,
+            "textSample": "Good morning church family."
+          },
+          {
+            "start": 8,
+            "end": 16,
+            "wpm": 60,
+            "textSample": "Please open with me to Mark chapter four."
+          },
+          {
+            "start": 16,
+            "end": 24,
+            "wpm": 120,
+            "textSample": "Jesus tells us that the same seed can produce very different outcomes depending on the soil."
+          },
+          {
+            "start": 24,
+            "end": 32,
+            "wpm": 105,
+            "textSample": "Some hearts are hard, some are shallow, some are crowded, and some are ready."
+          },
+          {
+            "start": 32,
+            "end": 40,
+            "wpm": 97.5,
+            "textSample": "If we are honest, each of us has known seasons of all four."
+          },
+          {
+            "start": 40,
+            "end": 48,
+            "wpm": 60,
+            "textSample": "The hard heart hears truth but dismisses it."
+          },
+          {
+            "start": 48,
+            "end": 56,
+            "wpm": 97.5,
+            "textSample": "The shallow heart responds with emotion but has no root when suffering comes."
+          },
+          {
+            "start": 56,
+            "end": 64,
+            "wpm": 82.5,
+            "textSample": "The crowded heart welcomes Jesus but refuses to uproot rival loves."
+          },
+          {
+            "start": 64,
+            "end": 72,
+            "wpm": 112.5,
+            "textSample": "But the good soil receives the word, holds it fast, and bears fruit with patience."
+          },
+          {
+            "start": 72,
+            "end": 80,
+            "wpm": 82.5,
+            "textSample": "So the question today is not whether the seed is powerful."
+          },
+          {
+            "start": 80,
+            "end": 88,
+            "wpm": 15,
+            "textSample": "It is."
+          },
+          {
+            "start": 88,
+            "end": 96,
+            "wpm": 120,
+            "textSample": "The question is whether we will repent of whatever is hard, shallow, or crowded in us."
+          },
+          {
+            "start": 96,
+            "end": 104,
+            "wpm": 75,
+            "textSample": "Parents, what is your home being planted with this week?"
+          },
+          {
+            "start": 104,
+            "end": 112,
+            "wpm": 45,
+            "textSample": "Students, what voice has your attention?"
+          },
+          {
+            "start": 112,
+            "end": 120,
+            "wpm": 52.5,
+            "textSample": "Leaders, are we cultivating performance or transformation?"
+          },
+          {
+            "start": 120,
+            "end": 128,
+            "wpm": 45,
+            "textSample": "Christ is not only inviting decisions."
+          },
+          {
+            "start": 128,
+            "end": 136,
+            "wpm": 30,
+            "textSample": "He is forming disciples."
+          },
+          {
+            "start": 136,
+            "end": 144,
+            "wpm": 210,
+            "textSample": "Let us ask the Spirit to break hard ground, deepen roots, clear thorns, and produce lasting fruit for the glory of God a"
+          }
+        ],
+        "fastSections": [
+          {
+            "start": 136,
+            "end": 144,
+            "wpm": 210,
+            "textSample": "Let us ask the Spirit to break hard ground, deepen roots, clear thorns, and produce lasting fruit for the glory of God a"
+          }
+        ],
+        "slowSections": [
+          {
+            "start": 0,
+            "end": 8,
+            "wpm": 30,
+            "textSample": "Good morning church family."
+          },
+          {
+            "start": 8,
+            "end": 16,
+            "wpm": 60,
+            "textSample": "Please open with me to Mark chapter four."
+          },
+          {
+            "start": 32,
+            "end": 40,
+            "wpm": 97.5,
+            "textSample": "If we are honest, each of us has known seasons of all four."
+          },
+          {
+            "start": 40,
+            "end": 48,
+            "wpm": 60,
+            "textSample": "The hard heart hears truth but dismisses it."
+          },
+          {
+            "start": 48,
+            "end": 56,
+            "wpm": 97.5,
+            "textSample": "The shallow heart responds with emotion but has no root when suffering comes."
+          },
+          {
+            "start": 56,
+            "end": 64,
+            "wpm": 82.5,
+            "textSample": "The crowded heart welcomes Jesus but refuses to uproot rival loves."
+          },
+          {
+            "start": 72,
+            "end": 80,
+            "wpm": 82.5,
+            "textSample": "So the question today is not whether the seed is powerful."
+          },
+          {
+            "start": 80,
+            "end": 88,
+            "wpm": 15,
+            "textSample": "It is."
+          },
+          {
+            "start": 96,
+            "end": 104,
+            "wpm": 75,
+            "textSample": "Parents, what is your home being planted with this week?"
+          },
+          {
+            "start": 104,
+            "end": 112,
+            "wpm": 45,
+            "textSample": "Students, what voice has your attention?"
+          },
+          {
+            "start": 112,
+            "end": 120,
+            "wpm": 52.5,
+            "textSample": "Leaders, are we cultivating performance or transformation?"
+          },
+          {
+            "start": 120,
+            "end": 128,
+            "wpm": 45,
+            "textSample": "Christ is not only inviting decisions."
+          }
+        ],
+        "pauseCount": 0,
+        "pauseTimeSec": 0,
+        "rhythmScore": 33.3
+      },
+      "vocalDynamics": {
+        "avgDb": 0,
+        "peakDb": 0,
+        "silenceRatio": 0,
+        "dynamicRangeDb": 0,
+        "volumeStdDb": 0,
+        "pitchMeanHz": 0,
+        "pitchStdHz": 0,
+        "pitchRangeHz": 0,
+        "varietyScore": 0,
+        "volumeRangeScore": 0,
+        "pitchVariationScore": 0,
+        "monotoneRiskScore": 0,
+        "monotoneSections": []
+      },
+      "contentAnalysis": {
+        "summary": "The sermon effectively uses the parable of the sower to address personal spiritual receptivity, emphasizing repentance and discipleship. It integrates practical questions for different groups, fostering personal application. The structure moves from biblical teaching to personal reflection and then to action, with vivid illustrations and calls to respond.",
+        "scriptureReferences": [
+          "Mark 4"
+        ],
+        "keyThemes": [
+          "Spiritual receptivity",
+          "Repentance",
+          "Discipleship",
+          "Fruitfulness",
+          "Transformation"
+        ],
+        "structureMovements": [
+          "Introduction to biblical parable",
+          "Explanation of soil types",
+          "Personal reflection and honesty",
+          "Call to repentance and discipleship",
+          "Practical questions for different groups",
+          "Prayer and closing"
+        ],
+        "illustrationTracking": [
+          "Seed and soil imagery",
+          "Heart conditions as soil types",
+          "Questions for parents, students, leaders"
+        ],
+        "callsToAction": [
+          "Identify and repent of hard, shallow, or crowded areas",
+          "Reflect on what is being planted in the home",
+          "Prioritize transformation over performance",
+          "Invite the Spirit to cultivate fruitful hearts"
+        ],
+        "gospelClarityScore": 8
+      },
+      "coachingFeedback": {
+        "executiveSummary": "The sermon effectively combines biblical depth with practical application, but pacing issues—particularly rushed transitions and slow sections—undermine engagement. Improving transition timing, vocal variation, and clarity will significantly enhance delivery within one week.",
+        "strengths": [
+          "Biblical engagement and relevant application",
+          "Effective imagery and reflective questions",
+          "Structured flow from teaching to action",
+          "Warm, pastoral tone encouraging reflection"
+        ],
+        "risks": [
+          "Rushing transitions, especially before calls to action",
+          "Overuse of abstract language reducing clarity",
+          "Limited vocal variation leading to monotony",
+          "Slow sections risking listener disengagement"
+        ],
+        "priorityActions": [
+          "[object Object]",
+          "[object Object]",
+          "[object Object]"
+        ],
+        "practiceDrills": [
+          "Record a 3-minute segment focusing on pacing transitions and calls to action, ensuring each transition is under 10 seconds with a deliberate pause, timed to 5-minute total. Review and adjust for smoothness.",
+          "Practice vocal variation exercises: alternate between speaking at 80 WPM and 130 WPM, incorporating pitch and volume changes, for 10 minutes. Record and evaluate for at least 3 distinct variations per minute.",
+          "Create a list of 3 abstract phrases from your sermon and develop concrete alternatives. Practice delivering these with emphasis, recording for self-assessment."
+        ],
+        "nextWeekPlan": [
+          "Identify 3 key transition points in upcoming sermons; rehearse each with a focus on smoothness and timing, aiming for under 10 seconds per transition, with pauses.",
+          "Plan vocal variation cues for emotional peaks and reflective moments; rehearse these segments twice, recording for feedback.",
+          "Select 2 abstract phrases to simplify; practice delivering these with clarity and emphasis, seeking peer or coach feedback.",
+          "Schedule a 15-minute review session mid-week to record and self-assess pacing and vocal variation, adjusting as needed."
+        ]
+      },
+      "coachMode": {
+        "planDays": 7,
+        "drills": [
+          {
+            "day": 1,
+            "focus": "Pacing discipline",
+            "target": "Run a 5-minute segment at target tempo with intentional pauses.",
+            "metric": "Target WPM band around 112-128"
+          },
+          {
+            "day": 2,
+            "focus": "Vocal dynamics",
+            "target": "Practice a paragraph with deliberate contrast in volume and pitch.",
+            "metric": "Increase variety score beyond 6.5"
+          },
+          {
+            "day": 3,
+            "focus": "Illustration clarity",
+            "target": "Rehearse transitions into and out of one illustration.",
+            "metric": "Record and verify no abrupt transitions."
+          },
+          {
+            "day": 4,
+            "focus": "Scripture emphasis",
+            "target": "Read key verses with slower cadence and emphasis markers.",
+            "metric": "At least 3 explicit emphasis moments."
+          },
+          {
+            "day": 5,
+            "focus": "Application urgency",
+            "target": "Deliver call-to-response section in under 3 minutes.",
+            "metric": "One specific action call for listeners."
+          },
+          {
+            "day": 6,
+            "focus": "Full run-through",
+            "target": "Run a 12-minute rehearsal with no notes.",
+            "metric": "Sustain pacing and vocal variety without drop-off."
+          },
+          {
+            "day": 7,
+            "focus": "Review and compare",
+            "target": "Record final drill and compare with Day 1 baseline.",
+            "metric": "Visible improvement in pacing and dynamics."
+          }
+        ]
+      },
+      "comparativeAnalytics": {
+        "pacingDeltaWpm": 0,
+        "vocalVarietyDelta": 0,
+        "clarityDelta": 0
+      }
+    },
+    "videoSearchWordStudy": {
+      "stats": {
+        "totalVideos": 2,
+        "transcribedVideos": 1,
+        "pendingVideos": 1,
+        "erroredVideos": 0,
+        "totalDurationSeconds": 7002.16,
+        "totalDurationHours": 1.95
+      },
+      "ingestion": {
+        "mode": "skip",
+        "attempted": [],
+        "completed": [],
+        "failed": [],
+        "unavailable": []
+      },
+      "filters": {
+        "category": "all",
+        "difficulty": "all",
+        "logosVersion": "all",
+        "maxMinutes": 0
+      },
+      "rankingMode": "semantic+lexical",
+      "results": [
+        {
+          "id": "how-to-write-a-research-paper-using-logo-media-hkgsnfwf4mo-001-720p:308",
+          "videoId": "how-to-write-a-research-paper-using-logo-media-hkgsnfwf4mo-001-720p",
+          "title": "How To Write A Research Paper Using Logo",
+          "category": "Research",
+          "topic": "Academic Research",
+          "difficulty": "Advanced",
+          "logosVersion": "General",
+          "duration": "15:15",
+          "durationSeconds": 915.14,
+          "transcriptStatus": "ready",
+          "timestamp": "5:08",
+          "timestampSeconds": 308.48,
+          "endTimestamp": "5:58",
+          "endSeconds": 358.2,
+          "snippet": "Now notice as I drag, Logos isn't highlighting one letter at a time, instead it's highlighting the words. And if I now drag down, see how it's grabbing words and sentences and so forth? Now it's grabbing whole verses at a time. Let's do this with a book. So let's grab just any kind of narrative book, like a commentary, and we'll just jump here to the middle of the book. All right, so here we have a paragraph. Now wat",
+          "tags": [
+            "Research",
+            "Write",
+            "Paper",
+            "using",
+            "Logo"
+          ],
+          "playbackUrl": "/ai/videos/How-to-Write-a-Research-Paper-using-Logo_Media_HkgsNfwF4Mo_001_720p.mp4",
+          "hostedUrl": "",
+          "sourceAvailable": true,
+          "accessTier": "free",
+          "locked": false,
+          "accessReasonCode": "",
+          "url": "/ai/videos/How-to-Write-a-Research-Paper-using-Logo_Media_HkgsNfwF4Mo_001_720p.mp4#t=308",
+          "why": "direct keyword overlap",
+          "score": 49.67
+        },
+        {
+          "id": "how-to-write-a-research-paper-using-logo-media-hkgsnfwf4mo-001-720p:221",
+          "videoId": "how-to-write-a-research-paper-using-logo-media-hkgsnfwf4mo-001-720p",
+          "title": "How To Write A Research Paper Using Logo",
+          "category": "Research",
+          "topic": "Academic Research",
+          "difficulty": "Advanced",
+          "logosVersion": "General",
+          "duration": "15:15",
+          "durationSeconds": 915.14,
+          "transcriptStatus": "ready",
+          "timestamp": "3:41",
+          "timestampSeconds": 221.56,
+          "endTimestamp": "4:28",
+          "endSeconds": 268.92,
+          "snippet": "the Logos inductive Bible study training video. So take advantage of that, of that early bird special that's going to be ending shortly. And we'll be sending an email out probably this week as one last reminder. Now let's do some preliminary setup so that we have optimized Logos for the purpose of writing a paper. So let's go to Tools, and let's go to Program Settings right away. Now the first thing you've got to mak",
+          "tags": [
+            "Research",
+            "Write",
+            "Paper",
+            "using",
+            "Logo"
+          ],
+          "playbackUrl": "/ai/videos/How-to-Write-a-Research-Paper-using-Logo_Media_HkgsNfwF4Mo_001_720p.mp4",
+          "hostedUrl": "",
+          "sourceAvailable": true,
+          "accessTier": "free",
+          "locked": false,
+          "accessReasonCode": "",
+          "url": "/ai/videos/How-to-Write-a-Research-Paper-using-Logo_Media_HkgsNfwF4Mo_001_720p.mp4#t=221",
+          "why": "contextual relevance",
+          "score": 48.06
+        },
+        {
+          "id": "how-to-write-a-research-paper-using-logo-media-hkgsnfwf4mo-001-720p:0",
+          "videoId": "how-to-write-a-research-paper-using-logo-media-hkgsnfwf4mo-001-720p",
+          "title": "How To Write A Research Paper Using Logo",
+          "category": "Research",
+          "topic": "Academic Research",
+          "difficulty": "Advanced",
+          "logosVersion": "General",
+          "duration": "15:15",
+          "durationSeconds": 915.14,
+          "transcriptStatus": "ready",
+          "timestamp": "0:00",
+          "timestampSeconds": 0,
+          "endTimestamp": "0:52",
+          "endSeconds": 52.44,
+          "snippet": "Welcome to how to write a research paper using Logos Bible Software. Now you may be wondering what is the purpose of a webinar. Well first we're going to provide training for Logos Bible Software. We're also going to provide training so that you can study the topic for yourself. We'll provide biblical insights related to topic when appropriate, and then we'll provide materials so you can equip yourself and others. No",
+          "tags": [
+            "Research",
+            "Write",
+            "Paper",
+            "using",
+            "Logo"
+          ],
+          "playbackUrl": "/ai/videos/How-to-Write-a-Research-Paper-using-Logo_Media_HkgsNfwF4Mo_001_720p.mp4",
+          "hostedUrl": "",
+          "sourceAvailable": true,
+          "accessTier": "free",
+          "locked": false,
+          "accessReasonCode": "",
+          "url": "/ai/videos/How-to-Write-a-Research-Paper-using-Logo_Media_HkgsNfwF4Mo_001_720p.mp4#t=0",
+          "why": "contextual relevance",
+          "score": 47.96
+        },
+        {
+          "id": "ytdown-com-youtube-meet-the-new-logos-bible-software-ai-and-media-n3sqoh9vc5y-001-1080p:0",
+          "videoId": "ytdown-com-youtube-meet-the-new-logos-bible-software-ai-and-media-n3sqoh9vc5y-001-1080p",
+          "title": "Meet The New Logos Bible Software AI And",
+          "category": "AI Features",
+          "topic": "Logos Training",
+          "difficulty": "Intermediate",
+          "logosVersion": "Logos 10",
+          "duration": "1:41:27",
+          "durationSeconds": 6087.02,
+          "transcriptStatus": "pending",
+          "timestamp": "0:00",
+          "timestampSeconds": 0,
+          "endTimestamp": "1:00",
+          "endSeconds": 60,
+          "snippet": "Meet The New Logos Bible Software AI And\nCategory: AI Features\nTopic: Logos Training\nDifficulty: Intermediate\nLogos Version: Logos 10\nTags: Logos, AI, Meet, Bible, Software",
+          "tags": [
+            "Logos",
+            "AI",
+            "Meet",
+            "Bible",
+            "Software"
+          ],
+          "playbackUrl": "/ai/videos/YTDown.com_YouTube_Meet-the-New-Logos-Bible-Software-AI-and_Media_n3sqoH9Vc5Y_001_1080p.mp4",
+          "hostedUrl": "",
+          "sourceAvailable": true,
+          "accessTier": "free",
+          "locked": false,
+          "accessReasonCode": "",
+          "url": "/ai/videos/YTDown.com_YouTube_Meet-the-New-Logos-Bible-Software-AI-and_Media_n3sqoH9Vc5Y_001_1080p.mp4#t=0",
+          "why": "topic alignment",
+          "score": 45.85
+        }
+      ],
+      "relatedContent": [
+        {
+          "id": "how-to-write-a-research-paper-using-logo-media-hkgsnfwf4mo-001-720p",
+          "title": "How To Write A Research Paper Using Logo",
+          "category": "Research",
+          "duration": "15:15",
+          "url": "/ai/videos/How-to-Write-a-Research-Paper-using-Logo_Media_HkgsNfwF4Mo_001_720p.mp4#t=0"
+        }
+      ],
+      "guidance": "Start by exploring the 'Meet The New Logos Bible Software AI And' video at 0:00 to get an intermediate overview of Logos 10 features that might assist in word studies. Then, review the 'How To Write A Research Paper Using Logo' clips in sequence from 0:00 to 5:08 to understand advanced research techniques that could enhance your Greek word study process. This progression will build your foundational knowledge before diving into more complex research applications.",
+      "suggestedQueries": [
+        "Greek word study basics in Logos 10",
+        "Using Logos 10 for original language research",
+        "Step-by-step Greek word study tutorial Logos",
+        "Advanced Greek word study techniques Logos 10",
+        "Logos Bible software AI features for word studies",
+        "How to analyze Greek words in Logos 10"
+      ],
+      "recovery": {
+        "diagnosis": "",
+        "altQueries": [],
+        "expansionTerms": [],
+        "strategy": ""
+      },
+      "personalization": {
+        "enabled": true,
+        "optOut": false
+      }
+    },
+    "videoSearchSermonWorkflow": {
+      "stats": {
+        "totalVideos": 2,
+        "transcribedVideos": 1,
+        "pendingVideos": 1,
+        "erroredVideos": 0,
+        "totalDurationSeconds": 7002.16,
+        "totalDurationHours": 1.95
+      },
+      "ingestion": {
+        "mode": "skip",
+        "attempted": [],
+        "completed": [],
+        "failed": [],
+        "unavailable": []
+      },
+      "filters": {
+        "category": "all",
+        "difficulty": "all",
+        "logosVersion": "all",
+        "maxMinutes": 0
+      },
+      "rankingMode": "semantic+lexical",
+      "results": [
+        {
+          "id": "how-to-write-a-research-paper-using-logo-media-hkgsnfwf4mo-001-720p:540",
+          "videoId": "how-to-write-a-research-paper-using-logo-media-hkgsnfwf4mo-001-720p",
+          "title": "How To Write A Research Paper Using Logo",
+          "category": "Research",
+          "topic": "Academic Research",
+          "difficulty": "Advanced",
+          "logosVersion": "General",
+          "duration": "15:15",
+          "durationSeconds": 915.14,
+          "transcriptStatus": "ready",
+          "timestamp": "9:00",
+          "timestampSeconds": 540,
+          "endTimestamp": "9:50",
+          "endSeconds": 590.84,
+          "snippet": "Notice that by clicking all open resources, Logos put in the bibliographic information for my commentary. Now why am I stopping here and showing this particular tool? When I was in seminary, and this was back in 2000-2005, we had to produce a bibliography with 50 or more resources. And this is way before, I mean Logos was available then, but it didn't have these kind of capabilities. So back then I used a tool called",
+          "tags": [
+            "Research",
+            "Write",
+            "Paper",
+            "using",
+            "Logo"
+          ],
+          "playbackUrl": "/ai/videos/How-to-Write-a-Research-Paper-using-Logo_Media_HkgsNfwF4Mo_001_720p.mp4",
+          "hostedUrl": "",
+          "sourceAvailable": true,
+          "accessTier": "free",
+          "locked": false,
+          "accessReasonCode": "",
+          "url": "/ai/videos/How-to-Write-a-Research-Paper-using-Logo_Media_HkgsNfwF4Mo_001_720p.mp4#t=540",
+          "why": "direct keyword overlap",
+          "score": 54.09
+        },
+        {
+          "id": "how-to-write-a-research-paper-using-logo-media-hkgsnfwf4mo-001-720p:221",
+          "videoId": "how-to-write-a-research-paper-using-logo-media-hkgsnfwf4mo-001-720p",
+          "title": "How To Write A Research Paper Using Logo",
+          "category": "Research",
+          "topic": "Academic Research",
+          "difficulty": "Advanced",
+          "logosVersion": "General",
+          "duration": "15:15",
+          "durationSeconds": 915.14,
+          "transcriptStatus": "ready",
+          "timestamp": "3:41",
+          "timestampSeconds": 221.56,
+          "endTimestamp": "4:28",
+          "endSeconds": 268.92,
+          "snippet": "the Logos inductive Bible study training video. So take advantage of that, of that early bird special that's going to be ending shortly. And we'll be sending an email out probably this week as one last reminder. Now let's do some preliminary setup so that we have optimized Logos for the purpose of writing a paper. So let's go to Tools, and let's go to Program Settings right away. Now the first thing you've got to mak",
+          "tags": [
+            "Research",
+            "Write",
+            "Paper",
+            "using",
+            "Logo"
+          ],
+          "playbackUrl": "/ai/videos/How-to-Write-a-Research-Paper-using-Logo_Media_HkgsNfwF4Mo_001_720p.mp4",
+          "hostedUrl": "",
+          "sourceAvailable": true,
+          "accessTier": "free",
+          "locked": false,
+          "accessReasonCode": "",
+          "url": "/ai/videos/How-to-Write-a-Research-Paper-using-Logo_Media_HkgsNfwF4Mo_001_720p.mp4#t=221",
+          "why": "direct keyword overlap",
+          "score": 53.3
+        },
+        {
+          "id": "how-to-write-a-research-paper-using-logo-media-hkgsnfwf4mo-001-720p:0",
+          "videoId": "how-to-write-a-research-paper-using-logo-media-hkgsnfwf4mo-001-720p",
+          "title": "How To Write A Research Paper Using Logo",
+          "category": "Research",
+          "topic": "Academic Research",
+          "difficulty": "Advanced",
+          "logosVersion": "General",
+          "duration": "15:15",
+          "durationSeconds": 915.14,
+          "transcriptStatus": "ready",
+          "timestamp": "0:00",
+          "timestampSeconds": 0,
+          "endTimestamp": "0:52",
+          "endSeconds": 52.44,
+          "snippet": "Welcome to how to write a research paper using Logos Bible Software. Now you may be wondering what is the purpose of a webinar. Well first we're going to provide training for Logos Bible Software. We're also going to provide training so that you can study the topic for yourself. We'll provide biblical insights related to topic when appropriate, and then we'll provide materials so you can equip yourself and others. No",
+          "tags": [
+            "Research",
+            "Write",
+            "Paper",
+            "using",
+            "Logo"
+          ],
+          "playbackUrl": "/ai/videos/How-to-Write-a-Research-Paper-using-Logo_Media_HkgsNfwF4Mo_001_720p.mp4",
+          "hostedUrl": "",
+          "sourceAvailable": true,
+          "accessTier": "free",
+          "locked": false,
+          "accessReasonCode": "",
+          "url": "/ai/videos/How-to-Write-a-Research-Paper-using-Logo_Media_HkgsNfwF4Mo_001_720p.mp4#t=0",
+          "why": "direct keyword overlap",
+          "score": 51.64
+        },
+        {
+          "id": "ytdown-com-youtube-meet-the-new-logos-bible-software-ai-and-media-n3sqoh9vc5y-001-1080p:0",
+          "videoId": "ytdown-com-youtube-meet-the-new-logos-bible-software-ai-and-media-n3sqoh9vc5y-001-1080p",
+          "title": "Meet The New Logos Bible Software AI And",
+          "category": "AI Features",
+          "topic": "Logos Training",
+          "difficulty": "Intermediate",
+          "logosVersion": "Logos 10",
+          "duration": "1:41:27",
+          "durationSeconds": 6087.02,
+          "transcriptStatus": "pending",
+          "timestamp": "0:00",
+          "timestampSeconds": 0,
+          "endTimestamp": "1:00",
+          "endSeconds": 60,
+          "snippet": "Meet The New Logos Bible Software AI And\nCategory: AI Features\nTopic: Logos Training\nDifficulty: Intermediate\nLogos Version: Logos 10\nTags: Logos, AI, Meet, Bible, Software",
+          "tags": [
+            "Logos",
+            "AI",
+            "Meet",
+            "Bible",
+            "Software"
+          ],
+          "playbackUrl": "/ai/videos/YTDown.com_YouTube_Meet-the-New-Logos-Bible-Software-AI-and_Media_n3sqoH9Vc5Y_001_1080p.mp4",
+          "hostedUrl": "",
+          "sourceAvailable": true,
+          "accessTier": "free",
+          "locked": false,
+          "accessReasonCode": "",
+          "url": "/ai/videos/YTDown.com_YouTube_Meet-the-New-Logos-Bible-Software-AI-and_Media_n3sqoH9Vc5Y_001_1080p.mp4#t=0",
+          "why": "topic alignment",
+          "score": 46.31
+        }
+      ],
+      "relatedContent": [
+        {
+          "id": "how-to-write-a-research-paper-using-logo-media-hkgsnfwf4mo-001-720p",
+          "title": "How To Write A Research Paper Using Logo",
+          "category": "Research",
+          "duration": "15:15",
+          "url": "/ai/videos/How-to-Write-a-Research-Paper-using-Logo_Media_HkgsNfwF4Mo_001_720p.mp4#t=0"
+        }
+      ],
+      "guidance": "Start by watching the 'Meet The New Logos Bible Software AI And' clip at 0:00 to get an intermediate overview of Logos features that can assist sermon preparation. Then, explore the 'How To Write A Research Paper Using Logo' series from 0:00 through 9:00 to understand advanced research techniques that can enhance your sermon workflow. This progression moves from general software capabilities to in-depth research methods, helping you build a comprehensive end-to-end process.",
+      "suggestedQueries": [
+        "Logos sermon preparation basics",
+        "Using Logos AI for sermon research",
+        "Step-by-step sermon workflow in Logos",
+        "Advanced Bible study research in Logos",
+        "Integrating Logos tools for sermon writing",
+        "Logos Bible software tutorial for pastors"
+      ],
+      "recovery": {
+        "diagnosis": "",
+        "altQueries": [],
+        "expansionTerms": [],
+        "strategy": ""
+      },
+      "personalization": {
+        "enabled": true,
+        "optOut": false
+      }
+    },
+    "platformDashboard": {
+      "entitlements": {
+        "workspaceId": "ws_2848d8367e51bf2f55",
+        "planId": "bundle-pro",
+        "planName": "Bible AI Hub Bundle",
+        "subscriptionStatus": "trialing",
+        "features": {
+          "bible-study": true,
+          "sermon-preparation": true,
+          "teaching-tools": true,
+          "research-helper": true,
+          "sermon-analyzer": true,
+          "video-search": true,
+          "premium-video": true,
+          "team-plan": true
+        },
+        "limits": {
+          "teachingKitsPerMonth": null,
+          "sermonAnalyzerMinutesPerMonth": null,
+          "sermonEvaluationRunsPerMonth": null,
+          "bibleStudyRunsPerMonth": null,
+          "sermonPrepRunsPerMonth": null
+        },
+        "overrides": []
+      },
+      "usageSummary": {
+        "workspaceId": "ws_2848d8367e51bf2f55",
+        "windowStart": "2026-02-01T00:00:00.000Z",
+        "totals": {
+          "bible-study": {
+            "runs": 1,
+            "units": 1,
+            "estimatedCostUsd": 0.01
+          },
+          "sermon-preparation": {
+            "runs": 1,
+            "units": 1,
+            "estimatedCostUsd": 0.03
+          },
+          "teaching-tools": {
+            "runs": 1,
+            "units": 2,
+            "estimatedCostUsd": 0.09
+          },
+          "research-helper": {
+            "runs": 1,
+            "units": 1,
+            "estimatedCostUsd": 0.028
+          },
+          "sermon-analyzer": {
+            "runs": 1,
+            "units": 3,
+            "estimatedCostUsd": 0.09
+          },
+          "video-search": {
+            "runs": 2,
+            "units": 2,
+            "estimatedCostUsd": 0.008
+          }
+        }
+      },
+      "activity": {
+        "workspaceId": "ws_2848d8367e51bf2f55",
+        "items": [
+          {
+            "id": "evt_febc161675f1a17bf4",
+            "type": "event",
+            "title": "generation_success",
+            "detail": "api",
+            "createdAt": "2026-02-13T05:55:09.970Z",
+            "userId": "usr_c97cb5df13ce5ac4ac",
+            "payload": {
+              "feature": "video-search",
+              "model": "text-embedding-3-small",
+              "units": 1
+            }
+          },
+          {
+            "id": "evt_f92bae6703a53deb98",
+            "type": "event",
+            "title": "generation_success",
+            "detail": "api",
+            "createdAt": "2026-02-13T05:55:07.052Z",
+            "userId": "usr_c97cb5df13ce5ac4ac",
+            "payload": {
+              "feature": "video-search",
+              "model": "text-embedding-3-small",
+              "units": 1
+            }
+          },
+          {
+            "id": "job_0a6c913a98b1e7c2e7",
+            "type": "analyzer_job",
+            "title": "Analyzer completed",
+            "detail": "",
+            "createdAt": "2026-02-13T05:55:02.392Z",
+            "userId": "usr_c97cb5df13ce5ac4ac",
+            "payload": {
+              "retries": 0
+            }
+          },
+          {
+            "id": "evt_2d5005d06922937643",
+            "type": "event",
+            "title": "sermon_evaluation_result",
+            "detail": "api",
+            "createdAt": "2026-02-13T05:54:42.429Z",
+            "userId": "usr_c97cb5df13ce5ac4ac",
+            "payload": {
+              "averageScore": 7.33,
+              "manuscriptLength": 528,
+              "scoreLabels": [
+                "Theological Clarity",
+                "Structure and Flow",
+                "Communication Quality"
+              ],
+              "scoreValues": [
+                9,
+                6,
+                7
+              ]
+            }
+          },
+          {
+            "id": "evt_0bb642d5adba9a7666",
+            "type": "event",
+            "title": "generation_success",
+            "detail": "api",
+            "createdAt": "2026-02-13T05:54:42.428Z",
+            "userId": "usr_c97cb5df13ce5ac4ac",
+            "payload": {
+              "feature": "research-helper",
+              "model": "gpt-4.1-mini",
+              "units": 1
+            }
+          },
+          {
+            "id": "evt_cc0f7f046d933d516a",
+            "type": "event",
+            "title": "generation_success",
+            "detail": "api",
+            "createdAt": "2026-02-13T05:54:28.437Z",
+            "userId": "usr_c97cb5df13ce5ac4ac",
+            "payload": {
+              "feature": "teaching-tools",
+              "model": "gpt-4.1-nano",
+              "units": 2
+            }
+          },
+          {
+            "id": "evt_198430b8d3e4cbf8e3",
+            "type": "event",
+            "title": "generation_success",
+            "detail": "api",
+            "createdAt": "2026-02-13T05:53:09.955Z",
+            "userId": "usr_c97cb5df13ce5ac4ac",
+            "payload": {
+              "feature": "sermon-preparation",
+              "model": "gpt-4.1-mini",
+              "units": 1
+            }
+          },
+          {
+            "id": "evt_09b7101cb2c2f7b24c",
+            "type": "event",
+            "title": "generation_success",
+            "detail": "api",
+            "createdAt": "2026-02-13T05:52:46.039Z",
+            "userId": "usr_c97cb5df13ce5ac4ac",
+            "payload": {
+              "feature": "bible-study",
+              "model": "gpt-4.1-nano",
+              "units": 1
+            }
+          },
+          {
+            "id": "evt_9ff259078de064a9a8",
+            "type": "event",
+            "title": "auth_signup_success",
+            "detail": "web",
+            "createdAt": "2026-02-13T05:51:59.089Z",
+            "userId": "usr_c97cb5df13ce5ac4ac",
+            "payload": {
+              "method": "guest"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "health": {
+    "ok": true,
+    "openaiConfigured": true,
+    "chatModel": "gpt-4.1-mini",
+    "embedModel": "text-embedding-3-small",
+    "transcribeModel": "whisper-1",
+    "users": 14,
+    "workspaces": 14,
+    "catalogSize": 2,
+    "transcribedVideos": 1,
+    "pendingVideos": 1
+  },
+  "auth": {
+    "userId": "usr_c97cb5df13ce5ac4ac",
+    "workspaceId": "ws_2848d8367e51bf2f55",
+    "role": "user"
+  }
+}

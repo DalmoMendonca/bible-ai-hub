@@ -1,0 +1,58 @@
+{
+  "inbox": [
+    {
+      "id": "feedback_c5a028e557a55285",
+      "createdAt": "2026-02-13T17:27:34.303Z",
+      "pagePath": "/ai/apps/bible-study/",
+      "message": "Valid feedback line here",
+      "rating": 5,
+      "sentiment": "positive",
+      "user": {
+        "id": "usr_2d1baab179b58fad18",
+        "email": "magic.test+1771003654233@example.com",
+        "name": "magic.test+1771003654233",
+        "workspaceId": "ws_c83d0ca9a6fdeea4b3"
+      },
+      "routeTo": "dalmomendonca@gmail.com"
+    },
+    {
+      "id": "feedback_279d20295afb0ae5",
+      "createdAt": "2026-02-13T17:39:26.672Z",
+      "pagePath": "/ai/apps/teaching-tools/",
+      "message": "Feedback post magic-link login",
+      "rating": 4,
+      "sentiment": "positive",
+      "user": {
+        "id": "usr_4aab7afdb3b0abb057",
+        "email": "magic.flow+1771004366600@example.com",
+        "name": "magic.flow+1771004366600",
+        "workspaceId": "ws_52f0e170734cb4eb8b"
+      },
+      "routeTo": "dalmomendonca@gmail.com"
+    }
+  ],
+  "testimonialQueue": [
+    {
+      "id": "tq_e77de05dfa31ca5d",
+      "createdAt": "2026-02-13T17:27:34.303Z",
+      "pagePath": "/ai/apps/bible-study/",
+      "quote": "Valid feedback line here",
+      "role": "user",
+      "author": "magic.test+1771003654233",
+      "email": "magic.test+1771003654233@example.com",
+      "sourceFeedbackId": "feedback_c5a028e557a55285",
+      "moderationStatus": "pending"
+    },
+    {
+      "id": "tq_f34e92557c9d69e1",
+      "createdAt": "2026-02-13T17:39:26.672Z",
+      "pagePath": "/ai/apps/teaching-tools/",
+      "quote": "Feedback post magic-link login",
+      "role": "user",
+      "author": "magic.flow+1771004366600",
+      "email": "magic.flow+1771004366600@example.com",
+      "sourceFeedbackId": "feedback_279d20295afb0ae5",
+      "moderationStatus": "pending"
+    }
+  ]
+}

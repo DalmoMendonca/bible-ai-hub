@@ -12,6 +12,10 @@ OPENAI_API_KEY=your_key_here
 GOOGLE_CLIENT_ID=your_google_oauth_client_id
 GA_MEASUREMENT_ID=G-XXXXXXXXXX
 ADMIN_DASHBOARD_PASSWORD=your_admin_dashboard_password
+# Optional for real magic-link emails (Resend):
+RESEND_API_KEY=re_xxxxxxxxxxxxx
+MAGIC_LINK_FROM_EMAIL=Bible AI Hub <no-reply@yourdomain.com>
+PUBLIC_BASE_URL=https://bible.hiredalmo.com
 ```
 
 2. Install deps:
@@ -168,7 +172,7 @@ OPENAI_RETRY_BASE_MS=650
 
 ## App routes
 
-- `/pricing/`
+- `/#homePricing` (pricing section on home)
 - `/ai/apps/bible-study/`
 - `/ai/apps/sermon-preparation/`
 - `/ai/apps/teaching-tools/`
