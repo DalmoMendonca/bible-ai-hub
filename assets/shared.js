@@ -1075,27 +1075,41 @@
   async function saveProjectAndOpen(tool, title, payload, existingProjectId) {
     const safeTool = cleanString(tool);
     let projectId = cleanString(existingProjectId);
-    if (projectId) {
-      await updateProject(projectId, payload || {});
-    } else {
-      const saved = await saveProject(safeTool, title, payload || {});
-      projectId = cleanString(saved && saved.project && saved.project.id);
+    let saveFailed = false;
+    let saveError = "";
+    try {
+      if (projectId) {
+        await updateProject(projectId, payload || {});
+      } else {
+        const saved = await saveProject(safeTool, title, payload || {});
+        projectId = cleanString(saved && saved.project && saved.project.id);
+      }
+    } catch (error) {
+      saveFailed = true;
+      saveError = cleanString(error && error.message, "Project autosave failed.");
+      if (window && window.console && typeof window.console.warn === "function") {
+        window.console.warn(`Project autosave failed for ${safeTool}: ${saveError}`);
+      }
     }
-    if (!projectId) {
+    if (!projectId && !saveFailed) {
       throw new Error("Project could not be saved.");
     }
     const currentProjectId = getQueryParam("project");
-    if (currentProjectId !== projectId) {
+    if (projectId && currentProjectId !== projectId) {
       const route = routeForTool(safeTool);
       window.location.href = `${route}?project=${encodeURIComponent(projectId)}`;
       return {
         projectId,
-        navigated: true
+        navigated: true,
+        saveFailed,
+        saveError
       };
     }
     return {
       projectId,
-      navigated: false
+      navigated: false,
+      saveFailed,
+      saveError
     };
   }
 

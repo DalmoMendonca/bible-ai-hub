@@ -63,6 +63,20 @@ const OPENAI_BIBLE_STUDY_MAX_REFINEMENTS = Number(
   || (IS_SERVERLESS_RUNTIME ? 0 : 3)
 );
 const OPENAI_LONG_FORM_MODEL = process.env.OPENAI_LONG_FORM_MODEL || "gpt-4.1-nano";
+const OPENAI_RESEARCH_HELPER_MODEL = process.env.OPENAI_RESEARCH_HELPER_MODEL
+  || (IS_SERVERLESS_RUNTIME ? OPENAI_LONG_FORM_MODEL : OPENAI_CHAT_MODEL);
+const OPENAI_RESEARCH_HELPER_MAX_TOKENS = Number(
+  process.env.OPENAI_RESEARCH_HELPER_MAX_TOKENS
+  || (IS_SERVERLESS_RUNTIME ? 950 : 1400)
+);
+const OPENAI_RESEARCH_HELPER_MAX_REFINEMENTS = Number(
+  process.env.OPENAI_RESEARCH_HELPER_MAX_REFINEMENTS
+  || (IS_SERVERLESS_RUNTIME ? 0 : 1)
+);
+const OPENAI_RESEARCH_HELPER_MAX_MANUSCRIPT_CHARS = Number(
+  process.env.OPENAI_RESEARCH_HELPER_MAX_MANUSCRIPT_CHARS
+  || (IS_SERVERLESS_RUNTIME ? 12000 : 24000)
+);
 const OPENAI_DASHBOARD_MODEL = process.env.OPENAI_DASHBOARD_MODEL || OPENAI_CHAT_MODEL;
 const OPENAI_RETRY_ATTEMPTS = Number(process.env.OPENAI_RETRY_ATTEMPTS || 4);
 const OPENAI_RETRY_BASE_MS = Number(process.env.OPENAI_RETRY_BASE_MS || 650);
@@ -2133,7 +2147,7 @@ app.post("/api/ai/teaching-tools", requireOpenAIKey, requireFeatureAccess("teach
 
 app.post("/api/ai/research-helper", requireOpenAIKey, requireFeatureAccess("research-helper"), enforceQuota("research-helper"), asyncHandler(async (req, res) => {
   const input = req.body || {};
-  const manuscript = cleanString(input.manuscript);
+  const manuscript = cleanString(input.manuscript).slice(0, Math.max(2000, OPENAI_RESEARCH_HELPER_MAX_MANUSCRIPT_CHARS));
   const revisionObjective = normalizeRevisionObjective(input.revisionObjective);
 
   if (!manuscript) {
@@ -2150,7 +2164,9 @@ app.post("/api/ai/research-helper", requireOpenAIKey, requireFeatureAccess("rese
   });
   let ai = await chatJson({
     ...researchPrompt,
-    temperature: 0.35
+    temperature: IS_SERVERLESS_RUNTIME ? 0.28 : 0.35,
+    model: OPENAI_RESEARCH_HELPER_MODEL,
+    maxTokens: OPENAI_RESEARCH_HELPER_MAX_TOKENS
   });
   const baselineScores = cleanObjectArray(ai.scores, 8)
     .map((row) => ({
@@ -2175,7 +2191,7 @@ app.post("/api/ai/research-helper", requireOpenAIKey, requireFeatureAccess("rese
     tightenLines: baselineTighten
   }, baselineScores, revisionObjective);
 
-  if (revisionQuality.shouldRefine) {
+  if (revisionQuality.shouldRefine && OPENAI_RESEARCH_HELPER_MAX_REFINEMENTS > 0) {
     try {
       const revisionPrompt = buildResearchHelperRevisionPrompt({
         sermonType: cleanString(input.sermonType, "Expository"),
@@ -2196,8 +2212,8 @@ app.post("/api/ai/research-helper", requireOpenAIKey, requireFeatureAccess("rese
       const revisionPack = await chatJson({
         ...revisionPrompt,
         temperature: 0.22,
-        model: OPENAI_LONG_FORM_MODEL,
-        maxTokens: 1200
+        model: OPENAI_RESEARCH_HELPER_MODEL,
+        maxTokens: Math.max(700, Math.min(1200, OPENAI_RESEARCH_HELPER_MAX_TOKENS))
       });
       const improvedRevisions = normalizeResearchHelperGuidanceLines(revisionPack.revisions, {
         objective: revisionObjective,
