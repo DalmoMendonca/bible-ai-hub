@@ -91,6 +91,15 @@ const PUBLIC_BASE_URL = cleanString(process.env.PUBLIC_BASE_URL, "https://bible.
 const AUTH_TOKEN_COOKIE = "bah_session_token";
 const AUTH_WORKSPACE_COOKIE = "bah_workspace_id";
 const AUTH_COOKIE_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
+const MAGIC_LINK_TOKEN_TTL_MS = 15 * 60 * 1000;
+const AUTH_TOKEN_SIGNING_SECRET = cleanString(
+  process.env.AUTH_TOKEN_SIGNING_SECRET
+  || process.env.OPENAI_API_KEY
+  || process.env.ADMIN_DASHBOARD_PASSWORD
+  || "local-dev-auth-secret-change-me"
+);
+const SESSION_TOKEN_PREFIX = "bahs1";
+const MAGIC_LINK_TOKEN_PREFIX = "bahm1";
 const platform = createPlatformStore({
   rootDir: ROOT_DIR,
   trialDays: Number.isFinite(PLATFORM_TRIAL_DAYS) ? PLATFORM_TRIAL_DAYS : 14
@@ -224,8 +233,7 @@ app.post("/api/auth/signup", asyncHandler(async (req, res) => {
     workspaceId: result.workspaceId,
     properties: { method: "password" }
   });
-  setAuthCookies(req, res, result);
-  res.status(201).json(result);
+  applyAuthResponse(req, res, result, 201);
 }));
 
 app.post("/api/auth/login", asyncHandler(async (req, res) => {
@@ -240,8 +248,7 @@ app.post("/api/auth/login", asyncHandler(async (req, res) => {
     workspaceId: result.workspaceId,
     properties: { method: "password" }
   });
-  setAuthCookies(req, res, result);
-  res.json(result);
+  applyAuthResponse(req, res, result, 200);
 }));
 
 app.post("/api/auth/google", asyncHandler(async (req, res) => {
@@ -257,8 +264,7 @@ app.post("/api/auth/google", asyncHandler(async (req, res) => {
     workspaceId: result.workspaceId,
     properties: { method: "google" }
   });
-  setAuthCookies(req, res, result);
-  res.json(result);
+  applyAuthResponse(req, res, result, 200);
 }));
 
 app.get("/api/auth/google/config", (_req, res) => {
@@ -329,13 +335,30 @@ app.post("/api/auth/google/token", asyncHandler(async (req, res) => {
     workspaceId: result.workspaceId,
     properties: { method: "google_oauth" }
   });
-  setAuthCookies(req, res, result);
-  res.json(result);
+  applyAuthResponse(req, res, result, 200);
 }));
 
 app.post("/api/auth/magic-link/request", asyncHandler(async (req, res) => {
   const input = req.body || {};
-  const result = platform.requestMagicLink(cleanString(input.email));
+  const identity = ensureUserIdentityByEmail(cleanString(input.email), cleanString(input.name));
+  const expiresAt = new Date(Date.now() + MAGIC_LINK_TOKEN_TTL_MS).toISOString();
+  const issuedMagicToken = createSignedToken("magic_link", {
+    userId: cleanString(identity && identity.user && identity.user.id),
+    email: cleanString(identity && identity.user && identity.user.email).toLowerCase(),
+    name: cleanString(identity && identity.user && identity.user.name),
+    role: cleanString(identity && identity.user && identity.user.role),
+    workspaceId: cleanString(identity && identity.workspaceId)
+  }, {
+    expiresAt
+  });
+  const result = {
+    ok: true,
+    email: cleanString(identity && identity.user && identity.user.email).toLowerCase(),
+    expiresInMinutes: Math.round(MAGIC_LINK_TOKEN_TTL_MS / 60000),
+    expiresAt,
+    simulated: true,
+    magicLinkToken: issuedMagicToken.token
+  };
   const origin = deriveRequestOrigin(req);
   const magicLinkUrl = buildMagicLinkUrl(origin, cleanString(result.magicLinkToken));
   const mailResult = await sendMagicLinkEmail({
@@ -345,8 +368,8 @@ app.post("/api/auth/magic-link/request", asyncHandler(async (req, res) => {
   });
   platform.trackEvent({
     name: "auth_magic_link_requested",
-    userId: "",
-    workspaceId: "",
+    userId: cleanString(identity && identity.user && identity.user.id),
+    workspaceId: cleanString(identity && identity.workspaceId),
     properties: {
       email: cleanString(input.email).toLowerCase(),
       deliveryMode: mailResult.mode,
@@ -369,15 +392,32 @@ app.post("/api/auth/magic-link/request", asyncHandler(async (req, res) => {
 
 app.post("/api/auth/magic-link/verify", asyncHandler(async (req, res) => {
   const input = req.body || {};
-  const result = platform.verifyMagicLink(cleanString(input.token));
+  const token = cleanString(input.token);
+  let result = null;
+  try {
+    result = platform.verifyMagicLink(token);
+  } catch (_) {
+    const claims = parseSignedToken(token, "magic_link");
+    if (!claims) {
+      throw createHttpError(400, "Magic link is invalid or expired.");
+    }
+    const identity = ensureUserIdentityByEmail(
+      cleanString(claims.email),
+      cleanString(claims.name)
+    );
+    result = {
+      user: identity.user,
+      workspaceId: identity.workspaceId,
+      sessionToken: ""
+    };
+  }
   platform.trackEvent({
     name: "auth_login_success",
     userId: result.user.id,
     workspaceId: result.workspaceId,
     properties: { method: "magic_link" }
   });
-  setAuthCookies(req, res, result);
-  res.json(result);
+  applyAuthResponse(req, res, result, 200);
 }));
 
 app.post("/api/auth/guest", asyncHandler(async (req, res) => {
@@ -408,8 +448,7 @@ app.post("/api/auth/guest", asyncHandler(async (req, res) => {
     workspaceId: result.workspaceId,
     properties: { method: "guest" }
   });
-  setAuthCookies(req, res, result);
-  res.status(201).json(result);
+  applyAuthResponse(req, res, result, 201);
 }));
 
 app.post("/api/auth/logout", asyncHandler(async (req, res) => {
@@ -423,6 +462,25 @@ app.post("/api/auth/logout", asyncHandler(async (req, res) => {
 app.post("/api/auth/refresh", asyncHandler(async (req, res) => {
   if (!req.auth || !req.auth.sessionToken) {
     res.status(401).json({ error: "Authentication required." });
+    return;
+  }
+  const signedSessionClaims = parseSignedToken(req.auth.sessionToken, "session");
+  if (signedSessionClaims) {
+    const renewed = issueSessionTokenForUser(
+      req.auth.user,
+      cleanString(req.auth.workspaceId || signedSessionClaims.workspaceId)
+    );
+    setAuthCookies(req, res, {
+      sessionToken: renewed.token,
+      workspaceId: renewed.workspaceId
+    });
+    res.json({
+      ok: true,
+      session: {
+        token: renewed.token,
+        expiresAt: renewed.expiresAt
+      }
+    });
     return;
   }
   const refreshed = platform.refreshSession(req.auth.sessionToken);
@@ -2954,6 +3012,231 @@ function parseCookieHeader(rawValue) {
   return output;
 }
 
+function base64UrlEncodeText(value) {
+  return Buffer.from(String(value || ""), "utf8")
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
+}
+
+function base64UrlDecodeText(value) {
+  const safeValue = cleanString(value).replace(/-/g, "+").replace(/_/g, "/");
+  if (!safeValue) {
+    return "";
+  }
+  const remainder = safeValue.length % 4;
+  const padded = remainder ? `${safeValue}${"=".repeat(4 - remainder)}` : safeValue;
+  return Buffer.from(padded, "base64").toString("utf8");
+}
+
+function secureEquals(left, right) {
+  const a = Buffer.from(cleanString(left));
+  const b = Buffer.from(cleanString(right));
+  if (!a.length || a.length !== b.length) {
+    return false;
+  }
+  try {
+    return crypto.timingSafeEqual(a, b);
+  } catch (_) {
+    return false;
+  }
+}
+
+function tokenPrefixForType(type) {
+  if (cleanString(type) === "magic_link") {
+    return MAGIC_LINK_TOKEN_PREFIX;
+  }
+  return SESSION_TOKEN_PREFIX;
+}
+
+function signTokenPayload(type, payloadB64) {
+  const scopedSecret = `${AUTH_TOKEN_SIGNING_SECRET}:${cleanString(type, "session")}`;
+  return crypto
+    .createHmac("sha256", scopedSecret)
+    .update(cleanString(payloadB64))
+    .digest("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
+}
+
+function createSignedToken(type, claims, options = {}) {
+  const safeType = cleanString(type, "session");
+  const expiresAt = cleanString(options.expiresAt)
+    || new Date(Date.now() + AUTH_COOKIE_MAX_AGE_MS).toISOString();
+  const payload = {
+    typ: safeType,
+    exp: expiresAt,
+    ...(claims && typeof claims === "object" ? claims : {})
+  };
+  const payloadB64 = base64UrlEncodeText(JSON.stringify(payload));
+  const signature = signTokenPayload(safeType, payloadB64);
+  return {
+    token: `${tokenPrefixForType(safeType)}.${payloadB64}.${signature}`,
+    expiresAt,
+    claims: payload
+  };
+}
+
+function parseSignedToken(token, expectedType) {
+  const safeToken = cleanString(token);
+  const safeExpectedType = cleanString(expectedType, "session");
+  if (!safeToken) {
+    return null;
+  }
+  const parts = safeToken.split(".");
+  if (parts.length !== 3) {
+    return null;
+  }
+  const [prefix, payloadB64, signature] = parts;
+  if (prefix !== tokenPrefixForType(safeExpectedType)) {
+    return null;
+  }
+  const expectedSignature = signTokenPayload(safeExpectedType, payloadB64);
+  if (!secureEquals(signature, expectedSignature)) {
+    return null;
+  }
+  let payload = null;
+  try {
+    payload = JSON.parse(base64UrlDecodeText(payloadB64));
+  } catch (_) {
+    return null;
+  }
+  if (!payload || cleanString(payload.typ) !== safeExpectedType) {
+    return null;
+  }
+  const expiresAt = cleanString(payload.exp);
+  const expiresMs = Date.parse(expiresAt);
+  if (!Number.isFinite(expiresMs) || expiresMs <= Date.now()) {
+    return null;
+  }
+  return payload;
+}
+
+function isGuestEmailAddress(email) {
+  return cleanString(email).toLowerCase().endsWith("@local.bibleaihub");
+}
+
+function sanitizeUserForSession(user) {
+  if (!user || typeof user !== "object") {
+    return null;
+  }
+  const safeEmail = cleanString(user.email).toLowerCase();
+  const numericCredits = Number(user.credits);
+  return {
+    id: cleanString(user.id),
+    email: safeEmail,
+    name: cleanString(user.name, safeEmail.split("@")[0]),
+    role: cleanString(user.role, "user"),
+    credits: Number.isFinite(numericCredits) ? numericCredits : null,
+    isGuest: Boolean(user.isGuest) || isGuestEmailAddress(safeEmail),
+    disabled: Boolean(user.disabled),
+    deletedAt: cleanString(user.deletedAt),
+    activeWorkspaceId: cleanString(user.activeWorkspaceId),
+    onboarding: user.onboarding && typeof user.onboarding === "object" ? user.onboarding : null,
+    emailPrefs: user.emailPrefs && typeof user.emailPrefs === "object" ? user.emailPrefs : { lifecycle: true },
+    createdAt: cleanString(user.createdAt),
+    updatedAt: cleanString(user.updatedAt)
+  };
+}
+
+function findInternalUserByEmail(email) {
+  const safeEmail = cleanString(email).toLowerCase();
+  if (!safeEmail) {
+    return null;
+  }
+  const rows = platform && platform.state && Array.isArray(platform.state.users)
+    ? platform.state.users
+    : [];
+  return rows.find((row) => cleanString(row && row.email).toLowerCase() === safeEmail && !row.deletedAt) || null;
+}
+
+function ensureUserIdentityByEmail(email, fallbackName = "") {
+  const safeEmail = cleanString(email).toLowerCase();
+  if (!safeEmail || !safeEmail.includes("@")) {
+    throw createHttpError(400, "Valid email is required.");
+  }
+  const existing = findInternalUserByEmail(safeEmail);
+  if (existing) {
+    if (existing.disabled) {
+      throw createHttpError(403, "Account is disabled. Contact support.");
+    }
+    if (existing.deletedAt) {
+      throw createHttpError(404, "Account not found.");
+    }
+    const workspaceId = cleanString(
+      existing.activeWorkspaceId
+      || platform.getPrimaryWorkspaceIdForUser(cleanString(existing.id))
+    );
+    return {
+      user: sanitizeUserForSession(existing),
+      workspaceId
+    };
+  }
+  const bootstrapped = platform.loginGoogle({
+    email: safeEmail,
+    name: cleanString(fallbackName, safeEmail.split("@")[0]),
+    sub: ""
+  });
+  return {
+    user: sanitizeUserForSession(bootstrapped && bootstrapped.user),
+    workspaceId: cleanString(bootstrapped && bootstrapped.workspaceId)
+  };
+}
+
+function issueSessionTokenForUser(user, workspaceId, options = {}) {
+  const safeUser = sanitizeUserForSession(user);
+  if (!safeUser) {
+    return {
+      token: "",
+      expiresAt: "",
+      workspaceId: ""
+    };
+  }
+  const resolvedWorkspaceId = cleanString(
+    workspaceId
+    || safeUser.activeWorkspaceId
+    || platform.getPrimaryWorkspaceIdForUser(cleanString(safeUser.id))
+  );
+  const issued = createSignedToken("session", {
+    userId: cleanString(safeUser.id),
+    email: cleanString(safeUser.email).toLowerCase(),
+    name: cleanString(safeUser.name),
+    role: cleanString(safeUser.role),
+    workspaceId: resolvedWorkspaceId
+  }, {
+    expiresAt: cleanString(options.expiresAt)
+      || new Date(Date.now() + AUTH_COOKIE_MAX_AGE_MS).toISOString()
+  });
+  return {
+    token: issued.token,
+    expiresAt: issued.expiresAt,
+    workspaceId: resolvedWorkspaceId
+  };
+}
+
+function applyAuthResponse(req, res, authPayload, statusCode = 200) {
+  const safePayload = authPayload && typeof authPayload === "object" ? authPayload : {};
+  const safeUser = sanitizeUserForSession(safePayload.user);
+  if (!safeUser) {
+    res.status(500).json({ error: "Authentication payload is missing user data." });
+    return;
+  }
+  const session = issueSessionTokenForUser(safeUser, cleanString(safePayload.workspaceId));
+  setAuthCookies(req, res, {
+    sessionToken: session.token,
+    workspaceId: session.workspaceId
+  });
+  res.status(statusCode).json({
+    ...safePayload,
+    user: safeUser,
+    sessionToken: session.token,
+    workspaceId: session.workspaceId,
+    sessionExpiresAt: session.expiresAt
+  });
+}
+
 function readRequestCookie(req, cookieName) {
   const safeCookieName = cleanString(cookieName);
   if (!safeCookieName) {
@@ -3009,19 +3292,55 @@ function parseSessionToken(req) {
 
 function attachAuthContext(req, _res, next) {
   const sessionToken = parseSessionToken(req);
-  const auth = platform.resolveAuth(sessionToken);
+  let auth = platform.resolveAuth(sessionToken);
+  let sessionInfo = auth && auth.session ? auth.session : null;
+  let user = auth && auth.user ? sanitizeUserForSession(auth.user) : null;
+
+  if (!user) {
+    const claims = parseSignedToken(sessionToken, "session");
+    if (claims) {
+      const claimedUserId = cleanString(claims.userId);
+      let internalUser = claimedUserId ? platform.getUserById(claimedUserId) : null;
+      if (!internalUser) {
+        internalUser = findInternalUserByEmail(cleanString(claims.email));
+      }
+      if (!internalUser && cleanString(claims.email)) {
+        try {
+          const identity = ensureUserIdentityByEmail(
+            cleanString(claims.email),
+            cleanString(claims.name)
+          );
+          user = sanitizeUserForSession(identity && identity.user);
+          sessionInfo = {
+            token: sessionToken,
+            expiresAt: cleanString(claims.exp)
+          };
+        } catch (_) {
+          user = null;
+          sessionInfo = null;
+        }
+      } else if (internalUser && !internalUser.deletedAt && !internalUser.disabled) {
+        user = sanitizeUserForSession(internalUser);
+        sessionInfo = {
+          token: sessionToken,
+          expiresAt: cleanString(claims.exp)
+        };
+      }
+    }
+  }
+
   const headerWorkspace = cleanString(req.headers && req.headers["x-workspace-id"]);
   const cookieWorkspace = cleanString(readRequestCookie(req, AUTH_WORKSPACE_COOKIE));
   const workspaceId = cleanString(
     headerWorkspace
       || cookieWorkspace
-      || (auth.user && auth.user.activeWorkspaceId)
-      || (auth.user && platform.getPrimaryWorkspaceIdForUser(auth.user.id))
+      || (user && user.activeWorkspaceId)
+      || (user && platform.getPrimaryWorkspaceIdForUser(user.id))
   );
 
   req.auth = {
-    user: auth.user || null,
-    session: auth.session || null,
+    user: user || null,
+    session: sessionInfo || null,
     sessionToken,
     workspaceId
   };
@@ -4609,6 +4928,14 @@ function buildFeatureFlagContext(req) {
 function createBadRequestError(message) {
   const error = new Error(cleanString(message, "Invalid request payload."));
   error.status = 400;
+  return error;
+}
+
+function createHttpError(status, message) {
+  const numericStatus = Number(status);
+  const safeStatus = Number.isFinite(numericStatus) ? Math.max(400, Math.trunc(numericStatus)) : 500;
+  const error = new Error(cleanString(message, safeStatus >= 500 ? "Internal Server Error" : "Request failed."));
+  error.status = safeStatus;
   return error;
 }
 
@@ -6306,7 +6633,7 @@ async function sendMagicLinkEmail({ toEmail, magicLinkUrl, expiresInMinutes }) {
     return {
       sent: false,
       mode: "simulated",
-      detail: "Email delivery is not configured yet; token-based sign-in is enabled for now."
+      detail: "Email delivery is not configured yet. Configure RESEND_API_KEY and MAGIC_LINK_FROM_EMAIL to enable magic-link emails."
     };
   }
 

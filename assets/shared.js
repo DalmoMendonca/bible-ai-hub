@@ -1701,15 +1701,7 @@
               <button type="button" class="btn primary" data-bah-magic-request>Send Magic Link</button>
             </div>
             <p class="inline-hint" data-bah-magic-status></p>
-          </div>
-          <div class="field span-2">
-            <label for="bahMagicToken">Magic Link Token</label>
-            <input id="bahMagicToken" class="input" type="text" placeholder="Paste token from your email" />
-          </div>
-          <div class="field span-2">
-            <div class="btn-row">
-              <button type="button" class="btn secondary" data-bah-magic-verify>Verify Magic Link</button>
-            </div>
+            <p class="inline-hint">Open the emailed link in this browser and you'll be signed in automatically.</p>
           </div>
           <div class="field span-2">
             <h4 class="section-title" style="margin:0;">Or continue with Google</h4>
@@ -1781,9 +1773,7 @@
     });
 
     const emailInput = modal.querySelector("#bahMagicEmail");
-    const tokenInput = modal.querySelector("#bahMagicToken");
     const requestBtn = modal.querySelector("[data-bah-magic-request]");
-    const verifyBtn = modal.querySelector("[data-bah-magic-verify]");
     const statusEl = modal.querySelector("[data-bah-magic-status]");
     const debugEl = modal.querySelector("[data-bah-auth-debug]");
 
@@ -1814,27 +1804,20 @@
         try {
           setBusy(requestBtn, "Sending...", true);
           const response = await publicApiPost("/api/auth/magic-link/request", { email });
-          const token = cleanString(response && response.magicLinkToken);
           const detail = cleanString(response && response.detail);
           const deliveryMode = cleanString(response && response.deliveryMode, response && response.simulated ? "simulated" : "");
           const deliverySent = Boolean(response && response.deliverySent);
           const expiresMinutes = Number(response && response.expiresInMinutes || 15);
 
-          if (tokenInput && token) {
-            tokenInput.value = token;
-          }
-
           if (statusEl) {
             if (deliverySent) {
               const inboxMessage = `Magic link sent to ${email}. It expires in ${expiresMinutes} minutes.`;
               statusEl.textContent = detail ? `${inboxMessage} ${detail}` : inboxMessage;
-            } else if (token) {
-              const fallbackLead = deliveryMode === "resend-error"
-                ? "Email delivery failed. Use the token field below to sign in now."
-                : "Email delivery is not configured yet. Use the token field below to sign in now.";
-              statusEl.textContent = detail ? `${fallbackLead} ${detail}` : fallbackLead;
             } else {
-              statusEl.textContent = detail || "Could not send magic link.";
+              const fallbackLead = deliveryMode === "resend-error"
+                ? "Email delivery failed. Please retry in a moment."
+                : "Magic-link email is not configured yet. Please use Google sign-in for now.";
+              statusEl.textContent = detail ? `${fallbackLead} ${detail}` : fallbackLead;
             }
           }
         } catch (error) {
@@ -1843,29 +1826,6 @@
           }
         } finally {
           setBusy(requestBtn, "", false);
-        }
-      };
-    }
-
-    if (verifyBtn) {
-      verifyBtn.onclick = async () => {
-        const token = cleanString(tokenInput && tokenInput.value);
-        if (!token) {
-          if (statusEl) statusEl.textContent = "Paste your token first.";
-          return;
-        }
-        try {
-          setBusy(verifyBtn, "Verifying...", true);
-          const auth = await publicApiPost("/api/auth/magic-link/verify", { token });
-          storeAuth(auth || {});
-          authReadyPromise = Promise.resolve(authState);
-          window.location.reload();
-        } catch (error) {
-          if (statusEl) {
-            statusEl.textContent = cleanString(error && error.message, "Magic link verification failed.");
-          }
-        } finally {
-          setBusy(verifyBtn, "", false);
         }
       };
     }
