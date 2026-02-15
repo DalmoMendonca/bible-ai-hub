@@ -49,6 +49,22 @@ const OPENAI_BASE_URL = "https://api.openai.com/v1";
 loadEnvFile(path.join(ROOT_DIR, ".env"));
 const APP_DATA_DIR = resolveAppDataDir();
 
+const ALLOW_EPHEMERAL_DATA = cleanString(process.env.ALLOW_EPHEMERAL_DATA);
+const IS_CLOUD_RUN = Boolean(cleanString(process.env.K_SERVICE) || cleanString(process.env.K_REVISION) || cleanString(process.env.K_CONFIGURATION));
+if (process.env.NODE_ENV === "production" && IS_CLOUD_RUN) {
+  const normalizedDataDir = String(APP_DATA_DIR || "").replace(/\\/g, "/");
+  if (normalizedDataDir.startsWith("/tmp/") || normalizedDataDir === "/tmp") {
+    if (!ALLOW_EPHEMERAL_DATA || ALLOW_EPHEMERAL_DATA === "0" || ALLOW_EPHEMERAL_DATA.toLowerCase() === "false") {
+      throw new Error(
+        "Refusing to start: BIBLE_AI_DATA_DIR points to ephemeral /tmp storage on Cloud Run. "
+        + "This will reset projects/credits on deploy or instance restart. "
+        + "Set BIBLE_AI_DATA_DIR to a persistent volume mount (recommended: Cloud Storage volume) "
+        + "or set ALLOW_EPHEMERAL_DATA=1 if you understand the data-loss risk."
+      );
+    }
+  }
+}
+
 const IS_SERVERLESS_RUNTIME = detectServerlessRuntime();
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
 const OPENAI_CHAT_MODEL = process.env.OPENAI_CHAT_MODEL || "gpt-4.1-mini";

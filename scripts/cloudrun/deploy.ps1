@@ -18,6 +18,7 @@ param(
   [string]$AuthTokenSigningSecret = "",
   [string]$ResendApiKey = "",
   [string]$DataBucketName = "",
+  [switch]$AllowEphemeralData,
   [int]$TimeoutSeconds = 900,
   [string]$Memory = "2Gi",
   [string]$Cpu = "1",
@@ -161,6 +162,10 @@ $imageUri = "$Region-docker.pkg.dev/$ProjectId/$ArtifactRepo/${ImageName}:$Tag"
 $dataMountPath = "/var/bible-ai-hub-data"
 $dataDir = if ($DataBucketName) { $dataMountPath } else { "/tmp/bible-ai-hub-data" }
 
+if (-not $DataBucketName -and -not $AllowEphemeralData) {
+  throw "Refusing to deploy without persistent storage. Provide -DataBucketName to persist projects/credits, or pass -AllowEphemeralData to explicitly accept data loss on restart." 
+}
+
 Write-Host "Setting active project to $ProjectId"
 Invoke-GCloud -Args @("config", "set", "project", $ProjectId)
 
@@ -216,6 +221,9 @@ $envVars["NODE_ENV"] = "production"
 $envVars["PUBLIC_BASE_URL"] = $PublicBaseUrl
 $envVars["BIBLE_AI_DATA_DIR"] = $dataDir
 $envVars["OPENAI_REQUEST_TIMEOUT_MS"] = "110000"
+if (-not $DataBucketName -and $AllowEphemeralData) {
+  $envVars["ALLOW_EPHEMERAL_DATA"] = "1"
+}
 if ($GoogleClientId) {
   $envVars["GOOGLE_CLIENT_ID"] = $GoogleClientId
 }
