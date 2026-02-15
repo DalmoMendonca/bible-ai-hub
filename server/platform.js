@@ -202,12 +202,15 @@ const FEATURE_LIMIT_KEYS = {
   "video-search": null
 };
 
-function createPlatformStore({ rootDir, trialDays = TRIAL_DAYS_DEFAULT } = {}) {
-  const preferredDataPath = path.join(rootDir || process.cwd(), "server", "data", "platform-state.json");
-  const dataPath = resolveWritableDataPath(preferredDataPath);
-  ensureDir(path.dirname(dataPath));
+function createPlatformStore({ rootDir, dataDir, dataPath, trialDays = TRIAL_DAYS_DEFAULT } = {}) {
+  const explicitDataPath = typeof dataPath === "string" ? dataPath.trim() : "";
+  const explicitDataDir = typeof dataDir === "string" ? dataDir.trim() : "";
+  const preferredDataPath = explicitDataPath
+    || path.join(explicitDataDir || path.join(rootDir || process.cwd(), "server", "data"), "platform-state.json");
+  const dataFilePath = resolveWritableDataPath(preferredDataPath);
+  ensureDir(path.dirname(dataFilePath));
 
-  const state = loadState(dataPath);
+  const state = loadState(dataFilePath);
   let hydrationMutations = false;
   for (const user of ensureArray(state.users)) {
     if (applyAccountDefaults(user)) {
@@ -220,12 +223,12 @@ function createPlatformStore({ rootDir, trialDays = TRIAL_DAYS_DEFAULT } = {}) {
     }
   }
   if (hydrationMutations) {
-    fs.writeFileSync(dataPath, `${JSON.stringify(state, null, 2)}\n`, "utf8");
+    fs.writeFileSync(dataFilePath, `${JSON.stringify(state, null, 2)}\n`, "utf8");
   }
   const rateLimiter = new Map();
 
   function persist() {
-    fs.writeFileSync(dataPath, `${JSON.stringify(state, null, 2)}\n`, "utf8");
+    fs.writeFileSync(dataFilePath, `${JSON.stringify(state, null, 2)}\n`, "utf8");
   }
 
   function nowIso() {
@@ -2071,7 +2074,7 @@ function createPlatformStore({ rootDir, trialDays = TRIAL_DAYS_DEFAULT } = {}) {
   }
 
   return {
-    dataPath,
+    dataPath: dataFilePath,
     state,
     PLAN_CATALOG,
     FEATURE_LIMIT_KEYS,

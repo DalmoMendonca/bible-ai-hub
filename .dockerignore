@@ -1,0 +1,16 @@
+.git
+.github
+.netlify
+node_modules
+npm-debug.log*
+*.log
+.env
+.env.*
+!.env.example
+tmp
+dist
+build
+ai/videos
+_tmp_ref_*.html
+image.png
+tmp_user_journey_outputs.json

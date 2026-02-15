@@ -47,6 +47,7 @@ const ROOT_DIR = resolveRootDir();
 const OPENAI_BASE_URL = "https://api.openai.com/v1";
 
 loadEnvFile(path.join(ROOT_DIR, ".env"));
+const APP_DATA_DIR = resolveAppDataDir();
 
 const IS_SERVERLESS_RUNTIME = detectServerlessRuntime();
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
@@ -128,9 +129,10 @@ const SESSION_TOKEN_PREFIX = "bahs1";
 const MAGIC_LINK_TOKEN_PREFIX = "bahm1";
 const platform = createPlatformStore({
   rootDir: ROOT_DIR,
+  dataDir: APP_DATA_DIR,
   trialDays: Number.isFinite(PLATFORM_TRIAL_DAYS) ? PLATFORM_TRIAL_DAYS : 14
 });
-const featureFlags = createFeatureFlagService({ rootDir: ROOT_DIR });
+const featureFlags = createFeatureFlagService({ rootDir: ROOT_DIR, dataDir: APP_DATA_DIR });
 const EVENT_TAXONOMY_PATH = path.join(ROOT_DIR, "server", "event-taxonomy.json");
 const PROMPT_OVERRIDES_PATH = resolveWritableAppDataPath("prompt-overrides.json");
 let promptOverridesState = loadPromptOverridesState();
@@ -834,9 +836,9 @@ app.get("/api/analytics/cogs", asyncHandler(async (req, res) => {
 }));
 
 app.get("/api/content/social-proof", (_req, res) => {
-  const canonicalPath = path.join(ROOT_DIR, "server", "data", "social-proof.json");
   const writablePath = resolveWritableAppDataPath("social-proof.json");
-  const payload = readJsonFile(canonicalPath, null) || readJsonFile(writablePath, {
+  const canonicalPath = path.join(ROOT_DIR, "server", "data", "social-proof.json");
+  const payload = readJsonFile(writablePath, null) || readJsonFile(canonicalPath, {
     testimonials: [],
     caseStudies: []
   });
@@ -1051,7 +1053,7 @@ app.post("/api/onboarding", asyncHandler(async (req, res) => {
 }));
 
 app.get("/api/onboarding/config", (_req, res) => {
-  const sourcePath = path.join(ROOT_DIR, "server", "data", "onboarding-config.json");
+  const sourcePath = resolveReadableAppDataPath("onboarding-config.json");
   const payload = readJsonFile(sourcePath, {
     questions: [],
     defaultWorkflow: []
@@ -1069,7 +1071,7 @@ app.post("/api/onboarding/config", asyncHandler(async (req, res) => {
     res.status(403).json({ error: "Admin access required." });
     return;
   }
-  const sourcePath = path.join(ROOT_DIR, "server", "data", "onboarding-config.json");
+  const sourcePath = resolveWritableAppDataPath("onboarding-config.json");
   const payload = req.body && typeof req.body === "object" ? req.body : {};
   fs.writeFileSync(sourcePath, `${JSON.stringify({
     questions: Array.isArray(payload.questions) ? payload.questions : [],
@@ -2148,6 +2150,7 @@ app.post("/api/ai/teaching-tools", requireOpenAIKey, requireFeatureAccess("teach
 app.post("/api/ai/research-helper", requireOpenAIKey, requireFeatureAccess("research-helper"), enforceQuota("research-helper"), asyncHandler(async (req, res) => {
   const input = req.body || {};
   const manuscript = cleanString(input.manuscript).slice(0, Math.max(2000, OPENAI_RESEARCH_HELPER_MAX_MANUSCRIPT_CHARS));
+  const targetMinutes = clampNumber(Number(input.targetMinutes || 35), 8, 90, 35);
   const revisionObjective = normalizeRevisionObjective(input.revisionObjective);
 
   if (!manuscript) {
@@ -2157,7 +2160,7 @@ app.post("/api/ai/research-helper", requireOpenAIKey, requireFeatureAccess("rese
 
   const researchPrompt = buildResearchHelperPrompt({
     sermonType: cleanString(input.sermonType, "Expository"),
-    targetMinutes: clampNumber(Number(input.targetMinutes || 35), 8, 90, 35),
+    targetMinutes,
     revisionObjective,
     diagnostics: input.diagnostics || {},
     manuscript
@@ -2195,7 +2198,7 @@ app.post("/api/ai/research-helper", requireOpenAIKey, requireFeatureAccess("rese
     try {
       const revisionPrompt = buildResearchHelperRevisionPrompt({
         sermonType: cleanString(input.sermonType, "Expository"),
-        targetMinutes: clampNumber(Number(input.targetMinutes || 35), 8, 90, 35),
+        targetMinutes,
         revisionObjective,
         diagnostics: input.diagnostics || {},
         manuscriptExcerpt: manuscript.slice(0, 12000),
@@ -2250,6 +2253,14 @@ app.post("/api/ai/research-helper", requireOpenAIKey, requireFeatureAccess("rese
     }
   }
 
+  const completeness = ensureResearchHelperCompleteness({
+    ai,
+    manuscript,
+    targetMinutes,
+    revisionObjective
+  });
+  ai = completeness.ai;
+
   const scores = cleanObjectArray(ai.scores, 6)
     .map((row) => ({
       label: cleanString(row.label),
@@ -2290,7 +2301,11 @@ app.post("/api/ai/research-helper", requireOpenAIKey, requireFeatureAccess("rese
     userId: req.auth.user.id,
     workspaceId: req.auth.workspaceId,
     source: "api",
-    properties: trendPayload.eventProperties
+    properties: {
+      ...trendPayload.eventProperties,
+      qualityFallbackApplied: completeness.applied,
+      qualityFallbackReasons: completeness.reasons
+    }
   });
   res.json({
     overallVerdict: cleanString(ai.overallVerdict),
@@ -2302,7 +2317,9 @@ app.post("/api/ai/research-helper", requireOpenAIKey, requireFeatureAccess("rese
     tightenLines: normalizedTightenLines.slice(0, 4),
     annotations: normalizedAnnotations,
     trends: trendPayload.trends,
-    revisionDelta
+    revisionDelta,
+    qualityFallbackApplied: completeness.applied,
+    qualityFallbackReasons: completeness.reasons
   });
 }));
 
@@ -2953,6 +2970,14 @@ function resolveRootDir() {
   }
 
   return __dirname;
+}
+
+function resolveAppDataDir() {
+  const configuredDir = cleanString(process.env.BIBLE_AI_DATA_DIR);
+  if (configuredDir) {
+    return path.resolve(configuredDir);
+  }
+  return path.join(ROOT_DIR, "server", "data");
 }
 
 function loadEnvFile(envPath) {
@@ -4302,6 +4327,319 @@ function normalizeResearchHelperAnnotations(rawAnnotations, context) {
   return annotations.slice(0, 16);
 }
 
+function ensureResearchHelperCompleteness({ ai, manuscript, targetMinutes, revisionObjective }) {
+  const source = ai && typeof ai === "object" ? ai : {};
+  const safeManuscript = cleanString(manuscript);
+  const safeObjective = normalizeRevisionObjective(revisionObjective);
+  const safeTargetMinutes = clampNumber(Number(targetMinutes || 35), 8, 90, 35);
+  const reasons = [];
+
+  const baseStrengths = cleanArray(source.strengths, 8);
+  const baseGaps = cleanArray(source.gaps, 9);
+  const baseScores = cleanObjectArray(source.scores, 8)
+    .map((row) => ({
+      label: cleanString(row.label),
+      score: clampNumber(Number(row.score), 0, 10, 0),
+      rationale: cleanString(row.rationale)
+    }))
+    .filter((row) => row.label);
+  const baseRevisions = normalizeResearchHelperGuidanceLines(source.revisions, {
+    objective: safeObjective,
+    max: 12,
+    type: "revision"
+  });
+  const baseTightenLines = normalizeResearchHelperGuidanceLines(source.tightenLines, {
+    objective: safeObjective,
+    max: 8,
+    type: "tighten"
+  });
+
+  const heuristics = buildResearchHelperFallbackHeuristics({
+    manuscript: safeManuscript,
+    targetMinutes: safeTargetMinutes,
+    revisionObjective: safeObjective
+  });
+
+  let strengths = mergeUniqueResearchHelperLines(baseStrengths, heuristics.strengths, 8);
+  if (strengths.length < 3) {
+    reasons.push("strengths");
+    strengths = mergeUniqueResearchHelperLines(strengths, [
+      "Shows sincere pastoral intent toward the congregation.",
+      "Contains usable sermon material that can be sharpened into a clearer movement.",
+      "Includes language that can support stronger application with tighter structure."
+    ], 8);
+  }
+
+  let gaps = mergeUniqueResearchHelperLines(baseGaps, heuristics.gaps, 9);
+  if (gaps.length < 5) {
+    reasons.push("gaps");
+    gaps = mergeUniqueResearchHelperLines(gaps, [
+      "State the central thesis earlier and repeat it at each major transition.",
+      "Increase explicit Scripture handling so interpretation and application stay tightly connected.",
+      "Reduce repetition by combining similar personal-history paragraphs into one concise section.",
+      "Build a clearer response pathway so hearers know what to do this week.",
+      "Tighten sentence structure so key lines can be heard clearly in live delivery."
+    ], 9);
+  }
+
+  let scores = baseScores.length >= 4
+    ? baseScores.slice(0, 6)
+    : buildResearchHelperFallbackScores(heuristics);
+  if (baseScores.length < 4) {
+    reasons.push("scores");
+  }
+
+  let revisions = baseRevisions;
+  if (revisions.length < 6) {
+    reasons.push("revisions");
+    revisions = normalizeResearchHelperGuidanceLines([
+      ...revisions,
+      ...buildResearchHelperFallbackRevisions(gaps, heuristics)
+    ], {
+      objective: safeObjective,
+      max: 12,
+      type: "revision"
+    });
+  }
+
+  let tightenLines = baseTightenLines;
+  if (tightenLines.length < 4) {
+    reasons.push("tightenLines");
+    tightenLines = normalizeResearchHelperGuidanceLines([
+      ...tightenLines,
+      ...buildResearchHelperFallbackTightenLines(heuristics)
+    ], {
+      objective: safeObjective,
+      max: 8,
+      type: "tighten"
+    });
+  }
+
+  let overallVerdict = cleanString(source.overallVerdict);
+  if (overallVerdict.length < 80) {
+    reasons.push("overallVerdict");
+    overallVerdict = [
+      `This sermon manuscript has a usable foundation but needs focused revision before delivery.`,
+      `Primary strengths: ${strengths.slice(0, 2).join(" ")}`,
+      `Priority gaps: ${gaps.slice(0, 2).join(" ")}`,
+      `For a ${safeTargetMinutes}-minute target, prioritize ${safeObjective.replace(/_/g, " ")} edits first, then finalize with line-level tightening.`
+    ].join(" ");
+  }
+
+  return {
+    ai: {
+      ...source,
+      overallVerdict,
+      scores: scores.slice(0, 6),
+      strengths: strengths.slice(0, 6),
+      gaps: gaps.slice(0, 7),
+      revisions: revisions.slice(0, 8),
+      tightenLines: tightenLines.slice(0, 4)
+    },
+    applied: reasons.length > 0,
+    reasons
+  };
+}
+
+function buildResearchHelperFallbackHeuristics({ manuscript, targetMinutes, revisionObjective }) {
+  const safeText = cleanString(manuscript);
+  const words = tokenize(safeText).length;
+  const sentenceAnchors = extractSentenceAnchors(safeText, 18);
+  const sentenceCount = Math.max(1, sentenceAnchors.length);
+  const avgSentenceLength = words / sentenceCount;
+  const paragraphCount = safeText
+    .split(/\n{2,}/)
+    .map((row) => cleanString(row))
+    .filter(Boolean)
+    .length;
+  const references = findScriptureReferences(safeText);
+  const questionCount = countRegexMatches(safeText, /\?/g);
+  const actionVerbCount = countRegexMatches(
+    safeText.toLowerCase(),
+    /\b(apply|obey|repent|believe|trust|serve|forgive|go|act|confess|pray)\b/g
+  );
+  const pronounCount = countRegexMatches(safeText.toLowerCase(), /\b(we|our|us|you|your)\b/g);
+  const estimatedMinutes = words / 130;
+  const durationDelta = Math.abs(estimatedMinutes - Number(targetMinutes || 35));
+  const objective = normalizeRevisionObjective(revisionObjective);
+
+  const strengths = [];
+  if (references.length >= 2) {
+    strengths.push(`Uses multiple Scripture references (${references.slice(0, 3).join(", ")}) to support the message.`);
+  }
+  if (avgSentenceLength <= 20) {
+    strengths.push("Sentence length is mostly manageable for spoken clarity.");
+  }
+  if (pronounCount >= 10) {
+    strengths.push("Uses relational language that helps listeners feel directly addressed.");
+  }
+  if (questionCount >= 3) {
+    strengths.push("Includes reflective questions that can support congregational engagement.");
+  }
+  if (actionVerbCount >= 6) {
+    strengths.push("Contains action-oriented language that can translate into practical response.");
+  }
+  if (!strengths.length) {
+    strengths.push("Has pastoral potential that can be strengthened with clearer structure and tighter wording.");
+  }
+
+  const gaps = [];
+  if (references.length < 2) {
+    gaps.push("Increase explicit Scripture grounding for each major claim.");
+  }
+  if (avgSentenceLength > 23) {
+    gaps.push("Reduce sentence complexity so key points land clearly when spoken aloud.");
+  }
+  if (paragraphCount < 4) {
+    gaps.push("Strengthen macro-structure with clearer section breaks and transitions.");
+  }
+  if (durationDelta > 5) {
+    gaps.push(`Current manuscript length appears off target by about ${Number(durationDelta.toFixed(1))} minutes at 130 WPM.`);
+  }
+  if (questionCount === 0) {
+    gaps.push("Add listener-facing questions to guide reflection and response.");
+  }
+  if (actionVerbCount < 4) {
+    gaps.push("Make applications more actionable with concrete next-step language.");
+  }
+  gaps.push(`Ensure edits stay aligned with the "${objective.replace(/_/g, " ")}" revision objective.`);
+
+  return {
+    objective,
+    manuscript: safeText,
+    words,
+    sentenceCount,
+    avgSentenceLength,
+    paragraphCount,
+    references,
+    questionCount,
+    actionVerbCount,
+    pronounCount,
+    estimatedMinutes,
+    durationDelta,
+    sentenceAnchors,
+    strengths,
+    gaps
+  };
+}
+
+function buildResearchHelperFallbackScores(heuristics) {
+  const referenceCount = Array.isArray(heuristics.references) ? heuristics.references.length : 0;
+  const avgSentenceLength = Number(heuristics.avgSentenceLength || 0);
+  const paragraphCount = Number(heuristics.paragraphCount || 0);
+  const questionCount = Number(heuristics.questionCount || 0);
+  const actionVerbCount = Number(heuristics.actionVerbCount || 0);
+  const pronounCount = Number(heuristics.pronounCount || 0);
+  const durationDelta = Number(heuristics.durationDelta || 0);
+  const estimatedMinutes = Number(heuristics.estimatedMinutes || 0);
+  const objective = cleanString(heuristics.objective, "balanced").replace(/_/g, " ");
+
+  const rows = [
+    {
+      label: "Biblical Grounding",
+      score: clampNumber(5.6 + Math.min(referenceCount, 6) * 0.6, 0, 10, 6.2),
+      rationale: referenceCount
+        ? `The manuscript names ${referenceCount} reference(s), but claims still need tighter text-to-point linkage.`
+        : "Core claims need more explicit passage-level grounding to strengthen biblical confidence."
+    },
+    {
+      label: "Theological Clarity",
+      score: clampNumber(7.6 - Math.max(0, avgSentenceLength - 20) * 0.16, 0, 10, 6.8),
+      rationale: `Average sentence length is ${Number(avgSentenceLength.toFixed(1))} words, which affects interpretive clarity in oral delivery.`
+    },
+    {
+      label: "Structure & Flow",
+      score: clampNumber(6.4 + Math.min(paragraphCount, 10) * 0.12 - (paragraphCount < 4 ? 0.9 : 0), 0, 10, 6.5),
+      rationale: `Detected ${paragraphCount} major paragraph block(s); transitions should carry the listener through a clearer movement.`
+    },
+    {
+      label: "Pastoral Tone",
+      score: clampNumber(6.7 + Math.min(pronounCount, 25) * 0.05, 0, 10, 7),
+      rationale: "Relational language is present, and warmth can increase further with concise, listener-centered framing."
+    },
+    {
+      label: "Application & Response",
+      score: clampNumber(6.1 + Math.min(actionVerbCount, 12) * 0.18 + Math.min(questionCount, 8) * 0.09, 0, 10, 6.4),
+      rationale: `Action-verb density (${actionVerbCount}) and reflective prompts (${questionCount}) suggest moderate application potential that needs sharper specificity.`
+    },
+    {
+      label: "Delivery Readiness",
+      score: clampNumber(7.2 - Math.max(0, durationDelta - 1) * 0.22, 0, 10, 6.6),
+      rationale: `Estimated runtime is ~${Number(estimatedMinutes.toFixed(1))} min; align pacing with the target and prioritize ${objective} edits.`
+    }
+  ];
+
+  return rows
+    .map((row) => ({
+      label: cleanString(row.label),
+      score: Number(Number(row.score || 0).toFixed(1)),
+      rationale: cleanString(row.rationale)
+    }))
+    .filter((row) => row.label);
+}
+
+function buildResearchHelperFallbackRevisions(gaps, heuristics) {
+  const lines = [];
+  const topGaps = cleanArray(gaps, 6);
+  for (const gap of topGaps) {
+    lines.push(`Address this gap in your next draft: ${gap}`);
+  }
+  lines.push("Rewrite your introduction to state one clear thesis sentence before any story detail.");
+  lines.push("Add one transition sentence at the end of each major section that previews the next movement.");
+  lines.push("For each key point, include one concrete application using this week, not someday language.");
+  return lines.slice(0, 10);
+}
+
+function buildResearchHelperFallbackTightenLines(heuristics) {
+  const anchors = Array.isArray(heuristics && heuristics.sentenceAnchors)
+    ? heuristics.sentenceAnchors
+    : [];
+  const rows = [];
+  for (const anchor of anchors) {
+    const sentence = cleanString(anchor && anchor.text);
+    if (!sentence) {
+      continue;
+    }
+    rows.push(`Tighten this sentence for clarity and pace: "${sentence.slice(0, 180)}"`);
+    if (rows.length >= 6) {
+      break;
+    }
+  }
+  if (!rows.length) {
+    rows.push("Tighten long sentences by keeping one main clause and one clear action verb.");
+    rows.push("Cut repeated setup language and move directly to the main claim.");
+    rows.push("Replace abstract wording with concrete pastoral application.");
+    rows.push("Shorten transition sentences to one idea each.");
+  }
+  return rows.slice(0, 6);
+}
+
+function mergeUniqueResearchHelperLines(primary, fallback, max = 8) {
+  const output = [];
+  const seen = new Set();
+  for (const line of [...cleanArray(primary, max), ...cleanArray(fallback, max)]) {
+    const key = cleanString(line).toLowerCase();
+    if (!key || seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    output.push(cleanString(line));
+    if (output.length >= max) {
+      break;
+    }
+  }
+  return output;
+}
+
+function countRegexMatches(text, pattern) {
+  const source = String(text || "");
+  if (!source) {
+    return 0;
+  }
+  const matches = source.match(pattern);
+  return matches ? matches.length : 0;
+}
+
 function enrichSermonAnalyzerReportWithCoaching(report, context) {
   const base = report && typeof report === "object" ? report : {};
   const pacing = base.pacingAnalysis && typeof base.pacingAnalysis === "object" ? base.pacingAnalysis : {};
@@ -4425,9 +4763,18 @@ function average(values) {
   return rows.reduce((sum, value) => sum + Number(value), 0) / rows.length;
 }
 
+function resolveReadableAppDataPath(fileName) {
+  const writablePath = resolveWritableAppDataPath(fileName);
+  if (fs.existsSync(writablePath)) {
+    return writablePath;
+  }
+  const safeName = cleanString(fileName);
+  return path.join(ROOT_DIR, "server", "data", safeName);
+}
+
 function resolveWritableAppDataPath(fileName) {
   const safeName = cleanString(fileName);
-  const preferredPath = path.join(ROOT_DIR, "server", "data", safeName);
+  const preferredPath = path.join(APP_DATA_DIR, safeName);
   const preferredDir = path.dirname(preferredPath);
   try {
     fs.mkdirSync(preferredDir, { recursive: true });

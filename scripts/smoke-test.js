@@ -190,6 +190,21 @@ async function run() {
     if (!researchHelper.overallVerdict) {
       throw new Error("Research helper response missing overallVerdict.");
     }
+    if (!Array.isArray(researchHelper.scores) || researchHelper.scores.length < 4) {
+      throw new Error("Research helper response missing required score coverage.");
+    }
+    if (!Array.isArray(researchHelper.strengths) || researchHelper.strengths.length < 2) {
+      throw new Error("Research helper response missing strengths.");
+    }
+    if (!Array.isArray(researchHelper.gaps) || researchHelper.gaps.length < 3) {
+      throw new Error("Research helper response missing gaps.");
+    }
+    if (!Array.isArray(researchHelper.revisions) || researchHelper.revisions.length < 4) {
+      throw new Error("Research helper response missing revisions.");
+    }
+    if (!Array.isArray(researchHelper.tightenLines) || researchHelper.tightenLines.length < 2) {
+      throw new Error("Research helper response missing tightenLines.");
+    }
 
     const sermonAnalyzer = await runStep("Sermon Analyzer", () => fetchJsonWithRetry(`${BASE_URL}/api/ai/sermon-analyzer`, {
       method: "POST",

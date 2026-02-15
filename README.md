@@ -36,6 +36,17 @@ npm start
 
 If you open files directly with `file://`, API calls will fail unless the local server is running.
 
+## Deploy to Google Cloud Run
+
+Cloud Run setup scripts are included in this repo:
+
+- `scripts/cloudrun/setup.ps1`
+- `scripts/cloudrun/deploy.ps1`
+
+Step-by-step instructions are in `docs/cloud-run-setup.md`.
+
+This is the recommended path if you need to remove Netlify function timeout constraints on long AI requests.
+
 ## Smoke testing
 
 Run an end-to-end API smoke test (all six apps):

@@ -440,6 +440,10 @@ async function run() {
       }, 4);
       assert.ok(response.overallVerdict, "research helper should return overallVerdict");
       assert.ok(Array.isArray(response.scores) && response.scores.length >= 3, "research helper should return scores");
+      assert.ok(Array.isArray(response.strengths) && response.strengths.length >= 2, "research helper should return strengths");
+      assert.ok(Array.isArray(response.gaps) && response.gaps.length >= 3, "research helper should return gaps");
+      assert.ok(Array.isArray(response.revisions) && response.revisions.length >= 4, "research helper should return revisions");
+      assert.ok(Array.isArray(response.tightenLines) && response.tightenLines.length >= 2, "research helper should return tightenLines");
     });
 
     await runStep("Sermon Analyzer API (Async)", async () => {

@@ -126,6 +126,23 @@
     `;
   }
 
+  function isIncompleteEvaluation(output) {
+    const ai = output && typeof output === "object" ? output : {};
+    const scoreCount = Array.isArray(ai.scores) ? ai.scores.length : 0;
+    const strengthsCount = Array.isArray(ai.strengths) ? ai.strengths.length : 0;
+    const gapsCount = Array.isArray(ai.gaps) ? ai.gaps.length : 0;
+    const revisionsCount = Array.isArray(ai.revisions) ? ai.revisions.length : 0;
+    const tightenCount = Array.isArray(ai.tightenLines) ? ai.tightenLines.length : 0;
+    return (
+      !cleanString(ai.overallVerdict)
+      || scoreCount < 3
+      || strengthsCount < 2
+      || gapsCount < 2
+      || revisionsCount < 2
+      || tightenCount < 1
+    );
+  }
+
   function resolveAnnotationRanges(manuscript, annotations) {
     const source = String(manuscript || "");
     const rows = Array.isArray(annotations) ? annotations : [];
@@ -525,6 +542,10 @@
         result.innerHTML = renderAnalysis(input.diagnostics, payload.output, input);
         wireAnnotationInteractions();
         setActionButtonsVisible(true);
+        if (isIncompleteEvaluation(payload.output)) {
+          showNotice("This saved evaluation came from an incomplete run. Click 'Run AI Evaluation' to regenerate a full report.", "error");
+          return;
+        }
       }
       showNotice("Loaded saved Sermon Evaluation project.", "ok");
     } catch (error) {

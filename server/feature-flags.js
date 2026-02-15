@@ -7,14 +7,17 @@ const os = require("node:os");
 
 const STAGES = new Set(["off", "internal", "partial", "ga"]);
 
-function createFeatureFlagService({ rootDir } = {}) {
+function createFeatureFlagService({ rootDir, dataDir, filePath: configuredFilePath } = {}) {
   const defaultPayload = {
     version: 1,
     updatedAt: new Date().toISOString(),
     internalDomains: ["hiredalmo.com"],
     flags: []
   };
-  const preferredPath = path.join(rootDir || process.cwd(), "server", "data", "feature-flags.json");
+  const explicitFilePath = typeof configuredFilePath === "string" ? configuredFilePath.trim() : "";
+  const explicitDataDir = typeof dataDir === "string" ? dataDir.trim() : "";
+  const preferredPath = explicitFilePath
+    || path.join(explicitDataDir || path.join(rootDir || process.cwd(), "server", "data"), "feature-flags.json");
   const filePath = resolveWritableFeatureFlagPath(preferredPath, defaultPayload);
 
   let cachedPayload = null;
