@@ -56,7 +56,8 @@ function createBibleStudyWorkflow(deps) {
     chatJson,
     cleanString,
     cleanArray,
-    cleanObjectArray
+    cleanObjectArray,
+    maxRefinementPasses = 3
   } = deps || {};
 
   if (
@@ -80,7 +81,8 @@ function createBibleStudyWorkflow(deps) {
       cleanObjectArray
     });
 
-    for (let attempt = 1; attempt <= 3; attempt += 1) {
+    const refinementPasses = Math.max(0, Math.floor(Number(maxRefinementPasses) || 0));
+    for (let attempt = 1; attempt <= refinementPasses; attempt += 1) {
       const rawQuality = evaluateStudyDraftQuality(rawCurrent, context, cleanString, cleanObjectArray);
       const normalizedQuality = evaluateNormalizedStudyQuality(finalNormalized, context, cleanString, cleanArray);
       if (!rawQuality.shouldRefine && !normalizedQuality.shouldRefine) {

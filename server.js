@@ -48,16 +48,28 @@ const OPENAI_BASE_URL = "https://api.openai.com/v1";
 
 loadEnvFile(path.join(ROOT_DIR, ".env"));
 
+const IS_SERVERLESS_RUNTIME = detectServerlessRuntime();
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
 const OPENAI_CHAT_MODEL = process.env.OPENAI_CHAT_MODEL || "gpt-4.1-mini";
 const OPENAI_EMBED_MODEL = process.env.OPENAI_EMBED_MODEL || "text-embedding-3-small";
 const OPENAI_TRANSCRIBE_MODEL = process.env.OPENAI_TRANSCRIBE_MODEL || "whisper-1";
 const OPENAI_BIBLE_STUDY_MODEL = process.env.OPENAI_BIBLE_STUDY_MODEL || "gpt-4.1-nano";
-const OPENAI_BIBLE_STUDY_MAX_TOKENS = Number(process.env.OPENAI_BIBLE_STUDY_MAX_TOKENS || 1800);
+const OPENAI_BIBLE_STUDY_MAX_TOKENS = Number(
+  process.env.OPENAI_BIBLE_STUDY_MAX_TOKENS
+  || (IS_SERVERLESS_RUNTIME ? 1200 : 1800)
+);
+const OPENAI_BIBLE_STUDY_MAX_REFINEMENTS = Number(
+  process.env.OPENAI_BIBLE_STUDY_MAX_REFINEMENTS
+  || (IS_SERVERLESS_RUNTIME ? 0 : 3)
+);
 const OPENAI_LONG_FORM_MODEL = process.env.OPENAI_LONG_FORM_MODEL || "gpt-4.1-nano";
 const OPENAI_DASHBOARD_MODEL = process.env.OPENAI_DASHBOARD_MODEL || OPENAI_CHAT_MODEL;
 const OPENAI_RETRY_ATTEMPTS = Number(process.env.OPENAI_RETRY_ATTEMPTS || 4);
 const OPENAI_RETRY_BASE_MS = Number(process.env.OPENAI_RETRY_BASE_MS || 650);
+const OPENAI_REQUEST_TIMEOUT_MS = Number(
+  process.env.OPENAI_REQUEST_TIMEOUT_MS
+  || (IS_SERVERLESS_RUNTIME ? 24000 : 60000)
+);
 const PLATFORM_TRIAL_DAYS = Number(process.env.PLATFORM_TRIAL_DAYS || 14);
 const API_RATE_LIMIT_PER_MINUTE = Number(process.env.API_RATE_LIMIT_PER_MINUTE || 180);
 const API_ALLOWED_ORIGINS = String(process.env.API_ALLOWED_ORIGINS || "")
@@ -189,6 +201,7 @@ const bibleStudyWorkflow = createBibleStudyWorkflow({
     model: OPENAI_BIBLE_STUDY_MODEL,
     maxTokens: OPENAI_BIBLE_STUDY_MAX_TOKENS
   }),
+  maxRefinementPasses: OPENAI_BIBLE_STUDY_MAX_REFINEMENTS,
   cleanString,
   cleanArray,
   cleanObjectArray
@@ -2956,6 +2969,14 @@ function loadEnvFile(envPath) {
       process.env[key] = value;
     }
   }
+}
+
+function detectServerlessRuntime() {
+  return Boolean(
+    cleanString(process.env.NETLIFY)
+    || cleanString(process.env.AWS_LAMBDA_FUNCTION_NAME)
+    || cleanString(process.env.LAMBDA_TASK_ROOT)
+  );
 }
 
 module.exports = {
@@ -6573,14 +6594,14 @@ function evaluateSermonCoachingDraft(rawDraft) {
 
 async function openAIRequest(endpoint, body) {
   return openAIRequestWithRetry(endpoint, async () => {
-    const response = await fetch(`${OPENAI_BASE_URL}${endpoint}`, {
+    const response = await fetchWithTimeout(`${OPENAI_BASE_URL}${endpoint}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${OPENAI_API_KEY}`
       },
       body: JSON.stringify(body)
-    });
+    }, resolveOpenAIRequestTimeoutMs(endpoint));
 
     return parseOpenAIResponse(response, "OpenAI request failed");
   });
@@ -6701,25 +6722,27 @@ async function openAIMultipartRequest(endpoint, formDataOrFactory) {
       ? formDataOrFactory()
       : formDataOrFactory;
 
-    const response = await fetch(`${OPENAI_BASE_URL}${endpoint}`, {
+    const response = await fetchWithTimeout(`${OPENAI_BASE_URL}${endpoint}`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${OPENAI_API_KEY}`
       },
       body: requestBody
-    });
+    }, resolveOpenAIRequestTimeoutMs(endpoint));
 
     return parseOpenAIResponse(response, "OpenAI multipart request failed");
   });
 }
 
 async function openAIRequestWithRetry(endpoint, requestFn) {
-  const maxAttempts = clampNumber(
-    Number(OPENAI_RETRY_ATTEMPTS),
-    1,
-    8,
-    4
-  );
+  const maxAttempts = IS_SERVERLESS_RUNTIME
+    ? 1
+    : clampNumber(
+      Number(OPENAI_RETRY_ATTEMPTS),
+      1,
+      8,
+      4
+    );
   const baseDelayMs = clampNumber(
     Number(OPENAI_RETRY_BASE_MS),
     100,
@@ -6745,6 +6768,47 @@ async function openAIRequestWithRetry(endpoint, requestFn) {
   }
 
   throw lastError || new Error(`OpenAI request failed for ${endpoint}`);
+}
+
+function resolveOpenAIRequestTimeoutMs(endpoint) {
+  const configured = clampNumber(
+    Number(OPENAI_REQUEST_TIMEOUT_MS),
+    1000,
+    120000,
+    IS_SERVERLESS_RUNTIME ? 24000 : 60000
+  );
+  const normalizedEndpoint = cleanString(endpoint).toLowerCase();
+  if (IS_SERVERLESS_RUNTIME && normalizedEndpoint === "/audio/transcriptions") {
+    return Math.min(26000, configured);
+  }
+  return configured;
+}
+
+async function fetchWithTimeout(url, options, timeoutMs) {
+  const safeTimeoutMs = clampNumber(Number(timeoutMs), 500, 120000, 30000);
+  const controller = new AbortController();
+  const timer = setTimeout(() => {
+    controller.abort();
+  }, safeTimeoutMs);
+
+  try {
+    const requestOptions = options && typeof options === "object" ? { ...options } : {};
+    return await fetch(url, {
+      ...requestOptions,
+      signal: controller.signal
+    });
+  } catch (error) {
+    const code = cleanString(error && error.code).toUpperCase();
+    if (error && (error.name === "AbortError" || code === "ABORT_ERR")) {
+      const timeoutError = new Error(`OpenAI request timed out after ${safeTimeoutMs} ms.`);
+      timeoutError.status = 504;
+      timeoutError.code = "ETIMEDOUT";
+      throw timeoutError;
+    }
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 async function parseOpenAIResponse(response, fallbackPrefix) {
@@ -6782,6 +6846,14 @@ function normalizeOpenAINetworkError(error, endpoint) {
   );
   if (code && !error.code) {
     error.code = code;
+  }
+
+  const normalizedCode = cleanString(
+    error.code
+    || (error && error.cause && error.cause.code)
+  ).toUpperCase();
+  if (!Number.isFinite(Number(error.status)) && (normalizedCode === "ETIMEDOUT" || normalizedCode === "ABORT_ERR")) {
+    error.status = 504;
   }
 
   if (!cleanString(error.message)) {
