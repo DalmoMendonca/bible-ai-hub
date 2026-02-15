@@ -380,7 +380,7 @@ app.post("/api/auth/magic-link/verify", asyncHandler(async (req, res) => {
   res.json(result);
 }));
 
-app.post("/api/auth/guest", asyncHandler(async (_req, res) => {
+app.post("/api/auth/guest", asyncHandler(async (req, res) => {
   let result = null;
   let attempts = 0;
   while (!result && attempts < 5) {

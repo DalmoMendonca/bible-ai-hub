@@ -1191,6 +1191,137 @@
     return routes[cleanString(tool)] || "/";
   }
 
+  const MOBILE_DOCK_BASE_ITEMS = [
+    {
+      slug: "bible-study",
+      label: "Bible",
+      iconPath: "M3.75 6.75a2.25 2.25 0 0 1 2.25-2.25h5.25v15H6a2.25 2.25 0 0 0-2.25 2.25V6.75Zm7.5-2.25H18a2.25 2.25 0 0 1 2.25 2.25v15A2.25 2.25 0 0 0 18 19.5h-6.75v-15Z"
+    },
+    {
+      slug: "sermon-preparation",
+      label: "Prep",
+      iconPath: "M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z"
+    },
+    {
+      slug: "research-helper",
+      label: "Review",
+      iconPath: "M9 12h6m-6 3.75h4.5M6.75 3.75h10.5a2.25 2.25 0 0 1 2.25 2.25v12a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 18V6a2.25 2.25 0 0 1 2.25-2.25Z"
+    },
+    {
+      slug: "sermon-analyzer",
+      label: "Analyze",
+      iconPath: "M4.5 18.75v-9m5.25 9V5.25m5.25 13.5v-6m5.25 6V9.75"
+    },
+    {
+      slug: "video-search",
+      label: "Videos",
+      iconPath: "m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9A2.25 2.25 0 0 0 4.5 18.75Z"
+    }
+  ];
+
+  function currentToolSlugFromPathname() {
+    const pathname = cleanString(window.location && window.location.pathname, "/");
+    const match = pathname.match(/^\/ai\/apps\/([^/]+)/);
+    return cleanString(match && match[1]).toLowerCase();
+  }
+
+  function applyBodyPageClasses() {
+    const body = document.body;
+    if (!body) {
+      return;
+    }
+    const pathname = cleanString(window.location && window.location.pathname, "/").toLowerCase();
+    body.classList.add("bah-page");
+    if (pathname === "/" || pathname === "/index.html") {
+      body.classList.add("page-home");
+      return;
+    }
+    if (pathname.startsWith("/ai/apps/")) {
+      body.classList.add("page-tool");
+      const slug = currentToolSlugFromPathname();
+      if (slug) {
+        body.classList.add(`tool-${slug.replace(/[^a-z0-9-]/g, "")}`);
+      }
+      return;
+    }
+    if (pathname.startsWith("/account")) {
+      body.classList.add("page-account");
+      return;
+    }
+    if (pathname.startsWith("/how-it-works")) {
+      body.classList.add("page-how-it-works");
+    }
+  }
+
+  function mobileDockIcon(pathData) {
+    return `
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="${escapeHtml(cleanString(pathData))}" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    `;
+  }
+
+  function mobileDockItems(currentSlug) {
+    const items = MOBILE_DOCK_BASE_ITEMS.map((item) => ({
+      ...item,
+      href: routeForTool(item.slug)
+    }));
+    if (!currentSlug || items.some((item) => item.slug === currentSlug)) {
+      return items;
+    }
+    const currentLabel = humanizeTool(currentSlug)
+      .split(/\s+/)
+      .slice(0, 1)
+      .join("") || "Tool";
+    items[2] = {
+      slug: currentSlug,
+      label: currentLabel,
+      href: routeForTool(currentSlug),
+      iconPath: "M12 4.5v15m7.5-7.5h-15"
+    };
+    return items;
+  }
+
+  function ensureMobileAppDock() {
+    const pathname = cleanString(window.location && window.location.pathname, "");
+    if (!pathname.startsWith("/ai/apps/")) {
+      return null;
+    }
+    const existing = document.querySelector("[data-bah-mobile-dock]");
+    if (existing) {
+      return existing;
+    }
+    const wrap = document.querySelector(".site-wrap");
+    if (!wrap) {
+      return null;
+    }
+    const currentSlug = currentToolSlugFromPathname();
+    const items = mobileDockItems(currentSlug);
+    const nav = document.createElement("nav");
+    nav.className = "bah-mobile-dock";
+    nav.setAttribute("data-bah-mobile-dock", "1");
+    nav.setAttribute("aria-label", "App navigation");
+    nav.innerHTML = `
+      <div class="bah-mobile-dock-row">
+        ${items.map((item, index) => {
+          const active = item.slug === currentSlug;
+          return `
+            <a
+              class="bah-mobile-dock-link${active ? " is-active" : ""}${index === 2 ? " is-center" : ""}"
+              href="${escapeHtml(cleanString(item.href, "/"))}"
+              ${active ? 'aria-current="page"' : ""}
+            >
+              <span class="bah-mobile-dock-icon">${mobileDockIcon(item.iconPath)}</span>
+              <span class="bah-mobile-dock-label">${escapeHtml(cleanString(item.label))}</span>
+            </a>
+          `;
+        }).join("")}
+      </div>
+    `;
+    wrap.appendChild(nav);
+    return nav;
+  }
+
   function humanizeTool(tool) {
     const labels = {
       "bible-study": "Bible Study",
@@ -2105,6 +2236,7 @@
       });
     }
 
+    ensureMobileAppDock();
     enforceIconSizing();
   }
 
@@ -2163,6 +2295,7 @@
     }
   }
 
+  applyBodyPageClasses();
   readStoredAuth();
   enforceIconSizing();
   window.addEventListener("load", () => {

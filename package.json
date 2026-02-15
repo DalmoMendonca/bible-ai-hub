@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "test:all": "node scripts/crossfunctional-test.js && npm run smoke && npm run smoke:platform && npm run test:user-feedback",
+    "test:all": "npm run test:auth && node scripts/crossfunctional-test.js && npm run smoke && npm run smoke:platform && npm run test:user-feedback",
+    "test:auth": "node scripts/auth-regression.js",
     "test:syntax": "node scripts/syntax-check.js",
     "test:seo": "node scripts/seo-structured-data-check.js && node scripts/social-meta-snapshot.js",
     "test:seo:update-snapshot": "node scripts/social-meta-snapshot.js --update",
