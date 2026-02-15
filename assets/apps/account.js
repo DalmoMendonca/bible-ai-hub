@@ -57,6 +57,32 @@
     return routes[cleanString(tool)] || "/";
   }
 
+  function humanizeTool(tool) {
+    const labels = {
+      "bible-study": "Bible Study",
+      "sermon-preparation": "Sermon Preparation",
+      "teaching-tools": "Teaching Tools",
+      "research-helper": "Sermon Evaluation",
+      "sermon-analyzer": "Sermon Analyzer",
+      "video-search": "Video Search"
+    };
+    const key = cleanString(tool);
+    return labels[key] || key || "Project";
+  }
+
+  function normalizeToolSlug(tool) {
+    return cleanString(tool).toLowerCase().replace(/[^a-z0-9-]/g, "");
+  }
+
+  function toolToneClass(tool) {
+    const slug = normalizeToolSlug(tool);
+    return slug ? `tool-tone--${slug}` : "";
+  }
+
+  function renderToolBadge(tool) {
+    return `<span class="bah-tool-badge ${escapeHtml(toolToneClass(tool))}">${escapeHtml(humanizeTool(tool))}</span>`;
+  }
+
   function formatDate(value) {
     const ts = Date.parse(cleanString(value));
     if (!Number.isFinite(ts)) {
@@ -235,10 +261,10 @@
     }
 
     projectsMount.innerHTML = rows.map((row) => `
-      <article class="bah-project-item">
+      <article class="bah-project-item ${escapeHtml(toolToneClass(row.tool))}">
         <div class="bah-project-main">
           <strong>${escapeHtml(cleanString(row.title, "Untitled Project"))}</strong>
-          <span>${escapeHtml(cleanString(row.tool))} | Updated ${escapeHtml(formatDate(row.updatedAt))}</span>
+          <span>${renderToolBadge(row.tool)} <span class="bah-project-meta-sep">|</span> Updated ${escapeHtml(formatDate(row.updatedAt))}</span>
         </div>
         <div class="bah-project-actions">
           <button type="button" class="btn secondary" data-account-project-open="${escapeHtml(cleanString(row.id))}" data-account-project-tool="${escapeHtml(cleanString(row.tool))}">Open</button>

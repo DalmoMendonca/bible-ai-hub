@@ -1334,6 +1334,21 @@
     return labels[cleanString(tool)] || cleanString(tool, "Project");
   }
 
+  function normalizeToolSlug(tool) {
+    return cleanString(tool).toLowerCase().replace(/[^a-z0-9-]/g, "");
+  }
+
+  function toolToneClass(tool) {
+    const slug = normalizeToolSlug(tool);
+    return slug ? `tool-tone--${slug}` : "";
+  }
+
+  function renderToolBadge(tool) {
+    const label = humanizeTool(tool);
+    const toneClass = toolToneClass(tool);
+    return `<span class="bah-tool-badge ${escapeHtml(toneClass)}">${escapeHtml(label)}</span>`;
+  }
+
   function buildProjectsDialog() {
     const existing = document.querySelector("[data-bah-project-modal]");
     if (existing) {
@@ -1402,11 +1417,12 @@
     listMount.innerHTML = rows.map((row) => {
       const exportsCount = Array.isArray(row.exports) ? row.exports.length : 0;
       const versionsCount = Array.isArray(row.versions) ? row.versions.length : 0;
+      const toolClass = toolToneClass(row.tool);
       return `
-        <article class="bah-project-item">
+        <article class="bah-project-item ${escapeHtml(toolClass)}">
           <div class="bah-project-main">
             <strong>${escapeHtml(cleanString(row.title, "Untitled Project"))}</strong>
-            <span>${escapeHtml(humanizeTool(row.tool))} | Updated ${escapeHtml(formatProjectDate(row.updatedAt))}</span>
+            <span>${renderToolBadge(row.tool)} <span class="bah-project-meta-sep">|</span> Updated ${escapeHtml(formatProjectDate(row.updatedAt))}</span>
             <span>${versionsCount} version${versionsCount === 1 ? "" : "s"} | ${exportsCount} export${exportsCount === 1 ? "" : "s"}</span>
           </div>
           <div class="bah-project-actions">

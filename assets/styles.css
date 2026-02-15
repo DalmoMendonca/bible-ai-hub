@@ -2624,9 +2624,16 @@ body.bah-page::after {
 }
 
 .site-header {
-  border-bottom: 0;
-  background: transparent;
-  backdrop-filter: none;
+  border-bottom: 1px solid rgba(198, 212, 228, 0.9);
+  background: linear-gradient(180deg, rgba(243, 248, 253, 0.97), rgba(236, 243, 251, 0.93));
+  backdrop-filter: blur(10px) saturate(1.04);
+  box-shadow: 0 8px 18px rgba(36, 52, 74, 0.1);
+}
+
+html[data-theme="dark"] .site-header {
+  border-bottom-color: rgba(74, 98, 124, 0.9);
+  background: linear-gradient(180deg, rgba(19, 32, 47, 0.96), rgba(17, 29, 43, 0.92));
+  box-shadow: 0 10px 22px rgba(6, 10, 15, 0.4);
 }
 
 .header-inner {
@@ -2706,20 +2713,17 @@ body.bah-page::after {
 }
 
 .main {
-  padding-top: 0.65rem;
+  padding-top: 1rem;
 }
 
-.page-home .container {
+.page-home .container,
+.page-tool .container {
   max-width: 1140px;
 }
 
 .page-account .container,
 .page-how-it-works .container {
   max-width: 980px;
-}
-
-.page-tool .container {
-  max-width: 640px;
 }
 
 .panel {
@@ -3140,4 +3144,190 @@ body.bah-page::after {
   .bah-mobile-dock-label {
     font-size: 0.62rem;
   }
+}
+
+/* Tool color system */
+.page-tool {
+  --tool-tone: #5b96cf;
+  --tool-tone-mid: #4a86c1;
+  --tool-tone-strong: #356fa8;
+  --tool-tone-soft: #e9f2fc;
+  --tool-tone-link: #2f74b0;
+}
+
+body.tool-bible-study,
+.tool-tone--bible-study,
+.page-home .tool-card.tool-card-bible-study {
+  --tool-tone: #5d9acf;
+  --tool-tone-mid: #4e89c1;
+  --tool-tone-strong: #3670a9;
+  --tool-tone-soft: #e8f2fc;
+  --tool-tone-link: #2e73af;
+}
+
+body.tool-sermon-preparation,
+.tool-tone--sermon-preparation,
+.page-home .tool-card.tool-card-sermon-preparation {
+  --tool-tone: #6b91d2;
+  --tool-tone-mid: #5b80c3;
+  --tool-tone-strong: #4468ac;
+  --tool-tone-soft: #eaf0fc;
+  --tool-tone-link: #3d63a2;
+}
+
+body.tool-teaching-tools,
+.tool-tone--teaching-tools,
+.page-home .tool-card.tool-card-teaching-tools {
+  --tool-tone: #72a58a;
+  --tool-tone-mid: #61957b;
+  --tool-tone-strong: #4a7963;
+  --tool-tone-soft: #ebf6ef;
+  --tool-tone-link: #3f6f58;
+}
+
+body.tool-research-helper,
+.tool-tone--research-helper,
+.page-home .tool-card.tool-card-research-helper {
+  --tool-tone: #767fbe;
+  --tool-tone-mid: #666fae;
+  --tool-tone-strong: #4f5895;
+  --tool-tone-soft: #eceefd;
+  --tool-tone-link: #4b5490;
+}
+
+body.tool-sermon-analyzer,
+.tool-tone--sermon-analyzer,
+.page-home .tool-card.tool-card-sermon-analyzer {
+  --tool-tone: #8390a3;
+  --tool-tone-mid: #748296;
+  --tool-tone-strong: #5f6d82;
+  --tool-tone-soft: #eef1f6;
+  --tool-tone-link: #54627a;
+}
+
+body.tool-video-search,
+.tool-tone--video-search,
+.page-home .tool-card.tool-card-video-search {
+  --tool-tone: #67a0bc;
+  --tool-tone-mid: #558fae;
+  --tool-tone-strong: #3f7392;
+  --tool-tone-soft: #e8f4fb;
+  --tool-tone-link: #3b6d8d;
+}
+
+.page-tool .hero {
+  background:
+    radial-gradient(140% 190% at 6% -35%, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0) 60%),
+    linear-gradient(120deg, var(--tool-tone) 0%, var(--tool-tone-mid) 45%, var(--tool-tone-strong) 100%);
+}
+
+.page-tool .btn.primary {
+  background: linear-gradient(180deg, var(--tool-tone), var(--tool-tone-strong));
+}
+
+.page-tool .btn.primary:hover:not(:disabled) {
+  background: linear-gradient(180deg, var(--tool-tone-mid), var(--tool-tone-strong));
+}
+
+.page-tool .kicker,
+.page-tool .clear-step strong,
+.page-tool .study-method-step strong {
+  color: var(--tool-tone-link);
+}
+
+.page-tool .tag {
+  border-color: color-mix(in srgb, var(--tool-tone) 30%, #d6e2ef);
+  background: var(--tool-tone-soft);
+  color: var(--tool-tone-link);
+}
+
+.page-tool .progress-fill {
+  background: linear-gradient(90deg, var(--tool-tone), var(--tool-tone-strong));
+}
+
+.page-home .tool-card .muted {
+  min-height: 1.3rem;
+}
+
+.page-home .tool-card.tool-card-bible-study::before {
+  background:
+    linear-gradient(160deg, rgba(58, 95, 140, 0.34), rgba(121, 161, 195, 0.2)),
+    radial-gradient(60% 90% at 76% 20%, rgba(255, 209, 128, 0.22), rgba(255, 209, 128, 0) 70%),
+    linear-gradient(180deg, #93afd0 0%, #6f94ba 55%, #4f6f92 100%);
+}
+
+.page-home .tool-card.tool-card-sermon-preparation::before {
+  background:
+    linear-gradient(160deg, rgba(70, 90, 138, 0.32), rgba(129, 141, 189, 0.2)),
+    radial-gradient(72% 96% at 30% 10%, rgba(255, 224, 177, 0.24), rgba(255, 224, 177, 0) 72%),
+    linear-gradient(180deg, #90a3cc 0%, #6d80af 60%, #4d6088 100%);
+}
+
+.page-home .tool-card.tool-card-teaching-tools::before {
+  background:
+    linear-gradient(160deg, rgba(74, 109, 88, 0.24), rgba(125, 157, 126, 0.16)),
+    radial-gradient(70% 100% at 72% 18%, rgba(252, 220, 141, 0.2), rgba(252, 220, 141, 0) 70%),
+    linear-gradient(180deg, #8da798 0%, #6d8878 58%, #4f6859 100%);
+}
+
+.page-home .tool-card.tool-card-research-helper::before {
+  background:
+    linear-gradient(160deg, rgba(66, 74, 118, 0.3), rgba(113, 121, 164, 0.2)),
+    radial-gradient(70% 100% at 64% 18%, rgba(255, 235, 179, 0.2), rgba(255, 235, 179, 0) 72%),
+    linear-gradient(180deg, #7f8cb2 0%, #606f97 55%, #4a567a 100%);
+}
+
+.page-home .tool-card.tool-card-sermon-analyzer::before {
+  background:
+    linear-gradient(160deg, rgba(87, 95, 110, 0.3), rgba(142, 150, 162, 0.2)),
+    radial-gradient(66% 96% at 68% 18%, rgba(255, 225, 182, 0.22), rgba(255, 225, 182, 0) 72%),
+    linear-gradient(180deg, #9da8b6 0%, #7f8b9a 56%, #5f6a78 100%);
+}
+
+.page-home .tool-card.tool-card-video-search::before {
+  background:
+    linear-gradient(160deg, rgba(63, 102, 117, 0.32), rgba(106, 143, 161, 0.2)),
+    radial-gradient(62% 94% at 70% 16%, rgba(255, 220, 170, 0.24), rgba(255, 220, 170, 0) 72%),
+    linear-gradient(180deg, #83a8b8 0%, #5f879d 58%, #446577 100%);
+}
+
+.page-home .tool-card.tool-card-bible-study .link,
+.page-home .tool-card.tool-card-sermon-preparation .link,
+.page-home .tool-card.tool-card-teaching-tools .link,
+.page-home .tool-card.tool-card-research-helper .link,
+.page-home .tool-card.tool-card-sermon-analyzer .link,
+.page-home .tool-card.tool-card-video-search .link {
+  color: var(--tool-tone-link);
+}
+
+.bah-project-item {
+  border-left: 4px solid transparent;
+}
+
+.bah-project-item.tool-tone--bible-study,
+.bah-project-item.tool-tone--sermon-preparation,
+.bah-project-item.tool-tone--teaching-tools,
+.bah-project-item.tool-tone--research-helper,
+.bah-project-item.tool-tone--sermon-analyzer,
+.bah-project-item.tool-tone--video-search {
+  border-left-color: var(--tool-tone);
+}
+
+.bah-tool-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--tool-tone) 35%, #d7e2ef);
+  background: var(--tool-tone-soft);
+  color: var(--tool-tone-link);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.18rem 0.48rem;
+  vertical-align: middle;
+}
+
+.bah-project-meta-sep {
+  color: #7f91a7;
+  margin: 0 0.25rem;
 }
