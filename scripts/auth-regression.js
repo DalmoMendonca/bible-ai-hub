@@ -189,6 +189,107 @@ async function run() {
       assert.notEqual(project.workspaceId, staleWorkspaceId, "Project save should not honor inaccessible workspace IDs.");
     });
 
+    await runStep("Viewer role can save and update own project", async () => {
+      const workspaceId = String(adminAuth && adminAuth.workspaceId || "").trim();
+      assert.ok(workspaceId, "Admin workspace is required.");
+
+      const viewerEmail = `viewer-${Date.now()}@example.com`;
+      const viewerAuthResponse = await fetchJson(`${BASE_URL}/api/auth/google`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: viewerEmail,
+          name: "Viewer Regression",
+          sub: `viewer-regression-${Date.now()}`
+        })
+      });
+      if (!viewerAuthResponse.response.ok) {
+        throw new Error(`Viewer bootstrap failed: ${viewerAuthResponse.response.status} ${viewerAuthResponse.text}`);
+      }
+      const viewerAuth = viewerAuthResponse.data || {};
+      assert.ok(viewerAuth.sessionToken, "Viewer auth should return a session token.");
+
+      const seatResponse = await fetchJson(`${BASE_URL}/api/team/seats`, {
+        method: "POST",
+        headers: {
+          ...buildAuthHeaders(adminAuth),
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          workspaceId,
+          seats: 2
+        })
+      });
+      if (!seatResponse.response.ok) {
+        throw new Error(`Seat update failed: ${seatResponse.response.status} ${seatResponse.text}`);
+      }
+
+      const inviteResponse = await fetchJson(`${BASE_URL}/api/workspaces/${encodeURIComponent(workspaceId)}/members`, {
+        method: "POST",
+        headers: {
+          ...buildAuthHeaders(adminAuth),
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email: viewerEmail,
+          role: "viewer"
+        })
+      });
+      if (inviteResponse.response.status !== 201) {
+        throw new Error(`Add member failed: ${inviteResponse.response.status} ${inviteResponse.text}`);
+      }
+
+      const activeWorkspaceResponse = await fetchJson(`${BASE_URL}/api/workspaces/active`, {
+        method: "POST",
+        headers: {
+          ...buildAuthHeaders(viewerAuth),
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          workspaceId
+        })
+      });
+      if (!activeWorkspaceResponse.response.ok) {
+        throw new Error(`Set active workspace failed: ${activeWorkspaceResponse.response.status} ${activeWorkspaceResponse.text}`);
+      }
+
+      const createResponse = await fetchJson(`${BASE_URL}/api/projects`, {
+        method: "POST",
+        headers: {
+          ...buildAuthHeaders(viewerAuth),
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          workspaceId,
+          tool: "teaching-tools",
+          title: "Viewer Owned Project",
+          payload: { generated: true }
+        })
+      });
+      if (createResponse.response.status !== 201) {
+        throw new Error(`Viewer project create failed: ${createResponse.response.status} ${createResponse.text}`);
+      }
+      const project = createResponse.data && createResponse.data.project ? createResponse.data.project : null;
+      assert.ok(project && project.id, "Viewer-owned project should include an id.");
+      const projectId = String(project && project.id || "").trim();
+
+      const updateResponse = await fetchJson(`${BASE_URL}/api/projects/${encodeURIComponent(projectId)}`, {
+        method: "PATCH",
+        headers: {
+          ...buildAuthHeaders(viewerAuth),
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          workspaceId,
+          title: "Viewer Owned Project Updated",
+          payload: { generated: true, revised: true }
+        })
+      });
+      if (!updateResponse.response.ok) {
+        throw new Error(`Viewer project update failed: ${updateResponse.response.status} ${updateResponse.text}`);
+      }
+    });
+
     await runStep("How-it-works marks admin as editable", async () => {
       const { response, data } = await fetchJson(`${BASE_URL}/api/how-it-works`, {
         headers: buildAuthHeaders(adminAuth)

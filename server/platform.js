@@ -1514,7 +1514,7 @@ function createPlatformStore({ rootDir, trialDays = TRIAL_DAYS_DEFAULT } = {}) {
   }
 
   function saveProject({ workspaceId, userId, tool, title, payload, sourceProjectId }) {
-    requireWorkspaceRole(userId, workspaceId, ["owner", "editor"]);
+    requireWorkspaceRole(userId, workspaceId, ["owner", "editor", "viewer"]);
     const now = nowIso();
     const project = {
       id: createId("prj"),
@@ -1542,10 +1542,13 @@ function createPlatformStore({ rootDir, trialDays = TRIAL_DAYS_DEFAULT } = {}) {
   }
 
   function updateProject({ workspaceId, userId, projectId, title, payload }) {
-    requireWorkspaceRole(userId, workspaceId, ["owner", "editor"]);
+    const role = requireWorkspaceRole(userId, workspaceId, ["owner", "editor", "viewer"]);
     const project = state.projects.find((row) => row.id === projectId && row.workspaceId === workspaceId) || null;
     if (!project) {
       throw createError(404, "Project not found.");
+    }
+    if (role === "viewer" && cleanString(project.createdBy) !== cleanString(userId)) {
+      throw createError(403, "You do not have permission for this project.");
     }
     if (cleanString(title)) {
       project.title = cleanString(title);
@@ -1609,7 +1612,11 @@ function createPlatformStore({ rootDir, trialDays = TRIAL_DAYS_DEFAULT } = {}) {
   }
 
   function deleteProject({ workspaceId, userId, projectId }) {
-    requireWorkspaceRole(userId, workspaceId, ["owner", "editor"]);
+    const role = requireWorkspaceRole(userId, workspaceId, ["owner", "editor", "viewer"]);
+    const target = state.projects.find((row) => row.workspaceId === workspaceId && row.id === projectId) || null;
+    if (target && role === "viewer" && cleanString(target.createdBy) !== cleanString(userId)) {
+      throw createError(403, "You do not have permission for this project.");
+    }
     const before = state.projects.length;
     state.projects = state.projects.filter((row) => !(row.workspaceId === workspaceId && row.id === projectId));
     persist();
