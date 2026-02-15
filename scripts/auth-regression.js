@@ -165,6 +165,30 @@ async function run() {
       assert.ok(data.activeWorkspaceId, "Session should resolve an accessible workspace.");
     });
 
+    await runStep("Project saves ignore stale workspace IDs from payload", async () => {
+      const staleWorkspaceId = "ws_stale_nonmember";
+      const { response, data, text } = await fetchJson(`${BASE_URL}/api/projects`, {
+        method: "POST",
+        headers: {
+          ...buildAuthHeaders(adminAuth),
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          workspaceId: staleWorkspaceId,
+          tool: "sermon-preparation",
+          title: "Workspace Fallback Regression",
+          payload: { ok: true }
+        })
+      });
+      if (response.status !== 201) {
+        throw new Error(`Expected 201, got ${response.status}. Body: ${text}`);
+      }
+      const project = data && data.project ? data.project : null;
+      assert.ok(project && project.id, "Project response should include an id.");
+      assert.ok(project && project.workspaceId, "Project response should include workspaceId.");
+      assert.notEqual(project.workspaceId, staleWorkspaceId, "Project save should not honor inaccessible workspace IDs.");
+    });
+
     await runStep("How-it-works marks admin as editable", async () => {
       const { response, data } = await fetchJson(`${BASE_URL}/api/how-it-works`, {
         headers: buildAuthHeaders(adminAuth)

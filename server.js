@@ -650,7 +650,7 @@ app.post("/api/billing/checkout", asyncHandler(async (req, res) => {
     return;
   }
   const input = req.body || {};
-  const workspaceId = cleanString(input.workspaceId || req.auth.workspaceId);
+  const workspaceId = resolveWorkspaceIdForRequest(req, input.workspaceId);
   const planId = cleanString(input.planId);
   const seats = clampNumber(Number(input.seats || 1), 1, 500, 1);
   const checkout = platform.createCheckout(req.auth.user.id, workspaceId, planId, seats);
@@ -668,7 +668,7 @@ app.post("/api/billing/portal", asyncHandler(async (req, res) => {
   if (res.headersSent) {
     return;
   }
-  const workspaceId = cleanString((req.body || {}).workspaceId || req.auth.workspaceId);
+  const workspaceId = resolveWorkspaceIdForRequest(req, (req.body || {}).workspaceId);
   const portal = platform.openBillingPortal(req.auth.user.id, workspaceId);
   res.json(portal);
 }));
@@ -692,7 +692,7 @@ app.get("/api/entitlements", asyncHandler(async (req, res) => {
   if (res.headersSent) {
     return;
   }
-  const workspaceId = cleanString(req.query.workspaceId || req.auth.workspaceId);
+  const workspaceId = resolveWorkspaceIdForRequest(req, req.query.workspaceId);
   const entitlements = platform.getWorkspaceEntitlements(workspaceId);
   res.json(entitlements);
 }));
@@ -702,7 +702,7 @@ app.get("/api/entitlements/audit", asyncHandler(async (req, res) => {
   if (res.headersSent) {
     return;
   }
-  const workspaceId = cleanString(req.query.workspaceId || req.auth.workspaceId);
+  const workspaceId = resolveWorkspaceIdForRequest(req, req.query.workspaceId);
   platform.requireWorkspaceRole(req.auth.user.id, workspaceId, ["owner", "editor", "viewer"]);
   res.json({
     workspaceId,
@@ -724,7 +724,7 @@ app.get("/api/usage/summary", asyncHandler(async (req, res) => {
   if (res.headersSent) {
     return;
   }
-  const workspaceId = cleanString(req.query.workspaceId || req.auth.workspaceId);
+  const workspaceId = resolveWorkspaceIdForRequest(req, req.query.workspaceId);
   platform.requireWorkspaceRole(req.auth.user.id, workspaceId, ["owner", "editor", "viewer"]);
   res.json(platform.usageSummary(workspaceId));
 }));
@@ -734,7 +734,7 @@ app.get("/api/usage/forecast", asyncHandler(async (req, res) => {
   if (res.headersSent) {
     return;
   }
-  const workspaceId = cleanString(req.query.workspaceId || req.auth.workspaceId);
+  const workspaceId = resolveWorkspaceIdForRequest(req, req.query.workspaceId);
   platform.requireWorkspaceRole(req.auth.user.id, workspaceId, ["owner", "editor", "viewer"]);
   res.json(platform.usageForecast(workspaceId));
 }));
@@ -744,7 +744,7 @@ app.get("/api/usage/export", asyncHandler(async (req, res) => {
   if (res.headersSent) {
     return;
   }
-  const workspaceId = cleanString(req.query.workspaceId || req.auth.workspaceId);
+  const workspaceId = resolveWorkspaceIdForRequest(req, req.query.workspaceId);
   platform.requireWorkspaceRole(req.auth.user.id, workspaceId, ["owner", "editor", "viewer"]);
   const rows = platform.getUsageForWorkspace(workspaceId);
   const header = ["id", "requestId", "workspaceId", "userId", "feature", "units", "unitType", "model", "estimatedCostUsd", "createdAt"];
@@ -761,7 +761,7 @@ app.get("/api/activity", asyncHandler(async (req, res) => {
   if (res.headersSent) {
     return;
   }
-  const workspaceId = cleanString(req.query.workspaceId || req.auth.workspaceId);
+  const workspaceId = resolveWorkspaceIdForRequest(req, req.query.workspaceId);
   const limit = clampNumber(Number(req.query.limit || 60), 1, 300, 60);
   const activity = platform.getWorkspaceActivity({
     workspaceId,
@@ -777,7 +777,7 @@ app.get("/api/activity", asyncHandler(async (req, res) => {
 app.post("/api/events", asyncHandler(async (req, res) => {
   const input = req.body || {};
   validateTrackedEventName(cleanString(input.name));
-  const workspaceId = cleanString(input.workspaceId || (req.auth && req.auth.workspaceId));
+  const workspaceId = resolveWorkspaceIdForRequest(req, input.workspaceId);
   const userId = req.auth && req.auth.user ? req.auth.user.id : "";
   const event = platform.trackEvent({
     name: cleanString(input.name),
@@ -1171,7 +1171,7 @@ app.get("/api/projects", asyncHandler(async (req, res) => {
   if (res.headersSent) {
     return;
   }
-  const workspaceId = cleanString(req.query.workspaceId || req.auth.workspaceId);
+  const workspaceId = resolveWorkspaceIdForRequest(req, req.query.workspaceId);
   const rows = platform.listProjects({
     workspaceId,
     userId: req.auth.user.id,
@@ -1248,7 +1248,7 @@ app.get("/api/projects/:projectId", asyncHandler(async (req, res) => {
   if (res.headersSent) {
     return;
   }
-  const workspaceId = cleanString(req.query.workspaceId || req.auth.workspaceId);
+  const workspaceId = resolveWorkspaceIdForRequest(req, req.query.workspaceId);
   const project = platform.getProject({
     workspaceId,
     userId: req.auth.user.id,
@@ -1267,7 +1267,7 @@ app.post("/api/projects", asyncHandler(async (req, res) => {
     return;
   }
   const input = req.body || {};
-  const workspaceId = cleanString(input.workspaceId || req.auth.workspaceId);
+  const workspaceId = resolveWorkspaceIdForRequest(req, input.workspaceId);
   const project = platform.saveProject({
     workspaceId,
     userId: req.auth.user.id,
@@ -1285,7 +1285,7 @@ app.post("/api/projects/:projectId/exports", asyncHandler(async (req, res) => {
     return;
   }
   const input = req.body || {};
-  const workspaceId = cleanString(input.workspaceId || req.auth.workspaceId);
+  const workspaceId = resolveWorkspaceIdForRequest(req, input.workspaceId);
   const entry = platform.appendProjectExport({
     workspaceId,
     userId: req.auth.user.id,
@@ -1303,7 +1303,7 @@ app.patch("/api/projects/:projectId", asyncHandler(async (req, res) => {
   }
   const input = req.body || {};
   const project = platform.updateProject({
-    workspaceId: cleanString(input.workspaceId || req.auth.workspaceId),
+    workspaceId: resolveWorkspaceIdForRequest(req, input.workspaceId),
     userId: req.auth.user.id,
     projectId: cleanString(req.params.projectId),
     title: cleanString(input.title),
@@ -1317,7 +1317,7 @@ app.delete("/api/projects/:projectId", asyncHandler(async (req, res) => {
   if (res.headersSent) {
     return;
   }
-  const workspaceId = cleanString(req.query.workspaceId || req.auth.workspaceId);
+  const workspaceId = resolveWorkspaceIdForRequest(req, req.query.workspaceId);
   const removed = platform.deleteProject({
     workspaceId,
     userId: req.auth.user.id,
@@ -1332,7 +1332,7 @@ app.post("/api/handoffs", asyncHandler(async (req, res) => {
     return;
   }
   const input = req.body || {};
-  const workspaceId = cleanString(input.workspaceId || req.auth.workspaceId);
+  const workspaceId = resolveWorkspaceIdForRequest(req, input.workspaceId);
   const handoff = platform.createHandoff({
     workspaceId,
     userId: req.auth.user.id,
@@ -1349,7 +1349,7 @@ app.get("/api/handoffs/:handoffId", asyncHandler(async (req, res) => {
   if (res.headersSent) {
     return;
   }
-  const workspaceId = cleanString(req.query.workspaceId || req.auth.workspaceId);
+  const workspaceId = resolveWorkspaceIdForRequest(req, req.query.workspaceId);
   const handoff = platform.getHandoff({
     workspaceId,
     userId: req.auth.user.id,
@@ -1368,7 +1368,7 @@ app.post("/api/learning-paths", asyncHandler(async (req, res) => {
     return;
   }
   const input = req.body || {};
-  const workspaceId = cleanString(input.workspaceId || req.auth.workspaceId);
+  const workspaceId = resolveWorkspaceIdForRequest(req, input.workspaceId);
   const pathRow = platform.createLearningPath({
     workspaceId,
     userId: req.auth.user.id,
@@ -1383,7 +1383,7 @@ app.get("/api/learning-paths", asyncHandler(async (req, res) => {
   if (res.headersSent) {
     return;
   }
-  const workspaceId = cleanString(req.query.workspaceId || req.auth.workspaceId);
+  const workspaceId = resolveWorkspaceIdForRequest(req, req.query.workspaceId);
   res.json({
     paths: platform.listLearningPaths({
       workspaceId,
@@ -1397,7 +1397,7 @@ app.get("/api/learning-paths/:pathId", asyncHandler(async (req, res) => {
   if (res.headersSent) {
     return;
   }
-  const workspaceId = cleanString(req.query.workspaceId || req.auth.workspaceId);
+  const workspaceId = resolveWorkspaceIdForRequest(req, req.query.workspaceId);
   const pathRow = platform.getLearningPath({
     workspaceId,
     userId: req.auth.user.id,
@@ -1416,7 +1416,7 @@ app.patch("/api/learning-paths/:pathId", asyncHandler(async (req, res) => {
     return;
   }
   const input = req.body || {};
-  const workspaceId = cleanString(input.workspaceId || req.auth.workspaceId);
+  const workspaceId = resolveWorkspaceIdForRequest(req, input.workspaceId);
   const pathRow = platform.updateLearningPath({
     workspaceId,
     userId: req.auth.user.id,
@@ -1431,7 +1431,7 @@ app.delete("/api/learning-paths/:pathId", asyncHandler(async (req, res) => {
   if (res.headersSent) {
     return;
   }
-  const workspaceId = cleanString(req.query.workspaceId || req.auth.workspaceId);
+  const workspaceId = resolveWorkspaceIdForRequest(req, req.query.workspaceId);
   const removed = platform.deleteLearningPath({
     workspaceId,
     userId: req.auth.user.id,
@@ -1445,7 +1445,7 @@ app.post("/api/learning-paths/:pathId/share", asyncHandler(async (req, res) => {
   if (res.headersSent) {
     return;
   }
-  const workspaceId = cleanString((req.body || {}).workspaceId || req.auth.workspaceId);
+  const workspaceId = resolveWorkspaceIdForRequest(req, (req.body || {}).workspaceId);
   const share = platform.shareLearningPath({
     workspaceId,
     userId: req.auth.user.id,
@@ -1460,7 +1460,7 @@ app.post("/api/series", asyncHandler(async (req, res) => {
     return;
   }
   const input = req.body || {};
-  const workspaceId = cleanString(input.workspaceId || req.auth.workspaceId);
+  const workspaceId = resolveWorkspaceIdForRequest(req, input.workspaceId);
   const row = platform.createSeries({
     workspaceId,
     userId: req.auth.user.id,
@@ -1478,7 +1478,7 @@ app.get("/api/series", asyncHandler(async (req, res) => {
   if (res.headersSent) {
     return;
   }
-  const workspaceId = cleanString(req.query.workspaceId || req.auth.workspaceId);
+  const workspaceId = resolveWorkspaceIdForRequest(req, req.query.workspaceId);
   const rows = platform.listSeries({
     workspaceId,
     userId: req.auth.user.id
@@ -1491,7 +1491,7 @@ app.patch("/api/series/:seriesId", asyncHandler(async (req, res) => {
   if (res.headersSent) {
     return;
   }
-  const workspaceId = cleanString((req.body || {}).workspaceId || req.auth.workspaceId);
+  const workspaceId = resolveWorkspaceIdForRequest(req, (req.body || {}).workspaceId);
   const row = platform.updateSeries({
     workspaceId,
     userId: req.auth.user.id,
@@ -1528,7 +1528,7 @@ app.get("/api/team/dashboard", asyncHandler(async (req, res) => {
   if (!requireAdminDashboardAccess(req, res)) {
     return;
   }
-  const workspaceId = cleanString(req.query.workspaceId || req.auth.workspaceId);
+  const workspaceId = resolveWorkspaceIdForRequest(req, req.query.workspaceId);
   res.json(platform.getTeamDashboard(workspaceId, req.auth.user.id));
 }));
 
@@ -1538,7 +1538,7 @@ app.post("/api/team/seats", asyncHandler(async (req, res) => {
     return;
   }
   const input = req.body || {};
-  const workspaceId = cleanString(input.workspaceId || req.auth.workspaceId);
+  const workspaceId = resolveWorkspaceIdForRequest(req, input.workspaceId);
   const seats = clampNumber(Number(input.seats || 1), 1, 500, 1);
   res.json(platform.updateSeatCount(req.auth.user.id, workspaceId, seats));
 }));
@@ -1548,7 +1548,7 @@ app.get("/api/team/invites", asyncHandler(async (req, res) => {
   if (res.headersSent) {
     return;
   }
-  const workspaceId = cleanString(req.query.workspaceId || req.auth.workspaceId);
+  const workspaceId = resolveWorkspaceIdForRequest(req, req.query.workspaceId);
   platform.requireWorkspaceRole(req.auth.user.id, workspaceId, ["owner", "editor", "viewer"]);
   const invites = platform.state.teamInvites
     .filter((invite) => invite.workspaceId === workspaceId)
@@ -1571,7 +1571,7 @@ app.post("/api/team/app-access", asyncHandler(async (req, res) => {
     return;
   }
   const input = req.body || {};
-  const workspaceId = cleanString(input.workspaceId || req.auth.workspaceId);
+  const workspaceId = resolveWorkspaceIdForRequest(req, input.workspaceId);
   const role = cleanString(input.role, "viewer");
   const tools = Array.isArray(input.tools) ? input.tools : [];
   const matrix = platform.setWorkspaceAppAccess(req.auth.user.id, workspaceId, role, tools);
@@ -2435,7 +2435,7 @@ app.get("/api/ai/sermon-analyzer/queue-status", asyncHandler(async (req, res) =>
   if (res.headersSent) {
     return;
   }
-  const workspaceId = cleanString(req.query.workspaceId || req.auth.workspaceId);
+  const workspaceId = resolveWorkspaceIdForRequest(req, req.query.workspaceId);
   platform.requireWorkspaceRole(req.auth.user.id, workspaceId, ["owner", "editor", "viewer"]);
   const jobs = platform.state.analyzerJobs.filter((job) => job.workspaceId === workspaceId);
   res.json({
@@ -3331,6 +3331,18 @@ function resolveAuthorizedWorkspaceId(user, candidates = []) {
     return primaryWorkspaceId;
   }
   return "";
+}
+
+function resolveWorkspaceIdForRequest(req, requestedWorkspaceId) {
+  const fallbackWorkspaceId = cleanString(req && req.auth && req.auth.workspaceId);
+  const candidateWorkspaceId = cleanString(requestedWorkspaceId);
+  if (!req || !req.auth || !req.auth.user) {
+    return candidateWorkspaceId || fallbackWorkspaceId;
+  }
+  if (candidateWorkspaceId && platform.getWorkspaceRole(req.auth.user.id, candidateWorkspaceId)) {
+    return candidateWorkspaceId;
+  }
+  return fallbackWorkspaceId;
 }
 
 function attachAuthContext(req, _res, next) {
