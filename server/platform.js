@@ -214,6 +214,11 @@ function createPlatformStore({ rootDir, trialDays = TRIAL_DAYS_DEFAULT } = {}) {
       hydrationMutations = true;
     }
   }
+  for (const workspace of ensureArray(state.workspaces)) {
+    if (applyWorkspaceDefaults(workspace)) {
+      hydrationMutations = true;
+    }
+  }
   if (hydrationMutations) {
     fs.writeFileSync(dataPath, `${JSON.stringify(state, null, 2)}\n`, "utf8");
   }
@@ -718,7 +723,8 @@ function createPlatformStore({ rootDir, trialDays = TRIAL_DAYS_DEFAULT } = {}) {
     return state.workspaces
       .filter((workspace) => workspace.members.some((member) => member.userId === userId))
       .map((workspace) => {
-        const role = (workspace.members.find((member) => member.userId === userId) || {}).role || "viewer";
+        const member = workspace.members.find((row) => row.userId === userId) || null;
+        const role = normalizeStoredWorkspaceRole(member && member.role) || "viewer";
         return {
           id: workspace.id,
           name: workspace.name,
@@ -738,7 +744,7 @@ function createPlatformStore({ rootDir, trialDays = TRIAL_DAYS_DEFAULT } = {}) {
       return "";
     }
     const member = workspace.members.find((row) => row.userId === userId) || null;
-    return member ? member.role : "";
+    return member ? normalizeStoredWorkspaceRole(member.role) : "";
   }
 
   function requireWorkspaceRole(userId, workspaceId, allowedRoles = []) {
@@ -910,12 +916,24 @@ function createPlatformStore({ rootDir, trialDays = TRIAL_DAYS_DEFAULT } = {}) {
     if (!role) {
       return false;
     }
+    if (role === "owner") {
+      return true;
+    }
     const matrix = workspace.appAccess && typeof workspace.appAccess === "object" ? workspace.appAccess : {};
-    const allowedForRole = ensureArray(matrix[role]);
+    const roleKeys = role === "viewer"
+      ? ["viewer", "user"]
+      : role === "owner"
+        ? ["owner", "admin"]
+        : [role];
+    const allowedForRole = roleKeys
+      .flatMap((roleKey) => ensureArray(matrix[roleKey]))
+      .map((tool) => cleanString(tool).toLowerCase())
+      .filter(Boolean);
     if (!allowedForRole.length) {
       return true;
     }
-    return allowedForRole.includes(feature);
+    const requested = resolveFeatureAccessAliases(feature);
+    return requested.some((candidate) => allowedForRole.includes(candidate));
   }
 
   function getActiveSubscription(workspaceId) {
@@ -2298,6 +2316,55 @@ function applyAccountDefaults(user) {
   return changed;
 }
 
+function applyWorkspaceDefaults(workspace) {
+  if (!workspace || typeof workspace !== "object") {
+    return false;
+  }
+  let changed = false;
+
+  if (!Array.isArray(workspace.members)) {
+    workspace.members = [];
+    changed = true;
+  }
+
+  for (const member of workspace.members) {
+    if (!member || typeof member !== "object") {
+      continue;
+    }
+    const normalizedRole = normalizeStoredWorkspaceRole(member.role);
+    if (normalizedRole && member.role !== normalizedRole) {
+      member.role = normalizedRole;
+      changed = true;
+    }
+  }
+
+  if (workspace.appAccess && typeof workspace.appAccess === "object" && !Array.isArray(workspace.appAccess)) {
+    const normalizedAccess = {};
+    for (const [role, tools] of Object.entries(workspace.appAccess)) {
+      const normalizedRole = normalizeStoredWorkspaceRole(role);
+      if (!normalizedRole) {
+        continue;
+      }
+      const normalizedTools = ensureArray(tools)
+        .map((tool) => cleanString(tool).toLowerCase())
+        .filter(Boolean);
+      const existing = ensureArray(normalizedAccess[normalizedRole]);
+      normalizedAccess[normalizedRole] = Array.from(new Set(existing.concat(normalizedTools)));
+    }
+    const before = JSON.stringify(workspace.appAccess);
+    const after = JSON.stringify(normalizedAccess);
+    if (before !== after) {
+      workspace.appAccess = normalizedAccess;
+      changed = true;
+    }
+  } else if (typeof workspace.appAccess !== "undefined") {
+    delete workspace.appAccess;
+    changed = true;
+  }
+
+  return changed;
+}
+
 function createToken() {
   return crypto.randomBytes(28).toString("hex");
 }
@@ -2348,11 +2415,32 @@ function normalizeLearningPathItems(value) {
 }
 
 function normalizeRole(role) {
-  const safe = cleanString(role, "viewer").toLowerCase();
+  return normalizeStoredWorkspaceRole(role) || "viewer";
+}
+
+function normalizeStoredWorkspaceRole(role) {
+  const safe = cleanString(role).toLowerCase();
   if (safe === "owner" || safe === "editor" || safe === "viewer") {
     return safe;
   }
-  return "viewer";
+  if (safe === "admin") {
+    return "owner";
+  }
+  if (safe === "user") {
+    return "viewer";
+  }
+  return "";
+}
+
+function resolveFeatureAccessAliases(feature) {
+  const safe = cleanString(feature).toLowerCase();
+  if (!safe) {
+    return [];
+  }
+  if (safe === "research-helper" || safe === "sermon-evaluation") {
+    return ["research-helper", "sermon-evaluation"];
+  }
+  return [safe];
 }
 
 function normalizeOveragePolicy(value) {

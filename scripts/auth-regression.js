@@ -150,6 +150,21 @@ async function run() {
       return data;
     });
 
+    await runStep("Session ignores stale workspace headers", async () => {
+      const staleWorkspaceId = "ws_missing_or_stale";
+      const { response, data, text } = await fetchJson(`${BASE_URL}/api/auth/session`, {
+        headers: {
+          ...buildAuthHeaders(adminAuth),
+          "X-Workspace-Id": staleWorkspaceId
+        }
+      });
+      if (response.status !== 200) {
+        throw new Error(`Expected 200, got ${response.status}. Body: ${text}`);
+      }
+      assert.notEqual(data.activeWorkspaceId, staleWorkspaceId, "Session should not keep a workspace the user cannot access.");
+      assert.ok(data.activeWorkspaceId, "Session should resolve an accessible workspace.");
+    });
+
     await runStep("How-it-works marks admin as editable", async () => {
       const { response, data } = await fetchJson(`${BASE_URL}/api/how-it-works`, {
         headers: buildAuthHeaders(adminAuth)

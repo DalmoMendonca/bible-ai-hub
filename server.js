@@ -3290,6 +3290,28 @@ function parseSessionToken(req) {
   return cleanString(readRequestCookie(req, AUTH_TOKEN_COOKIE));
 }
 
+function resolveAuthorizedWorkspaceId(user, candidates = []) {
+  if (!user || !user.id) {
+    return "";
+  }
+  const seen = new Set();
+  for (const candidate of candidates) {
+    const workspaceId = cleanString(candidate);
+    if (!workspaceId || seen.has(workspaceId)) {
+      continue;
+    }
+    seen.add(workspaceId);
+    if (platform.getWorkspaceRole(user.id, workspaceId)) {
+      return workspaceId;
+    }
+  }
+  const primaryWorkspaceId = cleanString(platform.getPrimaryWorkspaceIdForUser(user.id));
+  if (primaryWorkspaceId && !seen.has(primaryWorkspaceId) && platform.getWorkspaceRole(user.id, primaryWorkspaceId)) {
+    return primaryWorkspaceId;
+  }
+  return "";
+}
+
 function attachAuthContext(req, _res, next) {
   const sessionToken = parseSessionToken(req);
   let auth = platform.resolveAuth(sessionToken);
@@ -3331,12 +3353,11 @@ function attachAuthContext(req, _res, next) {
 
   const headerWorkspace = cleanString(req.headers && req.headers["x-workspace-id"]);
   const cookieWorkspace = cleanString(readRequestCookie(req, AUTH_WORKSPACE_COOKIE));
-  const workspaceId = cleanString(
-    headerWorkspace
-      || cookieWorkspace
-      || (user && user.activeWorkspaceId)
-      || (user && platform.getPrimaryWorkspaceIdForUser(user.id))
-  );
+  const workspaceId = resolveAuthorizedWorkspaceId(user, [
+    headerWorkspace,
+    cookieWorkspace,
+    user && user.activeWorkspaceId
+  ]);
 
   req.auth = {
     user: user || null,
