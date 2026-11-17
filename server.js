@@ -1,4 +1,4 @@
-﻿const fs = require("node:fs");
+const templeModelControl = require("./temple-model-control.cjs");templeModelControl.configure({ appId: "905bf94ab81fa3e920f9c9bb92ce0d6e" });const fs = require("node:fs");
 const path = require("node:path");
 const os = require("node:os");
 const crypto = require("node:crypto");
@@ -56,10 +56,10 @@ if (process.env.NODE_ENV === "production" && IS_CLOUD_RUN) {
   if (normalizedDataDir.startsWith("/tmp/") || normalizedDataDir === "/tmp") {
     if (!ALLOW_EPHEMERAL_DATA || ALLOW_EPHEMERAL_DATA === "0" || ALLOW_EPHEMERAL_DATA.toLowerCase() === "false") {
       throw new Error(
-        "Refusing to start: BIBLE_AI_DATA_DIR points to ephemeral /tmp storage on Cloud Run. "
-        + "This will reset projects/credits on deploy or instance restart. "
-        + "Set BIBLE_AI_DATA_DIR to a persistent volume mount (recommended: Cloud Storage volume) "
-        + "or set ALLOW_EPHEMERAL_DATA=1 if you understand the data-loss risk."
+        "Refusing to start: BIBLE_AI_DATA_DIR points to ephemeral /tmp storage on Cloud Run. " +
+        "This will reset projects/credits on deploy or instance restart. " +
+        "Set BIBLE_AI_DATA_DIR to a persistent volume mount (recommended: Cloud Storage volume) " +
+        "or set ALLOW_EPHEMERAL_DATA=1 if you understand the data-loss risk."
       );
     }
   }
@@ -72,47 +72,47 @@ const OPENAI_EMBED_MODEL = process.env.OPENAI_EMBED_MODEL || "text-embedding-3-s
 const OPENAI_TRANSCRIBE_MODEL = process.env.OPENAI_TRANSCRIBE_MODEL || "whisper-1";
 const OPENAI_BIBLE_STUDY_MODEL = process.env.OPENAI_BIBLE_STUDY_MODEL || "gpt-4.1-nano";
 const OPENAI_BIBLE_STUDY_MAX_TOKENS = Number(
-  process.env.OPENAI_BIBLE_STUDY_MAX_TOKENS
-  || (IS_SERVERLESS_RUNTIME ? 1200 : 1800)
+  process.env.OPENAI_BIBLE_STUDY_MAX_TOKENS || (
+  IS_SERVERLESS_RUNTIME ? 1200 : 1800)
 );
 const OPENAI_BIBLE_STUDY_MAX_REFINEMENTS = Number(
-  process.env.OPENAI_BIBLE_STUDY_MAX_REFINEMENTS
-  || (IS_SERVERLESS_RUNTIME ? 0 : 3)
+  process.env.OPENAI_BIBLE_STUDY_MAX_REFINEMENTS || (
+  IS_SERVERLESS_RUNTIME ? 0 : 3)
 );
 const OPENAI_LONG_FORM_MODEL = process.env.OPENAI_LONG_FORM_MODEL || "gpt-4.1-nano";
-const OPENAI_RESEARCH_HELPER_MODEL = process.env.OPENAI_RESEARCH_HELPER_MODEL
-  || (IS_SERVERLESS_RUNTIME ? OPENAI_LONG_FORM_MODEL : OPENAI_CHAT_MODEL);
+const OPENAI_RESEARCH_HELPER_MODEL = process.env.OPENAI_RESEARCH_HELPER_MODEL || (
+IS_SERVERLESS_RUNTIME ? OPENAI_LONG_FORM_MODEL : OPENAI_CHAT_MODEL);
 const OPENAI_RESEARCH_HELPER_MAX_TOKENS = Number(
-  process.env.OPENAI_RESEARCH_HELPER_MAX_TOKENS
-  || (IS_SERVERLESS_RUNTIME ? 950 : 1400)
+  process.env.OPENAI_RESEARCH_HELPER_MAX_TOKENS || (
+  IS_SERVERLESS_RUNTIME ? 950 : 1400)
 );
 const OPENAI_RESEARCH_HELPER_MAX_REFINEMENTS = Number(
-  process.env.OPENAI_RESEARCH_HELPER_MAX_REFINEMENTS
-  || (IS_SERVERLESS_RUNTIME ? 0 : 1)
+  process.env.OPENAI_RESEARCH_HELPER_MAX_REFINEMENTS || (
+  IS_SERVERLESS_RUNTIME ? 0 : 1)
 );
 const OPENAI_RESEARCH_HELPER_MAX_MANUSCRIPT_CHARS = Number(
-  process.env.OPENAI_RESEARCH_HELPER_MAX_MANUSCRIPT_CHARS
-  || (IS_SERVERLESS_RUNTIME ? 12000 : 24000)
+  process.env.OPENAI_RESEARCH_HELPER_MAX_MANUSCRIPT_CHARS || (
+  IS_SERVERLESS_RUNTIME ? 12000 : 24000)
 );
 const OPENAI_DASHBOARD_MODEL = process.env.OPENAI_DASHBOARD_MODEL || OPENAI_CHAT_MODEL;
 const OPENAI_RETRY_ATTEMPTS = Number(process.env.OPENAI_RETRY_ATTEMPTS || 4);
 const OPENAI_RETRY_BASE_MS = Number(process.env.OPENAI_RETRY_BASE_MS || 650);
 const OPENAI_REQUEST_TIMEOUT_MS = Number(
-  process.env.OPENAI_REQUEST_TIMEOUT_MS
-  || (IS_SERVERLESS_RUNTIME ? 24000 : 60000)
+  process.env.OPENAI_REQUEST_TIMEOUT_MS || (
+  IS_SERVERLESS_RUNTIME ? 24000 : 60000)
 );
 const PLATFORM_TRIAL_DAYS = Number(process.env.PLATFORM_TRIAL_DAYS || 14);
 const API_RATE_LIMIT_PER_MINUTE = Number(process.env.API_RATE_LIMIT_PER_MINUTE || 180);
-const API_ALLOWED_ORIGINS = String(process.env.API_ALLOWED_ORIGINS || "")
-  .split(",")
-  .map((value) => value.trim())
-  .filter(Boolean);
+const API_ALLOWED_ORIGINS = String(process.env.API_ALLOWED_ORIGINS || "").
+split(",").
+map((value) => value.trim()).
+filter(Boolean);
 const DEFAULT_ALLOWED_ORIGIN_PATTERNS = [
-  /^https?:\/\/localhost(?::\d+)?$/i,
-  /^https?:\/\/127\.0\.0\.1(?::\d+)?$/i,
-  /^https:\/\/bible\.hiredalmo\.com$/i,
-  /^https:\/\/(?:[a-z0-9-]+\.)?hiredalmo\.com$/i
-];
+/^https?:\/\/localhost(?::\d+)?$/i,
+/^https?:\/\/127\.0\.0\.1(?::\d+)?$/i,
+/^https:\/\/bible\.hiredalmo\.com$/i,
+/^https:\/\/(?:[a-z0-9-]+\.)?hiredalmo\.com$/i];
+
 const PORT = Number(process.env.PORT || 3000);
 const PRICING_ANCHOR_URL = "/#homePricing";
 
@@ -136,10 +136,10 @@ const AUTH_WORKSPACE_COOKIE = "bah_workspace_id";
 const AUTH_COOKIE_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 const MAGIC_LINK_TOKEN_TTL_MS = 15 * 60 * 1000;
 const AUTH_TOKEN_SIGNING_SECRET = cleanString(
-  process.env.AUTH_TOKEN_SIGNING_SECRET
-  || process.env.OPENAI_API_KEY
-  || process.env.ADMIN_DASHBOARD_PASSWORD
-  || "local-dev-auth-secret-change-me"
+  process.env.AUTH_TOKEN_SIGNING_SECRET ||
+  process.env.OPENAI_API_KEY ||
+  process.env.ADMIN_DASHBOARD_PASSWORD ||
+  "local-dev-auth-secret-change-me"
 );
 const SESSION_TOKEN_PREFIX = "bahs1";
 const MAGIC_LINK_TOKEN_PREFIX = "bahm1";
@@ -176,9 +176,9 @@ app.use("/api", (req, res, next) => {
 });
 app.use("/api", attachAuthContext);
 app.use("/api", (req, res, next) => {
-  const key = req.auth && req.auth.user
-    ? `user:${req.auth.user.id}`
-    : `ip:${cleanString(req.ip || req.headers["x-forwarded-for"] || "unknown")}`;
+  const key = req.auth && req.auth.user ?
+  `user:${req.auth.user.id}` :
+  `ip:${cleanString(req.ip || req.headers["x-forwarded-for"] || "unknown")}`;
   const rate = platform.checkRateLimit({
     key,
     limit: Math.max(30, API_RATE_LIMIT_PER_MINUTE),
@@ -220,13 +220,13 @@ const videoTranscriptionJobs = new Map();
 const sermonAnalyzerQueue = [];
 let sermonAnalyzerWorkerRunning = false;
 const LEGACY_APP_SLUGS = [
-  "bible-study",
-  "sermon-preparation",
-  "teaching-tools",
-  "research-helper",
-  "sermon-analyzer",
-  "video-search"
-];
+"bible-study",
+"sermon-preparation",
+"teaching-tools",
+"research-helper",
+"sermon-analyzer",
+"video-search"];
+
 const bibleStudyWorkflow = createBibleStudyWorkflow({
   chatJson: (payload) => chatJson({
     ...payload,
@@ -327,9 +327,9 @@ app.get("/api/public-config", (_req, res) => {
 });
 
 app.get("/api/auth/diagnostics", (req, res) => {
-  const actor = req.auth && req.auth.user
-    ? (platform.getUserById(req.auth.user.id) || req.auth.user)
-    : null;
+  const actor = req.auth && req.auth.user ?
+  platform.getUserById(req.auth.user.id) || req.auth.user :
+  null;
   const email = cleanString(actor && actor.email).toLowerCase();
   const isAdmin = cleanString(actor && actor.role).toLowerCase() === "admin";
   res.json({
@@ -780,9 +780,9 @@ app.get("/api/usage/export", asyncHandler(async (req, res) => {
   platform.requireWorkspaceRole(req.auth.user.id, workspaceId, ["owner", "editor", "viewer"]);
   const rows = platform.getUsageForWorkspace(workspaceId);
   const header = ["id", "requestId", "workspaceId", "userId", "feature", "units", "unitType", "model", "estimatedCostUsd", "createdAt"];
-  const csv = [header.join(",")]
-    .concat(rows.map((row) => header.map((key) => csvEscape(row[key])).join(",")))
-    .join("\n");
+  const csv = [header.join(",")].
+  concat(rows.map((row) => header.map((key) => csvEscape(row[key])).join(","))).
+  join("\n");
   res.setHeader("Content-Type", "text/csv; charset=utf-8");
   res.setHeader("Content-Disposition", `attachment; filename="usage-${workspaceId}.csv"`);
   res.status(200).send(csv);
@@ -1013,9 +1013,9 @@ app.patch("/api/how-it-works/prompts/:promptId", asyncHandler(async (req, res) =
     return;
   }
 
-  const existing = promptOverridesState.prompts[promptId] && typeof promptOverridesState.prompts[promptId] === "object"
-    ? { ...promptOverridesState.prompts[promptId] }
-    : {};
+  const existing = promptOverridesState.prompts[promptId] && typeof promptOverridesState.prompts[promptId] === "object" ?
+  { ...promptOverridesState.prompts[promptId] } :
+  {};
 
   if (resetToDefault) {
     delete promptOverridesState.prompts[promptId];
@@ -1053,9 +1053,9 @@ app.patch("/api/how-it-works/prompts/:promptId", asyncHandler(async (req, res) =
 }));
 
 app.get("/api/how-it-works", (req, res) => {
-  const actor = req.auth && req.auth.user
-    ? (platform.getUserById(req.auth.user.id) || req.auth.user)
-    : null;
+  const actor = req.auth && req.auth.user ?
+  platform.getUserById(req.auth.user.id) || req.auth.user :
+  null;
   res.json(buildHowItWorksPayload({ actor }));
 });
 
@@ -1103,7 +1103,7 @@ app.get("/api/user/settings", asyncHandler(async (req, res) => {
   }
   const user = platform.getUserById(req.auth.user.id);
   res.json({
-    emailPrefs: (user && user.emailPrefs) || { lifecycle: true },
+    emailPrefs: user && user.emailPrefs || { lifecycle: true },
     personalization: {
       optOut: Boolean(user && user.personalizationOptOut)
     },
@@ -1226,22 +1226,22 @@ app.get("/api/admin/projects", asyncHandler(async (req, res) => {
   const search = cleanString(req.query.q).toLowerCase();
   const sort = cleanString(req.query.sort, "updated_desc");
   const limit = clampNumber(Number(req.query.limit || 350), 1, 2000, 350);
-  let rows = Array.isArray(platform.state && platform.state.projects)
-    ? platform.state.projects.slice()
-    : [];
+  let rows = Array.isArray(platform.state && platform.state.projects) ?
+  platform.state.projects.slice() :
+  [];
   if (search) {
     rows = rows.filter((row) => {
       const user = platform.getUserById(cleanString(row && row.userId));
       const workspace = platform.getWorkspaceById(cleanString(row && row.workspaceId));
       const haystack = [
-        cleanString(row && row.id),
-        cleanString(row && row.title),
-        cleanString(row && row.tool),
-        cleanString(user && user.email),
-        cleanString(user && user.name),
-        cleanString(workspace && workspace.name),
-        cleanString(row && row.workspaceId)
-      ].join(" ").toLowerCase();
+      cleanString(row && row.id),
+      cleanString(row && row.title),
+      cleanString(row && row.tool),
+      cleanString(user && user.email),
+      cleanString(user && user.name),
+      cleanString(workspace && workspace.name),
+      cleanString(row && row.workspaceId)].
+      join(" ").toLowerCase();
       return haystack.includes(search);
     });
   }
@@ -1539,17 +1539,17 @@ app.post("/api/video-governance", asyncHandler(async (req, res) => {
     return;
   }
   const input = req.body || {};
-  const videoIds = Array.isArray(input.videoIds) && input.videoIds.length
-    ? input.videoIds
-    : [input.videoId];
-  const rows = videoIds
-    .map((videoId) => cleanString(videoId))
-    .filter(Boolean)
-    .map((videoId) => platform.upsertVideoGovernance(req.auth.user.id, {
-      videoId,
-      tier: cleanString(input.tier),
-      requiredPlans: input.requiredPlans
-    }));
+  const videoIds = Array.isArray(input.videoIds) && input.videoIds.length ?
+  input.videoIds :
+  [input.videoId];
+  const rows = videoIds.
+  map((videoId) => cleanString(videoId)).
+  filter(Boolean).
+  map((videoId) => platform.upsertVideoGovernance(req.auth.user.id, {
+    videoId,
+    tier: cleanString(input.tier),
+    requiredPlans: input.requiredPlans
+  }));
   res.status(201).json({
     videoGovernance: rows,
     updated: rows.length
@@ -1582,9 +1582,9 @@ app.get("/api/team/invites", asyncHandler(async (req, res) => {
   }
   const workspaceId = resolveWorkspaceIdForRequest(req, req.query.workspaceId);
   platform.requireWorkspaceRole(req.auth.user.id, workspaceId, ["owner", "editor", "viewer"]);
-  const invites = platform.state.teamInvites
-    .filter((invite) => invite.workspaceId === workspaceId)
-    .sort((a, b) => Date.parse(b.createdAt || 0) - Date.parse(a.createdAt || 0));
+  const invites = platform.state.teamInvites.
+  filter((invite) => invite.workspaceId === workspaceId).
+  sort((a, b) => Date.parse(b.createdAt || 0) - Date.parse(a.createdAt || 0));
   res.json({ invites });
 }));
 
@@ -1644,9 +1644,9 @@ app.get("/api/video-library/status", asyncHandler(async (req, res) => {
     stats,
     videos: VIDEO_LIBRARY.map((video) => {
       const playbackBaseUrl = resolveVideoPlaybackBaseUrl(video);
-      const videoAccess = req.auth && req.auth.workspaceId
-        ? platform.canAccessVideo(req.auth.workspaceId, video.id)
-        : { allowed: true, tier: "free" };
+      const videoAccess = req.auth && req.auth.workspaceId ?
+      platform.canAccessVideo(req.auth.workspaceId, video.id) :
+      { allowed: true, tier: "free" };
       return {
         id: video.id,
         title: video.title,
@@ -1677,25 +1677,25 @@ app.post("/api/video-library/ingest-next", requireOpenAIKey, asyncHandler(async 
   const dryRun = Boolean(input.dryRun);
   ensureVideoCatalog({ force: Boolean(input.refreshCatalog), maxAgeMs: 0 });
 
-  const pending = VIDEO_LIBRARY
-    .filter((video) => video.transcriptStatus !== "ready")
-    .filter((video) => video.sourceAvailable !== false)
-    .sort((a, b) => Number(a.durationSeconds || 0) - Number(b.durationSeconds || 0));
-  const unavailable = VIDEO_LIBRARY
-    .filter((video) => video.transcriptStatus !== "ready")
-    .filter((video) => video.sourceAvailable === false)
-    .map((video) => ({
-      id: video.id,
-      title: video.title,
-      reason: "Source file is not available on this server instance."
-    }));
+  const pending = VIDEO_LIBRARY.
+  filter((video) => video.transcriptStatus !== "ready").
+  filter((video) => video.sourceAvailable !== false).
+  sort((a, b) => Number(a.durationSeconds || 0) - Number(b.durationSeconds || 0));
+  const unavailable = VIDEO_LIBRARY.
+  filter((video) => video.transcriptStatus !== "ready").
+  filter((video) => video.sourceAvailable === false).
+  map((video) => ({
+    id: video.id,
+    title: video.title,
+    reason: "Source file is not available on this server instance."
+  }));
 
   if (!pending.length) {
     res.json({
       ok: true,
-      message: unavailable.length
-        ? "No locally available pending videos. Run ingestion on the machine that has source video files."
-        : "No pending videos for ingestion.",
+      message: unavailable.length ?
+      "No locally available pending videos. Run ingestion on the machine that has source video files." :
+      "No pending videos for ingestion.",
       processed: [],
       failed: [],
       unavailable,
@@ -1766,9 +1766,9 @@ app.post("/api/ai/bible-study", requireOpenAIKey, requireFeatureAccess("bible-st
     return;
   }
 
-  const profileDirective = theologicalProfile && theologicalProfile !== "text-centered"
-    ? `Theological profile: ${theologicalProfile}. Keep charity, textual fidelity, and clear caveats where traditions differ.`
-    : "";
+  const profileDirective = theologicalProfile && theologicalProfile !== "text-centered" ?
+  `Theological profile: ${theologicalProfile}. Keep charity, textual fidelity, and clear caveats where traditions differ.` :
+  "";
   const response = await bibleStudyWorkflow.generateStudy({
     passage: {
       reference,
@@ -1804,9 +1804,9 @@ app.post("/api/ai/sermon-preparation", requireOpenAIKey, requireFeatureAccess("s
   const goal = cleanString(input.goal);
   const styleMode = cleanString(input.styleMode || "expository").toLowerCase();
   const tightenWeakSections = Boolean(input.tightenWeakSections);
-  const seriesContext = input.seriesContext && typeof input.seriesContext === "object"
-    ? input.seriesContext
-    : {};
+  const seriesContext = input.seriesContext && typeof input.seriesContext === "object" ?
+  input.seriesContext :
+  {};
   const styleDirective = buildStyleDirective(styleMode);
   const continuityDirective = buildSeriesContinuityDirective(seriesContext);
   const augmentedGoal = [goal, styleDirective, continuityDirective].filter(Boolean).join("\n");
@@ -1853,43 +1853,43 @@ app.post("/api/ai/sermon-preparation", requireOpenAIKey, requireFeatureAccess("s
         ai = refined;
       }
     } catch (_) {
-      // Keep first-pass draft if optional refinement fails.
-    }
-  }
 
-  const outline = cleanObjectArray(ai.outline, 4)
-    .map((item) => {
-      const heading = cleanString(item.heading);
-      const referenceAudit = enforceSupportingReferenceBounds(
-        cleanArray(item.supportingReferences, 6),
-        passageBounds
-      );
-      for (const inScope of referenceAudit.inScope) {
-        passageBoundaryDiagnostics.inScopeReferences.push(inScope);
-      }
-      for (const outOfScope of referenceAudit.outOfScope) {
-        passageBoundaryDiagnostics.outOfScopeReferences.push({
-          reference: outOfScope.reference,
-          reason: outOfScope.reason,
-          heading
-        });
-      }
-      for (const unknown of referenceAudit.unknown) {
-        passageBoundaryDiagnostics.unknownFormatReferences.push({
-          reference: unknown.reference,
-          reason: unknown.reason,
-          heading
-        });
-      }
-      return {
-        heading,
-        explanation: cleanString(item.explanation),
-        application: cleanString(item.application),
-        supportingReferences: referenceAudit.inScope.slice(0, 4),
-        contextualReferences: referenceAudit.outOfScope.map((row) => row.reference).slice(0, 3)
-      };
-    })
-    .filter((item) => item.heading || item.explanation || item.application);
+      // Keep first-pass draft if optional refinement fails.
+    }}
+
+  const outline = cleanObjectArray(ai.outline, 4).
+  map((item) => {
+    const heading = cleanString(item.heading);
+    const referenceAudit = enforceSupportingReferenceBounds(
+      cleanArray(item.supportingReferences, 6),
+      passageBounds
+    );
+    for (const inScope of referenceAudit.inScope) {
+      passageBoundaryDiagnostics.inScopeReferences.push(inScope);
+    }
+    for (const outOfScope of referenceAudit.outOfScope) {
+      passageBoundaryDiagnostics.outOfScopeReferences.push({
+        reference: outOfScope.reference,
+        reason: outOfScope.reason,
+        heading
+      });
+    }
+    for (const unknown of referenceAudit.unknown) {
+      passageBoundaryDiagnostics.unknownFormatReferences.push({
+        reference: unknown.reference,
+        reason: unknown.reason,
+        heading
+      });
+    }
+    return {
+      heading,
+      explanation: cleanString(item.explanation),
+      application: cleanString(item.application),
+      supportingReferences: referenceAudit.inScope.slice(0, 4),
+      contextualReferences: referenceAudit.outOfScope.map((row) => row.reference).slice(0, 3)
+    };
+  }).
+  filter((item) => item.heading || item.explanation || item.application);
 
   if (passageBounds && passageBoundaryDiagnostics.outOfScopeReferences.length) {
     passageBoundaryDiagnostics.warnings.push("Some supporting references were outside the requested passage span and moved to contextual notes.");
@@ -1898,13 +1898,13 @@ app.post("/api/ai/sermon-preparation", requireOpenAIKey, requireFeatureAccess("s
     passageBoundaryDiagnostics.warnings.push("Some references could not be parsed for strict boundary checks; review them manually.");
   }
 
-  const timingPlan = cleanObjectArray(ai.timingPlan, 6)
-    .map((item) => ({
-      segment: cleanString(item.segment),
-      minutes: clampNumber(Number(item.minutes), 1, 90, null),
-      purpose: cleanString(item.purpose)
-    }))
-    .filter((item) => item.segment);
+  const timingPlan = cleanObjectArray(ai.timingPlan, 6).
+  map((item) => ({
+    segment: cleanString(item.segment),
+    minutes: clampNumber(Number(item.minutes), 1, 90, null),
+    purpose: cleanString(item.purpose)
+  })).
+  filter((item) => item.segment);
 
   const preachabilityScore = computePreachabilityScore({
     minutes,
@@ -1930,29 +1930,29 @@ app.post("/api/ai/sermon-preparation", requireOpenAIKey, requireFeatureAccess("s
         theme,
         goal: augmentedGoal,
         draft: ai,
-        qualitySignals: preachabilityScore.rubric
-          .filter((row) => row.score < 8)
-          .map((row) => `${row.dimension} needs tightening. ${row.rationale}`)
+        qualitySignals: preachabilityScore.rubric.
+        filter((row) => row.score < 8).
+        map((row) => `${row.dimension} needs tightening. ${row.rationale}`)
       });
       const tightened = await chatJson({
         ...tightenPrompt,
         temperature: 0.18
       });
-      const tightenedOutline = cleanObjectArray(tightened.outline, 4)
-        .map((item) => {
-          const referenceAudit = enforceSupportingReferenceBounds(
-            cleanArray(item.supportingReferences, 6),
-            passageBounds
-          );
-          return {
-            heading: cleanString(item.heading),
-            explanation: cleanString(item.explanation),
-            application: cleanString(item.application),
-            supportingReferences: referenceAudit.inScope.slice(0, 4),
-            contextualReferences: referenceAudit.outOfScope.map((row) => row.reference).slice(0, 3)
-          };
-        })
-        .filter((item) => item.heading || item.explanation || item.application);
+      const tightenedOutline = cleanObjectArray(tightened.outline, 4).
+      map((item) => {
+        const referenceAudit = enforceSupportingReferenceBounds(
+          cleanArray(item.supportingReferences, 6),
+          passageBounds
+        );
+        return {
+          heading: cleanString(item.heading),
+          explanation: cleanString(item.explanation),
+          application: cleanString(item.application),
+          supportingReferences: referenceAudit.inScope.slice(0, 4),
+          contextualReferences: referenceAudit.outOfScope.map((row) => row.reference).slice(0, 3)
+        };
+      }).
+      filter((item) => item.heading || item.explanation || item.application);
       if (tightenedOutline.length) {
         tighteningPass = {
           applied: true,
@@ -1962,9 +1962,9 @@ app.post("/api/ai/sermon-preparation", requireOpenAIKey, requireFeatureAccess("s
         };
       }
     } catch (_) {
+
       // Optional tightening pass; keep baseline result if it fails.
-    }
-  }
+    }}
 
   recordFeatureUsage(req, "sermon-preparation", {
     unitType: "generation",
@@ -1994,18 +1994,18 @@ app.post("/api/ai/teaching-tools", requireOpenAIKey, requireFeatureAccess("teach
   const sourceTitle = cleanString(input.sourceTitle, "Bible Lesson");
   const passageText = cleanString(input.passageText);
   const audience = cleanString(input.audience, "Adults");
-  const requestedAudiences = cleanArray(input.audiences, 3)
-    .map((value) => cleanString(value))
-    .filter(Boolean);
+  const requestedAudiences = cleanArray(input.audiences, 3).
+  map((value) => cleanString(value)).
+  filter(Boolean);
   const length = clampNumber(Number(input.length || 45), 15, 120, 45);
   const setting = cleanString(input.setting, "Small group");
   const groupSize = clampNumber(Number(input.groupSize || 12), 1, 300, 12);
   const resources = cleanString(input.resources);
   const outcome = cleanString(input.outcome);
   const notes = cleanString(input.notes);
-  const audiences = requestedAudiences.length
-    ? requestedAudiences
-    : [audience];
+  const audiences = requestedAudiences.length ?
+  requestedAudiences :
+  [audience];
 
   async function generateKitForAudience(audienceValue) {
     const teachingKitPrompt = buildTeachingToolsPrompt({
@@ -2052,36 +2052,36 @@ app.post("/api/ai/teaching-tools", requireOpenAIKey, requireFeatureAccess("teach
           ai = refined;
         }
       } catch (_) {
+
         // Keep first-pass draft if optional refinement fails.
-      }
-    }
+      }}
 
     const lessonPlanRaw = ai.lessonPlan && typeof ai.lessonPlan === "object" ? ai.lessonPlan : {};
-    const ageRaw = ai.ageAppropriateContent && typeof ai.ageAppropriateContent === "object"
-      ? ai.ageAppropriateContent
-      : {};
-    const dqRaw = ai.discussionQuestions && typeof ai.discussionQuestions === "object"
-      ? ai.discussionQuestions
-      : {};
-    const appRaw = ai.applicationPathways && typeof ai.applicationPathways === "object"
-      ? ai.applicationPathways
-      : {};
+    const ageRaw = ai.ageAppropriateContent && typeof ai.ageAppropriateContent === "object" ?
+    ai.ageAppropriateContent :
+    {};
+    const dqRaw = ai.discussionQuestions && typeof ai.discussionQuestions === "object" ?
+    ai.discussionQuestions :
+    {};
+    const appRaw = ai.applicationPathways && typeof ai.applicationPathways === "object" ?
+    ai.applicationPathways :
+    {};
 
-    const sessionTimeline = cleanObjectArray(lessonPlanRaw.sessionTimeline, 8)
-      .map((row) => ({
-        segment: cleanString(row.segment),
-        minutes: clampNumber(Number(row.minutes), 1, 120, null),
-        plan: cleanString(row.plan)
-      }))
-      .filter((row) => row.segment || row.plan);
+    const sessionTimeline = cleanObjectArray(lessonPlanRaw.sessionTimeline, 8).
+    map((row) => ({
+      segment: cleanString(row.segment),
+      minutes: clampNumber(Number(row.minutes), 1, 120, null),
+      plan: cleanString(row.plan)
+    })).
+    filter((row) => row.segment || row.plan);
 
-    const illustrationIdeas = cleanObjectArray(ai.illustrationIdeas, 6)
-      .map((row) => ({
-        title: cleanString(row.title),
-        description: cleanString(row.description),
-        connection: cleanString(row.connection)
-      }))
-      .filter((row) => row.title || row.description);
+    const illustrationIdeas = cleanObjectArray(ai.illustrationIdeas, 6).
+    map((row) => ({
+      title: cleanString(row.title),
+      description: cleanString(row.description),
+      connection: cleanString(row.connection)
+    })).
+    filter((row) => row.title || row.description);
 
     return {
       audience: audienceValue,
@@ -2151,14 +2151,14 @@ app.post("/api/ai/teaching-tools", requireOpenAIKey, requireFeatureAccess("teach
     ...primary,
     multiAudience: generatedKits.length > 1,
     selectedAudiences: generatedKits.map((row) => row.audience),
-    comparisonSummary: generatedKits.length > 1
-      ? generatedKits.map((row) => ({
-        audience: row.audience,
-        objectiveCount: cleanArray(row.lessonPlan && row.lessonPlan.objectives, 10).length,
-        discussionQuestionCount: Object.values(row.discussionQuestions || {})
-          .reduce((sum, list) => sum + cleanArray(list, 20).length, 0)
-      }))
-      : [],
+    comparisonSummary: generatedKits.length > 1 ?
+    generatedKits.map((row) => ({
+      audience: row.audience,
+      objectiveCount: cleanArray(row.lessonPlan && row.lessonPlan.objectives, 10).length,
+      discussionQuestionCount: Object.values(row.discussionQuestions || {}).
+      reduce((sum, list) => sum + cleanArray(list, 20).length, 0)
+    })) :
+    [],
     multiAudienceKits: generatedKits.length > 1 ? multiAudienceKits : {}
   });
 }));
@@ -2187,13 +2187,13 @@ app.post("/api/ai/research-helper", requireOpenAIKey, requireFeatureAccess("rese
     model: OPENAI_RESEARCH_HELPER_MODEL,
     maxTokens: OPENAI_RESEARCH_HELPER_MAX_TOKENS
   });
-  const baselineScores = cleanObjectArray(ai.scores, 8)
-    .map((row) => ({
-      label: cleanString(row.label),
-      score: clampNumber(Number(row.score), 0, 10, 0),
-      rationale: cleanString(row.rationale)
-    }))
-    .filter((row) => row.label);
+  const baselineScores = cleanObjectArray(ai.scores, 8).
+  map((row) => ({
+    label: cleanString(row.label),
+    score: clampNumber(Number(row.score), 0, 10, 0),
+    rationale: cleanString(row.rationale)
+  })).
+  filter((row) => row.label);
   const baselineRevisions = normalizeResearchHelperGuidanceLines(ai.revisions, {
     objective: revisionObjective,
     max: 14,
@@ -2265,9 +2265,9 @@ app.post("/api/ai/research-helper", requireOpenAIKey, requireFeatureAccess("rese
         ai = { ...ai, overallVerdict: cleanString(revisionPack.coachingSummary) };
       }
     } catch (_) {
+
       // Keep first-pass editorial report if optional refinement fails.
-    }
-  }
+    }}
 
   const completeness = ensureResearchHelperCompleteness({
     ai,
@@ -2277,13 +2277,13 @@ app.post("/api/ai/research-helper", requireOpenAIKey, requireFeatureAccess("rese
   });
   ai = completeness.ai;
 
-  const scores = cleanObjectArray(ai.scores, 6)
-    .map((row) => ({
-      label: cleanString(row.label),
-      score: clampNumber(Number(row.score), 0, 10, 0),
-      rationale: cleanString(row.rationale)
-    }))
-    .filter((row) => row.label);
+  const scores = cleanObjectArray(ai.scores, 6).
+  map((row) => ({
+    label: cleanString(row.label),
+    score: clampNumber(Number(row.score), 0, 10, 0),
+    rationale: cleanString(row.rationale)
+  })).
+  filter((row) => row.label);
   const trendPayload = buildEvaluationTrendPayload(req, scores, manuscript);
   const revisionDelta = trendPayload.delta;
   const normalizedRevisions = normalizeResearchHelperGuidanceLines(ai.revisions, {
@@ -2340,7 +2340,7 @@ app.post("/api/ai/research-helper", requireOpenAIKey, requireFeatureAccess("rese
 }));
 
 app.post("/api/ai/sermon-analyzer", requireOpenAIKey, requireFeatureAccess("sermon-analyzer"), enforceQuota("sermon-analyzer", (req) => estimateAnalyzerMinutes(req)), upload.single("audio"), asyncHandler(async (req, res) => {
-  const asyncMode = String((req.body && req.body.asyncMode) || req.query.asyncMode || "").toLowerCase() === "true";
+  const asyncMode = String(req.body && req.body.asyncMode || req.query.asyncMode || "").toLowerCase() === "true";
 
   if (asyncMode) {
     const payload = {
@@ -2349,13 +2349,13 @@ app.post("/api/ai/sermon-analyzer", requireOpenAIKey, requireFeatureAccess("serm
       notes: cleanString(req.body && req.body.notes),
       transcriptOverride: cleanString(req.body && req.body.transcriptOverride),
       localAnalysis: safeJsonParse(req.body && req.body.localAnalysis, {}),
-      file: req.file
-        ? {
-          originalname: cleanString(req.file.originalname),
-          mimetype: cleanString(req.file.mimetype),
-          bufferBase64: req.file.buffer.toString("base64")
-        }
-        : null
+      file: req.file ?
+      {
+        originalname: cleanString(req.file.originalname),
+        mimetype: cleanString(req.file.mimetype),
+        bufferBase64: req.file.buffer.toString("base64")
+      } :
+      null
     };
     if (!payload.file && !payload.transcriptOverride) {
       res.status(400).json({ error: "Upload audio (or provide transcript override) to run sermon analyzer." });
@@ -2392,9 +2392,9 @@ app.post("/api/ai/sermon-analyzer", requireOpenAIKey, requireFeatureAccess("serm
   });
   recordFeatureUsage(req, "sermon-analyzer", {
     unitType: "audio_minute",
-    units: Math.max(1, Math.ceil(Number((enrichedReport.meta.durationSeconds || 60)) / 60)),
+    units: Math.max(1, Math.ceil(Number(enrichedReport.meta.durationSeconds || 60) / 60)),
     model: OPENAI_TRANSCRIBE_MODEL,
-    estimatedCostUsd: Number((Math.max(1, Math.ceil(Number((enrichedReport.meta.durationSeconds || 60)) / 60)) * 0.03).toFixed(4))
+    estimatedCostUsd: Number((Math.max(1, Math.ceil(Number(enrichedReport.meta.durationSeconds || 60) / 60)) * 0.03).toFixed(4))
   });
   res.json(enrichedReport);
 }));
@@ -2514,11 +2514,11 @@ app.post("/api/ai/video-search", requireOpenAIKey, requireFeatureAccess("video-s
   const forceRefresh = Boolean(input.refreshCatalog);
   const autoTranscribe = input.autoTranscribe !== false;
   const requestedMode = cleanString(input.transcribeMode);
-  const transcribeMode = requestedMode === "force"
-    ? "force"
-    : (!autoTranscribe || requestedMode === "skip" || requestedMode === "off")
-      ? "skip"
-      : "auto";
+  const transcribeMode = requestedMode === "force" ?
+  "force" :
+  !autoTranscribe || requestedMode === "skip" || requestedMode === "off" ?
+  "skip" :
+  "auto";
   const autoTranscribeMaxMinutes = clampNumber(
     Number(input.autoTranscribeMaxMinutes || 35),
     5,
@@ -2593,26 +2593,26 @@ app.post("/api/ai/video-search", requireOpenAIKey, requireFeatureAccess("video-s
   const catalogIndex = new Map(VIDEO_LIBRARY.map((video, idx) => [video.id, idx]));
   const queryTerms = tokenize(query);
 
-  const scored = filteredRows
-    .map((video) => {
-      const idx = catalogIndex.get(video.id);
-      const semantic = semanticSearchEnabled
-        ? Math.max(0, cosineSimilarity(queryEmbedding, corpusEmbeddings[idx] || []))
-        : 0;
-      const lexical = lexicalScoreVideo(video, queryTerms);
-      const transcriptBoost = video.transcriptStatus === "ready" ? 0.06 : -0.02;
-      const score = semanticSearchEnabled
-        ? semantic * 0.76 + lexical * 0.2 + transcriptBoost
-        : lexical * 0.88 + (transcriptBoost * 0.5);
+  const scored = filteredRows.
+  map((video) => {
+    const idx = catalogIndex.get(video.id);
+    const semantic = semanticSearchEnabled ?
+    Math.max(0, cosineSimilarity(queryEmbedding, corpusEmbeddings[idx] || [])) :
+    0;
+    const lexical = lexicalScoreVideo(video, queryTerms);
+    const transcriptBoost = video.transcriptStatus === "ready" ? 0.06 : -0.02;
+    const score = semanticSearchEnabled ?
+    semantic * 0.76 + lexical * 0.2 + transcriptBoost :
+    lexical * 0.88 + transcriptBoost * 0.5;
 
-      return {
-        ...video,
-        score,
-        semantic,
-        lexical
-      };
-    })
-    .filter((row) => row.score > 0.01);
+    return {
+      ...video,
+      score,
+      semantic,
+      lexical
+    };
+  }).
+  filter((row) => row.score > 0.01);
 
   let sorted = scored;
   if (sortMode === "duration") {
@@ -2626,8 +2626,8 @@ app.post("/api/ai/video-search", requireOpenAIKey, requireFeatureAccess("video-s
   }
 
   const topRows = sorted.slice(0, 8);
-  const chunkCandidates = topRows.flatMap((video) => buildVideoSearchChunks(video, 26)
-    .map((chunk) => ({ ...chunk, video })));
+  const chunkCandidates = topRows.flatMap((video) => buildVideoSearchChunks(video, 26).
+  map((chunk) => ({ ...chunk, video })));
   let chunkEmbeddings = [];
   let chunkSemanticEnabled = semanticSearchEnabled;
   if (chunkSemanticEnabled && chunkCandidates.length) {
@@ -2638,26 +2638,26 @@ app.post("/api/ai/video-search", requireOpenAIKey, requireFeatureAccess("video-s
     }
   }
 
-  const scoredChunks = chunkCandidates
-    .map((chunk, idx) => {
-      const semantic = chunkSemanticEnabled
-        ? Math.max(0, cosineSimilarity(queryEmbedding, chunkEmbeddings[idx] || []))
-        : 0;
-      const lexical = lexicalScoreText(chunk.text, queryTerms);
-      const chunkScore = chunkSemanticEnabled
-        ? semantic * 0.8 + lexical * 0.2
-        : lexical;
-      const score = (chunk.video.score * 0.3) + (chunkScore * 0.7);
+  const scoredChunks = chunkCandidates.
+  map((chunk, idx) => {
+    const semantic = chunkSemanticEnabled ?
+    Math.max(0, cosineSimilarity(queryEmbedding, chunkEmbeddings[idx] || [])) :
+    0;
+    const lexical = lexicalScoreText(chunk.text, queryTerms);
+    const chunkScore = chunkSemanticEnabled ?
+    semantic * 0.8 + lexical * 0.2 :
+    lexical;
+    const score = chunk.video.score * 0.3 + chunkScore * 0.7;
 
-      return {
-        ...chunk,
-        score,
-        chunkScore,
-        semantic,
-        lexical
-      };
-    })
-    .sort((a, b) => b.score - a.score);
+    return {
+      ...chunk,
+      score,
+      chunkScore,
+      semantic,
+      lexical
+    };
+  }).
+  sort((a, b) => b.score - a.score);
 
   const videoHitCounter = new Map();
   const results = [];
@@ -2844,9 +2844,9 @@ app.post("/api/ai/video-search", requireOpenAIKey, requireFeatureAccess("video-s
   }
   if (recovery.altQueries.length) {
     suggestedQueries = Array.from(new Set([
-      ...suggestedQueries,
-      ...recovery.altQueries
-    ])).slice(0, 6);
+    ...suggestedQueries,
+    ...recovery.altQueries]
+    )).slice(0, 6);
   }
   if (recovery.strategy && results.length < 5) {
     guidanceText = cleanString(`${guidanceText} ${recovery.strategy}`.trim());
@@ -2855,16 +2855,16 @@ app.post("/api/ai/video-search", requireOpenAIKey, requireFeatureAccess("video-s
   const personalization = buildVideoPersonalization(req.auth && req.auth.user ? req.auth.user.id : "", query, sorted);
   if (!personalization.optOut && personalization.suggestedQueries.length) {
     suggestedQueries = Array.from(new Set([
-      ...suggestedQueries,
-      ...personalization.suggestedQueries
-    ])).slice(0, 6);
+    ...suggestedQueries,
+    ...personalization.suggestedQueries]
+    )).slice(0, 6);
   }
-  const personalizedRelated = !personalization.optOut
-    ? personalization.relatedContent
-    : [];
+  const personalizedRelated = !personalization.optOut ?
+  personalization.relatedContent :
+  [];
   const mergedRelated = Array.from(new Map(
-    [...relatedContent, ...personalizedRelated]
-      .map((item) => [`${cleanString(item.id)}:${cleanString(item.url)}`, item])
+    [...relatedContent, ...personalizedRelated].
+    map((item) => [`${cleanString(item.id)}:${cleanString(item.url)}`, item])
   ).values()).slice(0, 8);
 
   const rankingMode = chunkSemanticEnabled ? "semantic+lexical" : "lexical-fallback";
@@ -2961,13 +2961,13 @@ if (require.main === module) {
 
 function resolveRootDir() {
   const candidates = [
-    __dirname,
-    process.cwd(),
-    path.resolve(__dirname, ".."),
-    path.resolve(__dirname, "..", ".."),
-    path.resolve(process.cwd(), ".."),
-    path.resolve(process.cwd(), "..", "..")
-  ];
+  __dirname,
+  process.cwd(),
+  path.resolve(__dirname, ".."),
+  path.resolve(__dirname, "..", ".."),
+  path.resolve(process.cwd(), ".."),
+  path.resolve(process.cwd(), "..", "..")];
+
   const seen = new Set();
 
   for (const rawCandidate of candidates) {
@@ -2977,8 +2977,8 @@ function resolveRootDir() {
     }
     seen.add(candidate);
 
-    const hasAppShell = fs.existsSync(path.join(candidate, "index.html"))
-      && fs.existsSync(path.join(candidate, "ai", "apps"));
+    const hasAppShell = fs.existsSync(path.join(candidate, "index.html")) &&
+    fs.existsSync(path.join(candidate, "ai", "apps"));
     const hasVideoIndex = fs.existsSync(path.join(candidate, "server", "data", "video-library-index.json"));
     if (hasAppShell || hasVideoIndex) {
       return candidate;
@@ -3018,7 +3018,7 @@ function loadEnvFile(envPath) {
     const key = trimmed.slice(0, eqIdx).trim();
     let value = trimmed.slice(eqIdx + 1).trim();
 
-    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+    if (value.startsWith('"') && value.endsWith('"') || value.startsWith("'") && value.endsWith("'")) {
       value = value.slice(1, -1);
     }
 
@@ -3030,9 +3030,9 @@ function loadEnvFile(envPath) {
 
 function detectServerlessRuntime() {
   return Boolean(
-    cleanString(process.env.NETLIFY)
-    || cleanString(process.env.AWS_LAMBDA_FUNCTION_NAME)
-    || cleanString(process.env.LAMBDA_TASK_ROOT)
+    cleanString(process.env.NETLIFY) ||
+    cleanString(process.env.AWS_LAMBDA_FUNCTION_NAME) ||
+    cleanString(process.env.LAMBDA_TASK_ROOT)
   );
 }
 
@@ -3055,9 +3055,9 @@ function resolveAllowedOrigin(origin) {
     return "";
   }
   if (!API_ALLOWED_ORIGINS.length) {
-    return DEFAULT_ALLOWED_ORIGIN_PATTERNS.some((pattern) => pattern.test(safeOrigin))
-      ? safeOrigin
-      : "";
+    return DEFAULT_ALLOWED_ORIGIN_PATTERNS.some((pattern) => pattern.test(safeOrigin)) ?
+    safeOrigin :
+    "";
   }
   if (API_ALLOWED_ORIGINS.includes("*")) {
     return safeOrigin;
@@ -3091,11 +3091,11 @@ function parseCookieHeader(rawValue) {
 }
 
 function base64UrlEncodeText(value) {
-  return Buffer.from(String(value || ""), "utf8")
-    .toString("base64")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/g, "");
+  return Buffer.from(String(value || ""), "utf8").
+  toString("base64").
+  replace(/\+/g, "-").
+  replace(/\//g, "_").
+  replace(/=+$/g, "");
 }
 
 function base64UrlDecodeText(value) {
@@ -3130,19 +3130,19 @@ function tokenPrefixForType(type) {
 
 function signTokenPayload(type, payloadB64) {
   const scopedSecret = `${AUTH_TOKEN_SIGNING_SECRET}:${cleanString(type, "session")}`;
-  return crypto
-    .createHmac("sha256", scopedSecret)
-    .update(cleanString(payloadB64))
-    .digest("base64")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/g, "");
+  return crypto.
+  createHmac("sha256", scopedSecret).
+  update(cleanString(payloadB64)).
+  digest("base64").
+  replace(/\+/g, "-").
+  replace(/\//g, "_").
+  replace(/=+$/g, "");
 }
 
 function createSignedToken(type, claims, options = {}) {
   const safeType = cleanString(type, "session");
-  const expiresAt = cleanString(options.expiresAt)
-    || new Date(Date.now() + AUTH_COOKIE_MAX_AGE_MS).toISOString();
+  const expiresAt = cleanString(options.expiresAt) ||
+  new Date(Date.now() + AUTH_COOKIE_MAX_AGE_MS).toISOString();
   const payload = {
     typ: safeType,
     exp: expiresAt,
@@ -3224,9 +3224,9 @@ function findInternalUserByEmail(email) {
   if (!safeEmail) {
     return null;
   }
-  const rows = platform && platform.state && Array.isArray(platform.state.users)
-    ? platform.state.users
-    : [];
+  const rows = platform && platform.state && Array.isArray(platform.state.users) ?
+  platform.state.users :
+  [];
   return rows.find((row) => cleanString(row && row.email).toLowerCase() === safeEmail && !row.deletedAt) || null;
 }
 
@@ -3244,8 +3244,8 @@ function ensureUserIdentityByEmail(email, fallbackName = "") {
       throw createHttpError(404, "Account not found.");
     }
     const workspaceId = cleanString(
-      existing.activeWorkspaceId
-      || platform.getPrimaryWorkspaceIdForUser(cleanString(existing.id))
+      existing.activeWorkspaceId ||
+      platform.getPrimaryWorkspaceIdForUser(cleanString(existing.id))
     );
     return {
       user: sanitizeUserForSession(existing),
@@ -3273,9 +3273,9 @@ function issueSessionTokenForUser(user, workspaceId, options = {}) {
     };
   }
   const resolvedWorkspaceId = cleanString(
-    workspaceId
-    || safeUser.activeWorkspaceId
-    || platform.getPrimaryWorkspaceIdForUser(cleanString(safeUser.id))
+    workspaceId ||
+    safeUser.activeWorkspaceId ||
+    platform.getPrimaryWorkspaceIdForUser(cleanString(safeUser.id))
   );
   const issued = createSignedToken("session", {
     userId: cleanString(safeUser.id),
@@ -3284,8 +3284,8 @@ function issueSessionTokenForUser(user, workspaceId, options = {}) {
     role: cleanString(safeUser.role),
     workspaceId: resolvedWorkspaceId
   }, {
-    expiresAt: cleanString(options.expiresAt)
-      || new Date(Date.now() + AUTH_COOKIE_MAX_AGE_MS).toISOString()
+    expiresAt: cleanString(options.expiresAt) ||
+    new Date(Date.now() + AUTH_COOKIE_MAX_AGE_MS).toISOString()
   });
   return {
     token: issued.token,
@@ -3444,10 +3444,10 @@ function attachAuthContext(req, _res, next) {
   const headerWorkspace = cleanString(req.headers && req.headers["x-workspace-id"]);
   const cookieWorkspace = cleanString(readRequestCookie(req, AUTH_WORKSPACE_COOKIE));
   const workspaceId = resolveAuthorizedWorkspaceId(user, [
-    headerWorkspace,
-    cookieWorkspace,
-    user && user.activeWorkspaceId
-  ]);
+  headerWorkspace,
+  cookieWorkspace,
+  user && user.activeWorkspaceId]
+  );
 
   req.auth = {
     user: user || null,
@@ -3517,9 +3517,9 @@ function requireFeatureAccess(feature) {
     }
     const entitlements = platform.getWorkspaceEntitlements(req.auth.workspaceId);
     if (!entitlements.features[feature]) {
-      const upgradePlans = PLAN_CATALOG
-        .filter((plan) => plan.features && plan.features[feature])
-        .map((plan) => plan.id);
+      const upgradePlans = PLAN_CATALOG.
+      filter((plan) => plan.features && plan.features[feature]).
+      map((plan) => plan.id);
       res.status(403).json({
         error: "Your current plan does not include this feature.",
         reasonCode: "feature_not_in_plan",
@@ -3542,14 +3542,14 @@ function enforceQuota(feature, unitsResolver) {
     if (!requireAuth(req, res)) {
       return;
     }
-    const unitsRequested = typeof unitsResolver === "function"
-      ? Math.max(1, Number(unitsResolver(req) || 1))
-      : 1;
+    const unitsRequested = typeof unitsResolver === "function" ?
+    Math.max(1, Number(unitsResolver(req) || 1)) :
+    1;
     const quota = platform.checkQuota(req.auth.workspaceId, feature, unitsRequested);
     if (!quota.allowed) {
-      const overagePolicy = quota && quota.overagePolicy && typeof quota.overagePolicy === "object"
-        ? quota.overagePolicy
-        : {};
+      const overagePolicy = quota && quota.overagePolicy && typeof quota.overagePolicy === "object" ?
+      quota.overagePolicy :
+      {};
       res.status(403).json({
         error: cleanString(overagePolicy.message, "Usage limit reached for this plan."),
         reasonCode: quota.reasonCode || "quota_exceeded",
@@ -3640,19 +3640,19 @@ function recordFeatureUsage(req, feature, row = {}) {
       req.auth.user.isGuest = cleanString(updated.email).toLowerCase().endsWith("@local.bibleaihub");
     }
   } catch (_) {
+
     // Credit consumption failures should not break successful generations.
-  }
-}
+  }}
 
 function createRequestId(req, feature) {
   const source = [
-    cleanString(req.auth && req.auth.user && req.auth.user.id),
-    cleanString(feature),
-    cleanString(req.path),
-    cleanString(req.method),
-    String(Date.now()),
-    crypto.randomBytes(4).toString("hex")
-  ].join(":");
+  cleanString(req.auth && req.auth.user && req.auth.user.id),
+  cleanString(feature),
+  cleanString(req.path),
+  cleanString(req.method),
+  String(Date.now()),
+  crypto.randomBytes(4).toString("hex")].
+  join(":");
   return `req_${crypto.createHash("sha1").update(source).digest("hex").slice(0, 20)}`;
 }
 
@@ -3681,7 +3681,7 @@ async function runSermonAnalyzerWorker() {
         continue;
       }
       const job = platform.state.analyzerJobs.find((row) => row.id === jobId) || null;
-      if (!job || (job.status === "completed")) {
+      if (!job || job.status === "completed") {
         continue;
       }
       try {
@@ -3689,20 +3689,20 @@ async function runSermonAnalyzerWorker() {
           status: "processing",
           startedAt: new Date().toISOString()
         });
-        const file = job.payload && job.payload.file
-          ? {
-            originalname: cleanString(job.payload.file.originalname),
-            mimetype: cleanString(job.payload.file.mimetype),
-            buffer: Buffer.from(cleanString(job.payload.file.bufferBase64), "base64")
-          }
-          : null;
+        const file = job.payload && job.payload.file ?
+        {
+          originalname: cleanString(job.payload.file.originalname),
+          mimetype: cleanString(job.payload.file.mimetype),
+          buffer: Buffer.from(cleanString(job.payload.file.bufferBase64), "base64")
+        } :
+        null;
         const report = await generateSermonAnalyzerReport({
           file,
           context: cleanString(job.payload && job.payload.context, "General sermon context"),
           goal: cleanString(job.payload && job.payload.goal),
           notes: cleanString(job.payload && job.payload.notes),
           transcriptOverride: cleanString(job.payload && job.payload.transcriptOverride),
-          localAnalysis: (job.payload && job.payload.localAnalysis) || {}
+          localAnalysis: job.payload && job.payload.localAnalysis || {}
         });
         const enrichedReport = enrichSermonAnalyzerReportWithCoaching(report, {
           workspaceId: cleanString(job.workspaceId),
@@ -3712,10 +3712,10 @@ async function runSermonAnalyzerWorker() {
           workspaceId: cleanString(job.workspaceId),
           userId: cleanString(job.userId),
           feature: "sermon-analyzer",
-          units: Math.max(1, Math.ceil(Number((enrichedReport.meta.durationSeconds || 60)) / 60)),
+          units: Math.max(1, Math.ceil(Number(enrichedReport.meta.durationSeconds || 60) / 60)),
           unitType: "audio_minute",
           model: OPENAI_TRANSCRIBE_MODEL,
-          estimatedCostUsd: Number((Math.max(1, Math.ceil(Number((enrichedReport.meta.durationSeconds || 60)) / 60)) * 0.03).toFixed(4))
+          estimatedCostUsd: Number((Math.max(1, Math.ceil(Number(enrichedReport.meta.durationSeconds || 60) / 60)) * 0.03).toFixed(4))
         });
         platform.updateAnalyzerJob(job.id, {
           status: "completed",
@@ -3858,10 +3858,10 @@ function attachBibleStudyEvidence(response, context = {}) {
   for (const [key, value] of Object.entries(clear)) {
     const stage = value && typeof value === "object" ? value : {};
     const references = findScriptureReferences([
-      ...(Array.isArray(stage.aiFindings) ? stage.aiFindings : []),
-      ...(Array.isArray(stage.actions) ? stage.actions : []),
-      cleanString(stage.stageSummary)
-    ].join(" ")).slice(0, 8);
+    ...(Array.isArray(stage.aiFindings) ? stage.aiFindings : []),
+    ...(Array.isArray(stage.actions) ? stage.actions : []),
+    cleanString(stage.stageSummary)].
+    join(" ")).slice(0, 8);
     const citations = Array.from(new Set([primaryReference, ...references])).slice(0, 8).map((reference) => ({
       reference,
       source: reference === primaryReference ? "primary-passage" : "cross-reference"
@@ -3884,9 +3884,9 @@ function attachBibleStudyEvidence(response, context = {}) {
     evidencePanel: {
       exportReady: true,
       notes: [
-        "Citations are generated from explicit references in the output and the primary passage.",
-        "Confidence labels are heuristic and should be validated through direct textual study."
-      ]
+      "Citations are generated from explicit references in the output and the primary passage.",
+      "Confidence labels are heuristic and should be validated through direct textual study."]
+
     },
     exportPack: {
       markdown: buildBibleStudyMarkdownExport({
@@ -3936,15 +3936,15 @@ function inferConfidenceFromStage(stage) {
 
 function buildBibleStudyMarkdownExport({ reference, profile, payload }) {
   const lines = [
-    `# Bible Study Pack: ${reference}`,
-    "",
-    `- Theological profile: ${profile}`,
-    `- Generated: ${new Date().toISOString()}`,
-    "",
-    `## Summary`,
-    cleanString(payload && payload.summary, "No summary provided."),
-    ""
-  ];
+  `# Bible Study Pack: ${reference}`,
+  "",
+  `- Theological profile: ${profile}`,
+  `- Generated: ${new Date().toISOString()}`,
+  "",
+  `## Summary`,
+  cleanString(payload && payload.summary, "No summary provided."),
+  ""];
+
   const clear = payload && payload.clear && typeof payload.clear === "object" ? payload.clear : {};
   for (const [key, stage] of Object.entries(clear)) {
     const label = cleanString(stage && stage.label, key);
@@ -3963,41 +3963,41 @@ function buildBibleStudyMarkdownExport({ reference, profile, payload }) {
 
 function buildBibleStudyDocTextExport({ reference, profile, payload }) {
   return [
-    `Bible Study Pack: ${reference}`,
-    `Theological Profile: ${profile}`,
-    `Generated: ${new Date().toISOString()}`,
-    "",
-    `Summary`,
-    cleanString(payload && payload.summary, "No summary provided."),
-    "",
-    `CLEAR Stages`,
-    ...Object.entries(payload && payload.clear && typeof payload.clear === "object" ? payload.clear : {})
-      .flatMap(([key, stage]) => [
-        `${cleanString(stage && stage.label, key)}: ${cleanString(stage && stage.stageSummary, "No summary.")}`,
-        `Confidence: ${cleanString(stage && stage.evidence && stage.evidence.confidence, "unknown")}`,
-        `Citations: ${(Array.isArray(stage && stage.evidence && stage.evidence.citations) ? stage.evidence.citations : []).map((row) => cleanString(row.reference)).join(", ")}`,
-        ""
-      ])
-  ].join("\n");
+  `Bible Study Pack: ${reference}`,
+  `Theological Profile: ${profile}`,
+  `Generated: ${new Date().toISOString()}`,
+  "",
+  `Summary`,
+  cleanString(payload && payload.summary, "No summary provided."),
+  "",
+  `CLEAR Stages`,
+  ...Object.entries(payload && payload.clear && typeof payload.clear === "object" ? payload.clear : {}).
+  flatMap(([key, stage]) => [
+  `${cleanString(stage && stage.label, key)}: ${cleanString(stage && stage.stageSummary, "No summary.")}`,
+  `Confidence: ${cleanString(stage && stage.evidence && stage.evidence.confidence, "unknown")}`,
+  `Citations: ${(Array.isArray(stage && stage.evidence && stage.evidence.citations) ? stage.evidence.citations : []).map((row) => cleanString(row.reference)).join(", ")}`,
+  ""]
+  )].
+  join("\n");
 }
 
 function buildBibleStudyHtmlExport({ reference, profile, payload }) {
   const escape = (value) => escapeHtml(value);
   const clear = payload && payload.clear && typeof payload.clear === "object" ? payload.clear : {};
   return [
-    "<!doctype html>",
-    "<html lang=\"en\"><head><meta charset=\"utf-8\" />",
-    `<title>${escape(`Bible Study Pack: ${reference}`)}</title>`,
-    "<style>body{font-family:Arial,sans-serif;line-height:1.5;padding:24px;color:#10243a}h1,h2{color:#16385d}section{margin-bottom:20px}small{color:#5b738c}</style>",
-    "</head><body>",
-    `<h1>${escape(`Bible Study Pack: ${reference}`)}</h1>`,
-    `<p><strong>Theological Profile:</strong> ${escape(profile)}</p>`,
-    `<p><small>Generated ${escape(new Date().toISOString())}</small></p>`,
-    "<section>",
-    "<h2>Summary</h2>",
-    `<p>${escape(cleanString(payload && payload.summary, "No summary provided."))}</p>`,
-    "</section>",
-    ...Object.entries(clear).map(([key, stage]) => `
+  "<!doctype html>",
+  "<html lang=\"en\"><head><meta charset=\"utf-8\" />",
+  `<title>${escape(`Bible Study Pack: ${reference}`)}</title>`,
+  "<style>body{font-family:Arial,sans-serif;line-height:1.5;padding:24px;color:#10243a}h1,h2{color:#16385d}section{margin-bottom:20px}small{color:#5b738c}</style>",
+  "</head><body>",
+  `<h1>${escape(`Bible Study Pack: ${reference}`)}</h1>`,
+  `<p><strong>Theological Profile:</strong> ${escape(profile)}</p>`,
+  `<p><small>Generated ${escape(new Date().toISOString())}</small></p>`,
+  "<section>",
+  "<h2>Summary</h2>",
+  `<p>${escape(cleanString(payload && payload.summary, "No summary provided."))}</p>`,
+  "</section>",
+  ...Object.entries(clear).map(([key, stage]) => `
       <section>
         <h2>${escape(cleanString(stage && stage.label, key))}</h2>
         <p>${escape(cleanString(stage && stage.stageSummary, "No summary provided."))}</p>
@@ -4005,8 +4005,8 @@ function buildBibleStudyHtmlExport({ reference, profile, payload }) {
         <p><strong>Citations:</strong> ${escape((Array.isArray(stage && stage.evidence && stage.evidence.citations) ? stage.evidence.citations : []).map((row) => cleanString(row.reference)).join(", "))}</p>
       </section>
     `),
-    "</body></html>"
-  ].join("");
+  "</body></html>"].
+  join("");
 }
 
 function buildStyleDirective(styleMode) {
@@ -4031,10 +4031,10 @@ function buildSeriesContinuityDirective(seriesContext) {
     return "";
   }
   return `Series continuity: ${[
-    title ? `series title "${title}"` : "",
-    week ? `week ${week}` : "",
-    priorThemes.length ? `prior themes: ${priorThemes.join("; ")}` : ""
-  ].filter(Boolean).join(", ")}.`;
+  title ? `series title "${title}"` : "",
+  week ? `week ${week}` : "",
+  priorThemes.length ? `prior themes: ${priorThemes.join("; ")}` : ""].
+  filter(Boolean).join(", ")}.`;
 }
 
 function summarizeSeriesMemory(seriesContext) {
@@ -4042,10 +4042,10 @@ function summarizeSeriesMemory(seriesContext) {
     return { enabled: false, summary: "" };
   }
   const summary = [
-    cleanString(seriesContext.title) ? `Series: ${cleanString(seriesContext.title)}` : "",
-    cleanString(seriesContext.week) ? `Week: ${cleanString(seriesContext.week)}` : "",
-    cleanArray(seriesContext.priorThemes, 6).length ? `Prior themes: ${cleanArray(seriesContext.priorThemes, 6).join(", ")}` : ""
-  ].filter(Boolean).join(" | ");
+  cleanString(seriesContext.title) ? `Series: ${cleanString(seriesContext.title)}` : "",
+  cleanString(seriesContext.week) ? `Week: ${cleanString(seriesContext.week)}` : "",
+  cleanArray(seriesContext.priorThemes, 6).length ? `Prior themes: ${cleanArray(seriesContext.priorThemes, 6).join(", ")}` : ""].
+  filter(Boolean).join(" | ");
   return {
     enabled: Boolean(summary),
     summary
@@ -4053,74 +4053,74 @@ function summarizeSeriesMemory(seriesContext) {
 }
 
 function computePreachabilityScore({ minutes, outline, transitions, applications, illustrations, timingPlan }) {
-  const totalPlannedMinutes = (Array.isArray(timingPlan) ? timingPlan : [])
-    .reduce((sum, row) => sum + Number(row.minutes || 0), 0);
+  const totalPlannedMinutes = (Array.isArray(timingPlan) ? timingPlan : []).
+  reduce((sum, row) => sum + Number(row.minutes || 0), 0);
   const structure = clampNumber((Array.isArray(outline) ? outline.length : 0) * 2.2, 0, 10, 0);
   const transitionScore = clampNumber((Array.isArray(transitions) ? transitions.length : 0) * 1.8, 0, 10, 0);
   const applicationScore = clampNumber((Array.isArray(applications) ? applications.length : 0) * 1.8, 0, 10, 0);
   const illustrationScore = clampNumber((Array.isArray(illustrations) ? illustrations.length : 0) * 1.8, 0, 10, 0);
   const timingVariance = Math.abs(Number(minutes || 0) - totalPlannedMinutes);
-  const timingScore = clampNumber(10 - (timingVariance * 0.4), 0, 10, 0);
-  const weighted = (
-    (structure * 0.24)
-    + (transitionScore * 0.16)
-    + (applicationScore * 0.24)
-    + (illustrationScore * 0.16)
-    + (timingScore * 0.2)
-  );
+  const timingScore = clampNumber(10 - timingVariance * 0.4, 0, 10, 0);
+  const weighted =
+  structure * 0.24 +
+  transitionScore * 0.16 +
+  applicationScore * 0.24 +
+  illustrationScore * 0.16 +
+  timingScore * 0.2;
+
   return {
     overall: Number(weighted.toFixed(2)),
     rubric: [
-      { dimension: "Structure", score: Number(structure.toFixed(2)), rationale: "Counts coherent movement and explanatory depth." },
-      { dimension: "Transitions", score: Number(transitionScore.toFixed(2)), rationale: "Measures movement continuity across sections." },
-      { dimension: "Application", score: Number(applicationScore.toFixed(2)), rationale: "Measures concrete congregational response pathways." },
-      { dimension: "Illustration", score: Number(illustrationScore.toFixed(2)), rationale: "Measures imagination and listener connection points." },
-      { dimension: "Timing", score: Number(timingScore.toFixed(2)), rationale: "Measures fit between target length and segment plan." }
-    ]
+    { dimension: "Structure", score: Number(structure.toFixed(2)), rationale: "Counts coherent movement and explanatory depth." },
+    { dimension: "Transitions", score: Number(transitionScore.toFixed(2)), rationale: "Measures movement continuity across sections." },
+    { dimension: "Application", score: Number(applicationScore.toFixed(2)), rationale: "Measures concrete congregational response pathways." },
+    { dimension: "Illustration", score: Number(illustrationScore.toFixed(2)), rationale: "Measures imagination and listener connection points." },
+    { dimension: "Timing", score: Number(timingScore.toFixed(2)), rationale: "Measures fit between target length and segment plan." }]
+
   };
 }
 
 function buildTeachingKitMarkdown(sourceTitle, audience, ai) {
   return [
-    `# Teaching Kit: ${sourceTitle}`,
-    "",
-    `Audience: ${audience}`,
-    "",
-    `## Overview`,
-    cleanString(ai && ai.overview, "No overview provided."),
-    "",
-    `## Central Truth`,
-    cleanString(ai && ai.centralTruth, "No central truth provided."),
-    "",
-    `## Objectives`,
-    ...cleanArray(ai && ai.lessonPlan && ai.lessonPlan.objectives, 8).map((item) => `- ${item}`)
-  ].join("\n");
+  `# Teaching Kit: ${sourceTitle}`,
+  "",
+  `Audience: ${audience}`,
+  "",
+  `## Overview`,
+  cleanString(ai && ai.overview, "No overview provided."),
+  "",
+  `## Central Truth`,
+  cleanString(ai && ai.centralTruth, "No central truth provided."),
+  "",
+  `## Objectives`,
+  ...cleanArray(ai && ai.lessonPlan && ai.lessonPlan.objectives, 8).map((item) => `- ${item}`)].
+  join("\n");
 }
 
 function buildTeachingHandout(ai, variant) {
   const objectives = cleanArray(ai && ai.lessonPlan && ai.lessonPlan.objectives, 6);
   const keyVerse = cleanString(ai && ai.lessonPlan && ai.lessonPlan.keyVerse);
   const challenge = cleanString(ai && ai.takeHomeChallenge);
-  const prefix = variant === "leader"
-    ? "Facilitator notes:"
-    : variant === "parent"
-      ? "Family follow-up:"
-      : "Student handout:";
+  const prefix = variant === "leader" ?
+  "Facilitator notes:" :
+  variant === "parent" ?
+  "Family follow-up:" :
+  "Student handout:";
   return [
-    prefix,
-    keyVerse ? `Key verse: ${keyVerse}` : "",
-    ...objectives.map((item, idx) => `${idx + 1}. ${item}`),
-    challenge ? `Challenge: ${challenge}` : ""
-  ].filter(Boolean).join("\n");
+  prefix,
+  keyVerse ? `Key verse: ${keyVerse}` : "",
+  ...objectives.map((item, idx) => `${idx + 1}. ${item}`),
+  challenge ? `Challenge: ${challenge}` : ""].
+  filter(Boolean).join("\n");
 }
 
 function buildSlideOutline(ai) {
-  const timeline = cleanObjectArray(ai && ai.lessonPlan && ai.lessonPlan.sessionTimeline, 12)
-    .map((row) => ({
-      title: cleanString(row.segment, "Segment"),
-      subtitle: cleanString(row.plan),
-      minutes: Number(row.minutes || 0)
-    }));
+  const timeline = cleanObjectArray(ai && ai.lessonPlan && ai.lessonPlan.sessionTimeline, 12).
+  map((row) => ({
+    title: cleanString(row.segment, "Segment"),
+    subtitle: cleanString(row.plan),
+    minutes: Number(row.minutes || 0)
+  }));
   return {
     title: cleanString(ai && ai.lessonPlan && ai.lessonPlan.title, "Lesson Deck"),
     slides: timeline
@@ -4130,10 +4130,10 @@ function buildSlideOutline(ai) {
 function buildEvaluationTrendPayload(req, scores, manuscript) {
   const workspaceId = req.auth.workspaceId;
   const currentAverage = average(scores.map((row) => Number(row.score || 0)));
-  const history = platform.state.events
-    .filter((event) => event.name === "sermon_evaluation_result" && event.workspaceId === workspaceId)
-    .sort((a, b) => Date.parse(a.createdAt || 0) - Date.parse(b.createdAt || 0))
-    .slice(-10);
+  const history = platform.state.events.
+  filter((event) => event.name === "sermon_evaluation_result" && event.workspaceId === workspaceId).
+  sort((a, b) => Date.parse(a.createdAt || 0) - Date.parse(b.createdAt || 0)).
+  slice(-10);
   const pastAverages = history.map((event) => Number(event.properties && event.properties.averageScore || 0));
   const previousAverage = pastAverages.length ? pastAverages[pastAverages.length - 1] : 0;
   const deltaScore = Number((currentAverage - previousAverage).toFixed(2));
@@ -4147,7 +4147,7 @@ function buildEvaluationTrendPayload(req, scores, manuscript) {
     },
     delta: {
       scoreDelta: deltaScore,
-      manuscriptLengthDelta: Number((String(manuscript || "").length - Number((history[history.length - 1] && history[history.length - 1].properties && history[history.length - 1].properties.manuscriptLength) || 0)).toFixed(0))
+      manuscriptLengthDelta: Number((String(manuscript || "").length - Number(history[history.length - 1] && history[history.length - 1].properties && history[history.length - 1].properties.manuscriptLength || 0)).toFixed(0))
     },
     eventProperties: {
       averageScore: Number(currentAverage.toFixed(2)),
@@ -4352,13 +4352,13 @@ function ensureResearchHelperCompleteness({ ai, manuscript, targetMinutes, revis
 
   const baseStrengths = cleanArray(source.strengths, 8);
   const baseGaps = cleanArray(source.gaps, 9);
-  const baseScores = cleanObjectArray(source.scores, 8)
-    .map((row) => ({
-      label: cleanString(row.label),
-      score: clampNumber(Number(row.score), 0, 10, 0),
-      rationale: cleanString(row.rationale)
-    }))
-    .filter((row) => row.label);
+  const baseScores = cleanObjectArray(source.scores, 8).
+  map((row) => ({
+    label: cleanString(row.label),
+    score: clampNumber(Number(row.score), 0, 10, 0),
+    rationale: cleanString(row.rationale)
+  })).
+  filter((row) => row.label);
   const baseRevisions = normalizeResearchHelperGuidanceLines(source.revisions, {
     objective: safeObjective,
     max: 12,
@@ -4380,27 +4380,27 @@ function ensureResearchHelperCompleteness({ ai, manuscript, targetMinutes, revis
   if (strengths.length < 3) {
     reasons.push("strengths");
     strengths = mergeUniqueResearchHelperLines(strengths, [
-      "Shows sincere pastoral intent toward the congregation.",
-      "Contains usable sermon material that can be sharpened into a clearer movement.",
-      "Includes language that can support stronger application with tighter structure."
-    ], 8);
+    "Shows sincere pastoral intent toward the congregation.",
+    "Contains usable sermon material that can be sharpened into a clearer movement.",
+    "Includes language that can support stronger application with tighter structure."],
+    8);
   }
 
   let gaps = mergeUniqueResearchHelperLines(baseGaps, heuristics.gaps, 9);
   if (gaps.length < 5) {
     reasons.push("gaps");
     gaps = mergeUniqueResearchHelperLines(gaps, [
-      "State the central thesis earlier and repeat it at each major transition.",
-      "Increase explicit Scripture handling so interpretation and application stay tightly connected.",
-      "Reduce repetition by combining similar personal-history paragraphs into one concise section.",
-      "Build a clearer response pathway so hearers know what to do this week.",
-      "Tighten sentence structure so key lines can be heard clearly in live delivery."
-    ], 9);
+    "State the central thesis earlier and repeat it at each major transition.",
+    "Increase explicit Scripture handling so interpretation and application stay tightly connected.",
+    "Reduce repetition by combining similar personal-history paragraphs into one concise section.",
+    "Build a clearer response pathway so hearers know what to do this week.",
+    "Tighten sentence structure so key lines can be heard clearly in live delivery."],
+    9);
   }
 
-  let scores = baseScores.length >= 4
-    ? baseScores.slice(0, 6)
-    : buildResearchHelperFallbackScores(heuristics);
+  let scores = baseScores.length >= 4 ?
+  baseScores.slice(0, 6) :
+  buildResearchHelperFallbackScores(heuristics);
   if (baseScores.length < 4) {
     reasons.push("scores");
   }
@@ -4409,9 +4409,9 @@ function ensureResearchHelperCompleteness({ ai, manuscript, targetMinutes, revis
   if (revisions.length < 6) {
     reasons.push("revisions");
     revisions = normalizeResearchHelperGuidanceLines([
-      ...revisions,
-      ...buildResearchHelperFallbackRevisions(gaps, heuristics)
-    ], {
+    ...revisions,
+    ...buildResearchHelperFallbackRevisions(gaps, heuristics)],
+    {
       objective: safeObjective,
       max: 12,
       type: "revision"
@@ -4422,9 +4422,9 @@ function ensureResearchHelperCompleteness({ ai, manuscript, targetMinutes, revis
   if (tightenLines.length < 4) {
     reasons.push("tightenLines");
     tightenLines = normalizeResearchHelperGuidanceLines([
-      ...tightenLines,
-      ...buildResearchHelperFallbackTightenLines(heuristics)
-    ], {
+    ...tightenLines,
+    ...buildResearchHelperFallbackTightenLines(heuristics)],
+    {
       objective: safeObjective,
       max: 8,
       type: "tighten"
@@ -4435,11 +4435,11 @@ function ensureResearchHelperCompleteness({ ai, manuscript, targetMinutes, revis
   if (overallVerdict.length < 80) {
     reasons.push("overallVerdict");
     overallVerdict = [
-      `This sermon manuscript has a usable foundation but needs focused revision before delivery.`,
-      `Primary strengths: ${strengths.slice(0, 2).join(" ")}`,
-      `Priority gaps: ${gaps.slice(0, 2).join(" ")}`,
-      `For a ${safeTargetMinutes}-minute target, prioritize ${safeObjective.replace(/_/g, " ")} edits first, then finalize with line-level tightening.`
-    ].join(" ");
+    `This sermon manuscript has a usable foundation but needs focused revision before delivery.`,
+    `Primary strengths: ${strengths.slice(0, 2).join(" ")}`,
+    `Priority gaps: ${gaps.slice(0, 2).join(" ")}`,
+    `For a ${safeTargetMinutes}-minute target, prioritize ${safeObjective.replace(/_/g, " ")} edits first, then finalize with line-level tightening.`].
+    join(" ");
   }
 
   return {
@@ -4463,11 +4463,11 @@ function buildResearchHelperFallbackHeuristics({ manuscript, targetMinutes, revi
   const sentenceAnchors = extractSentenceAnchors(safeText, 18);
   const sentenceCount = Math.max(1, sentenceAnchors.length);
   const avgSentenceLength = words / sentenceCount;
-  const paragraphCount = safeText
-    .split(/\n{2,}/)
-    .map((row) => cleanString(row))
-    .filter(Boolean)
-    .length;
+  const paragraphCount = safeText.
+  split(/\n{2,}/).
+  map((row) => cleanString(row)).
+  filter(Boolean).
+  length;
   const references = findScriptureReferences(safeText);
   const questionCount = countRegexMatches(safeText, /\?/g);
   const actionVerbCount = countRegexMatches(
@@ -4551,47 +4551,47 @@ function buildResearchHelperFallbackScores(heuristics) {
   const objective = cleanString(heuristics.objective, "balanced").replace(/_/g, " ");
 
   const rows = [
-    {
-      label: "Biblical Grounding",
-      score: clampNumber(5.6 + Math.min(referenceCount, 6) * 0.6, 0, 10, 6.2),
-      rationale: referenceCount
-        ? `The manuscript names ${referenceCount} reference(s), but claims still need tighter text-to-point linkage.`
-        : "Core claims need more explicit passage-level grounding to strengthen biblical confidence."
-    },
-    {
-      label: "Theological Clarity",
-      score: clampNumber(7.6 - Math.max(0, avgSentenceLength - 20) * 0.16, 0, 10, 6.8),
-      rationale: `Average sentence length is ${Number(avgSentenceLength.toFixed(1))} words, which affects interpretive clarity in oral delivery.`
-    },
-    {
-      label: "Structure & Flow",
-      score: clampNumber(6.4 + Math.min(paragraphCount, 10) * 0.12 - (paragraphCount < 4 ? 0.9 : 0), 0, 10, 6.5),
-      rationale: `Detected ${paragraphCount} major paragraph block(s); transitions should carry the listener through a clearer movement.`
-    },
-    {
-      label: "Pastoral Tone",
-      score: clampNumber(6.7 + Math.min(pronounCount, 25) * 0.05, 0, 10, 7),
-      rationale: "Relational language is present, and warmth can increase further with concise, listener-centered framing."
-    },
-    {
-      label: "Application & Response",
-      score: clampNumber(6.1 + Math.min(actionVerbCount, 12) * 0.18 + Math.min(questionCount, 8) * 0.09, 0, 10, 6.4),
-      rationale: `Action-verb density (${actionVerbCount}) and reflective prompts (${questionCount}) suggest moderate application potential that needs sharper specificity.`
-    },
-    {
-      label: "Delivery Readiness",
-      score: clampNumber(7.2 - Math.max(0, durationDelta - 1) * 0.22, 0, 10, 6.6),
-      rationale: `Estimated runtime is ~${Number(estimatedMinutes.toFixed(1))} min; align pacing with the target and prioritize ${objective} edits.`
-    }
-  ];
+  {
+    label: "Biblical Grounding",
+    score: clampNumber(5.6 + Math.min(referenceCount, 6) * 0.6, 0, 10, 6.2),
+    rationale: referenceCount ?
+    `The manuscript names ${referenceCount} reference(s), but claims still need tighter text-to-point linkage.` :
+    "Core claims need more explicit passage-level grounding to strengthen biblical confidence."
+  },
+  {
+    label: "Theological Clarity",
+    score: clampNumber(7.6 - Math.max(0, avgSentenceLength - 20) * 0.16, 0, 10, 6.8),
+    rationale: `Average sentence length is ${Number(avgSentenceLength.toFixed(1))} words, which affects interpretive clarity in oral delivery.`
+  },
+  {
+    label: "Structure & Flow",
+    score: clampNumber(6.4 + Math.min(paragraphCount, 10) * 0.12 - (paragraphCount < 4 ? 0.9 : 0), 0, 10, 6.5),
+    rationale: `Detected ${paragraphCount} major paragraph block(s); transitions should carry the listener through a clearer movement.`
+  },
+  {
+    label: "Pastoral Tone",
+    score: clampNumber(6.7 + Math.min(pronounCount, 25) * 0.05, 0, 10, 7),
+    rationale: "Relational language is present, and warmth can increase further with concise, listener-centered framing."
+  },
+  {
+    label: "Application & Response",
+    score: clampNumber(6.1 + Math.min(actionVerbCount, 12) * 0.18 + Math.min(questionCount, 8) * 0.09, 0, 10, 6.4),
+    rationale: `Action-verb density (${actionVerbCount}) and reflective prompts (${questionCount}) suggest moderate application potential that needs sharper specificity.`
+  },
+  {
+    label: "Delivery Readiness",
+    score: clampNumber(7.2 - Math.max(0, durationDelta - 1) * 0.22, 0, 10, 6.6),
+    rationale: `Estimated runtime is ~${Number(estimatedMinutes.toFixed(1))} min; align pacing with the target and prioritize ${objective} edits.`
+  }];
 
-  return rows
-    .map((row) => ({
-      label: cleanString(row.label),
-      score: Number(Number(row.score || 0).toFixed(1)),
-      rationale: cleanString(row.rationale)
-    }))
-    .filter((row) => row.label);
+
+  return rows.
+  map((row) => ({
+    label: cleanString(row.label),
+    score: Number(Number(row.score || 0).toFixed(1)),
+    rationale: cleanString(row.rationale)
+  })).
+  filter((row) => row.label);
 }
 
 function buildResearchHelperFallbackRevisions(gaps, heuristics) {
@@ -4607,9 +4607,9 @@ function buildResearchHelperFallbackRevisions(gaps, heuristics) {
 }
 
 function buildResearchHelperFallbackTightenLines(heuristics) {
-  const anchors = Array.isArray(heuristics && heuristics.sentenceAnchors)
-    ? heuristics.sentenceAnchors
-    : [];
+  const anchors = Array.isArray(heuristics && heuristics.sentenceAnchors) ?
+  heuristics.sentenceAnchors :
+  [];
   const rows = [];
   for (const anchor of anchors) {
     const sentence = cleanString(anchor && anchor.text);
@@ -4660,9 +4660,9 @@ function enrichSermonAnalyzerReportWithCoaching(report, context) {
   const base = report && typeof report === "object" ? report : {};
   const pacing = base.pacingAnalysis && typeof base.pacingAnalysis === "object" ? base.pacingAnalysis : {};
   const dynamics = base.vocalDynamics && typeof base.vocalDynamics === "object" ? base.vocalDynamics : {};
-  const priorJobs = platform.state.analyzerJobs
-    .filter((job) => job.workspaceId === context.workspaceId && job.userId === context.userId && job.status === "completed" && job.result)
-    .sort((a, b) => Date.parse(b.completedAt || 0) - Date.parse(a.completedAt || 0));
+  const priorJobs = platform.state.analyzerJobs.
+  filter((job) => job.workspaceId === context.workspaceId && job.userId === context.userId && job.status === "completed" && job.result).
+  sort((a, b) => Date.parse(b.completedAt || 0) - Date.parse(a.completedAt || 0));
   const previous = priorJobs[0] ? priorJobs[0].result : null;
   const drills = buildCoachingDrills(pacing, dynamics);
   return {
@@ -4671,66 +4671,66 @@ function enrichSermonAnalyzerReportWithCoaching(report, context) {
       planDays: 7,
       drills
     },
-    comparativeAnalytics: previous
-      ? {
-        pacingDeltaWpm: Number((Number(pacing.avgWpm || 0) - Number(previous.pacingAnalysis && previous.pacingAnalysis.avgWpm || 0)).toFixed(2)),
-        vocalVarietyDelta: Number((Number(dynamics.varietyScore || 0) - Number(previous.vocalDynamics && previous.vocalDynamics.varietyScore || 0)).toFixed(2)),
-        clarityDelta: Number((Number((base.contentAnalysis && base.contentAnalysis.gospelClarityScore) || 0) - Number((previous.contentAnalysis && previous.contentAnalysis.gospelClarityScore) || 0)).toFixed(2))
-      }
-      : {
-        pacingDeltaWpm: 0,
-        vocalVarietyDelta: 0,
-        clarityDelta: 0
-      }
+    comparativeAnalytics: previous ?
+    {
+      pacingDeltaWpm: Number((Number(pacing.avgWpm || 0) - Number(previous.pacingAnalysis && previous.pacingAnalysis.avgWpm || 0)).toFixed(2)),
+      vocalVarietyDelta: Number((Number(dynamics.varietyScore || 0) - Number(previous.vocalDynamics && previous.vocalDynamics.varietyScore || 0)).toFixed(2)),
+      clarityDelta: Number((Number(base.contentAnalysis && base.contentAnalysis.gospelClarityScore || 0) - Number(previous.contentAnalysis && previous.contentAnalysis.gospelClarityScore || 0)).toFixed(2))
+    } :
+    {
+      pacingDeltaWpm: 0,
+      vocalVarietyDelta: 0,
+      clarityDelta: 0
+    }
   };
 }
 
 function buildCoachingDrills(pacing, dynamics) {
   const avgWpm = Number(pacing && pacing.avgWpm || 120);
   return [
-    {
-      day: 1,
-      focus: "Pacing discipline",
-      target: "Run a 5-minute segment at target tempo with intentional pauses.",
-      metric: `Target WPM band around ${Math.max(100, Math.round(avgWpm - 8))}-${Math.round(avgWpm + 8)}`
-    },
-    {
-      day: 2,
-      focus: "Vocal dynamics",
-      target: "Practice a paragraph with deliberate contrast in volume and pitch.",
-      metric: `Increase variety score beyond ${Math.max(6, Number((Number(dynamics.varietyScore || 6) + 0.5).toFixed(1)))}`
-    },
-    {
-      day: 3,
-      focus: "Illustration clarity",
-      target: "Rehearse transitions into and out of one illustration.",
-      metric: "Record and verify no abrupt transitions."
-    },
-    {
-      day: 4,
-      focus: "Scripture emphasis",
-      target: "Read key verses with slower cadence and emphasis markers.",
-      metric: "At least 3 explicit emphasis moments."
-    },
-    {
-      day: 5,
-      focus: "Application urgency",
-      target: "Deliver call-to-response section in under 3 minutes.",
-      metric: "One specific action call for listeners."
-    },
-    {
-      day: 6,
-      focus: "Full run-through",
-      target: "Run a 12-minute rehearsal with no notes.",
-      metric: "Sustain pacing and vocal variety without drop-off."
-    },
-    {
-      day: 7,
-      focus: "Review and compare",
-      target: "Record final drill and compare with Day 1 baseline.",
-      metric: "Visible improvement in pacing and dynamics."
-    }
-  ];
+  {
+    day: 1,
+    focus: "Pacing discipline",
+    target: "Run a 5-minute segment at target tempo with intentional pauses.",
+    metric: `Target WPM band around ${Math.max(100, Math.round(avgWpm - 8))}-${Math.round(avgWpm + 8)}`
+  },
+  {
+    day: 2,
+    focus: "Vocal dynamics",
+    target: "Practice a paragraph with deliberate contrast in volume and pitch.",
+    metric: `Increase variety score beyond ${Math.max(6, Number((Number(dynamics.varietyScore || 6) + 0.5).toFixed(1)))}`
+  },
+  {
+    day: 3,
+    focus: "Illustration clarity",
+    target: "Rehearse transitions into and out of one illustration.",
+    metric: "Record and verify no abrupt transitions."
+  },
+  {
+    day: 4,
+    focus: "Scripture emphasis",
+    target: "Read key verses with slower cadence and emphasis markers.",
+    metric: "At least 3 explicit emphasis moments."
+  },
+  {
+    day: 5,
+    focus: "Application urgency",
+    target: "Deliver call-to-response section in under 3 minutes.",
+    metric: "One specific action call for listeners."
+  },
+  {
+    day: 6,
+    focus: "Full run-through",
+    target: "Run a 12-minute rehearsal with no notes.",
+    metric: "Sustain pacing and vocal variety without drop-off."
+  },
+  {
+    day: 7,
+    focus: "Review and compare",
+    target: "Record final drill and compare with Day 1 baseline.",
+    metric: "Visible improvement in pacing and dynamics."
+  }];
+
 }
 
 function buildVideoPersonalization(userId, query, sortedRows) {
@@ -4743,27 +4743,27 @@ function buildVideoPersonalization(userId, query, sortedRows) {
       relatedContent: []
     };
   }
-  const history = platform.state.events
-    .filter((event) => event.userId === userId)
-    .filter((event) => event.name === "generation_success" || event.name === "tool_start")
-    .sort((a, b) => Date.parse(b.createdAt || 0) - Date.parse(a.createdAt || 0))
-    .slice(0, 30);
+  const history = platform.state.events.
+  filter((event) => event.userId === userId).
+  filter((event) => event.name === "generation_success" || event.name === "tool_start").
+  sort((a, b) => Date.parse(b.createdAt || 0) - Date.parse(a.createdAt || 0)).
+  slice(0, 30);
   const recentTerms = tokenize(history.map((event) => cleanString(event.properties && event.properties.feature)).join(" "));
   const queryTerms = tokenize(query);
   const suggestedQueries = Array.from(new Set([
-    ...queryTerms.map((term) => `${term} walkthrough`),
-    ...recentTerms.slice(0, 3).map((term) => `best ${term} workflow`)
-  ])).filter(Boolean).slice(0, 4);
-  const relatedContent = (Array.isArray(sortedRows) ? sortedRows : [])
-    .filter((row) => recentTerms.some((term) => cleanString(row.topic).toLowerCase().includes(term)))
-    .slice(0, 3)
-    .map((row) => ({
-      id: row.id,
-      title: row.title,
-      category: row.category,
-      duration: row.duration,
-      url: buildTimestampedPlaybackUrl(resolveVideoPlaybackBaseUrl(row), 0)
-    }));
+  ...queryTerms.map((term) => `${term} walkthrough`),
+  ...recentTerms.slice(0, 3).map((term) => `best ${term} workflow`)]
+  )).filter(Boolean).slice(0, 4);
+  const relatedContent = (Array.isArray(sortedRows) ? sortedRows : []).
+  filter((row) => recentTerms.some((term) => cleanString(row.topic).toLowerCase().includes(term))).
+  slice(0, 3).
+  map((row) => ({
+    id: row.id,
+    title: row.title,
+    category: row.category,
+    duration: row.duration,
+    url: buildTimestampedPlaybackUrl(resolveVideoPlaybackBaseUrl(row), 0)
+  }));
   return {
     optOut,
     suggestedQueries,
@@ -4883,18 +4883,18 @@ function persistPromptOverrides() {
 
 function canEditPromptOverrides(actor) {
   const email = cleanString(actor && actor.email).toLowerCase();
-  return cleanString(actor && actor.role).toLowerCase() === "admin"
-    || email === cleanString(PROMPT_EDITOR_EMAIL).toLowerCase();
+  return cleanString(actor && actor.role).toLowerCase() === "admin" ||
+  email === cleanString(PROMPT_EDITOR_EMAIL).toLowerCase();
 }
 
 function resolvePromptOverride(promptId, builtPrompt) {
   const safePromptId = cleanString(promptId);
-  const base = builtPrompt && typeof builtPrompt === "object"
-    ? builtPrompt
-    : {};
-  const entry = promptOverridesState && promptOverridesState.prompts
-    ? promptOverridesState.prompts[safePromptId]
-    : null;
+  const base = builtPrompt && typeof builtPrompt === "object" ?
+  builtPrompt :
+  {};
+  const entry = promptOverridesState && promptOverridesState.prompts ?
+  promptOverridesState.prompts[safePromptId] :
+  null;
   if (!entry || typeof entry !== "object") {
     return base;
   }
@@ -4907,9 +4907,9 @@ function resolvePromptOverride(promptId, builtPrompt) {
 
 function getPromptOverrideInfo(promptId) {
   const safePromptId = cleanString(promptId);
-  const entry = promptOverridesState && promptOverridesState.prompts
-    ? promptOverridesState.prompts[safePromptId]
-    : null;
+  const entry = promptOverridesState && promptOverridesState.prompts ?
+  promptOverridesState.prompts[safePromptId] :
+  null;
   if (!entry || typeof entry !== "object") {
     return {
       active: false,
@@ -4926,9 +4926,9 @@ function getPromptOverrideInfo(promptId) {
 }
 
 function buildHowItWorksPayload(options = {}) {
-  const actor = options && options.actor && typeof options.actor === "object"
-    ? options.actor
-    : null;
+  const actor = options && options.actor && typeof options.actor === "object" ?
+  options.actor :
+  null;
   const canEdit = canEditPromptOverrides(actor);
   const promptTemplates = buildPromptTransparencyTemplates();
   return {
@@ -4946,104 +4946,104 @@ function buildHowItWorksPayload(options = {}) {
       transcriptionModel: OPENAI_TRANSCRIBE_MODEL
     },
     apps: [
-      {
-        slug: "bible-study",
-        name: "Bible Study Chat",
-        endpoint: "POST /api/ai/bible-study",
-        calls: [
-          { type: "passage", endpoint: "GET https://bible-api.com/{reference}?translation=web", optional: true, role: "Client passage fetch when the input is a Bible reference." },
-          { type: "prompt", promptId: "bible-study.package", optional: false, role: "Primary generation of CLEAR + 10-step package." },
-          { type: "prompt", promptId: "bible-study.refiner", optional: true, role: "Quality-gated refinement pass when first draft is weak." }
-        ],
-        outputUsage: [
-          "CLEAR cards and step-by-step workflow are rendered in the app UI.",
-          "10-step study method sections are persisted when a project is saved.",
-          "Study output can be handed off to Sermon Preparation."
-        ]
-      },
-      {
-        slug: "sermon-preparation",
-        name: "Sermon Preparation",
-        endpoint: "POST /api/ai/sermon-preparation",
-        calls: [
-          { type: "passage", endpoint: "GET https://bible-api.com/{reference}?translation=web", optional: true, role: "Client-side passage text retrieval." },
-          { type: "prompt", promptId: "sermon-preparation.plan", optional: false, role: "Primary sermon plan generation." },
-          { type: "prompt", promptId: "sermon-preparation.refiner", optional: true, role: "Refines weak sections and optional tightening pass." }
-        ],
-        outputUsage: [
-          "Big idea, outline, transitions, and timing are displayed for sermon drafting.",
-          "Boundary diagnostics are used to flag out-of-scope supporting references.",
-          "Plans can be saved and handed off to Sermon Evaluation."
-        ]
-      },
-      {
-        slug: "teaching-tools",
-        name: "Teaching Tools",
-        endpoint: "POST /api/ai/teaching-tools",
-        calls: [
-          { type: "passage", endpoint: "GET https://bible-api.com/{reference}?translation=web", optional: true, role: "Only used when input is a passage reference." },
-          { type: "prompt", promptId: "teaching-tools.kit", optional: false, role: "Primary lesson kit generation per selected audience." },
-          { type: "prompt", promptId: "teaching-tools.refiner", optional: true, role: "Refinement pass for timeline/question/application quality." }
-        ],
-        outputUsage: [
-          "Renders full lesson kit cards: objectives, timeline, discussion, illustration, application.",
-          "Export payloads generate handouts and slide outlines.",
-          "If multi-audience mode is selected, comparison cards are generated."
-        ]
-      },
-      {
-        slug: "research-helper",
-        name: "Sermon Evaluation",
-        endpoint: "POST /api/ai/research-helper",
-        calls: [
-          { type: "prompt", promptId: "research-helper.evaluation", optional: false, role: "Primary manuscript evaluation and scoring." },
-          { type: "prompt", promptId: "research-helper.revision-pack", optional: true, role: "High-impact revision pack when baseline coaching is weak." }
-        ],
-        outputUsage: [
-          "Renders verdict, scorecards, strengths, gaps, revisions, and tighten-lines.",
-          "Trend data is charted and can be exported to CSV after generation.",
-          "Evaluations can be saved for later revision cycles."
-        ]
-      },
-      {
-        slug: "sermon-analyzer",
-        name: "Sermon Analyzer",
-        endpoint: "POST /api/ai/sermon-analyzer",
-        calls: [
-          { type: "audio", endpoint: "POST /v1/audio/transcriptions", optional: true, role: "Transcribes uploaded audio when transcript override is not used." },
-          { type: "prompt", promptId: "sermon-analyzer.insights", optional: false, role: "Primary multi-signal synthesis (emotion/content/coaching)." },
-          { type: "prompt", promptId: "sermon-analyzer.coaching-refiner", optional: true, role: "Refines coaching when actionability is weak." }
-        ],
-        outputUsage: [
-          "Renders transcript table, pacing/vocal/emotional analytics, and coaching cards.",
-          "Drill actions are saved through coach drill completion API.",
-          "Report text can be copied/saved once generation is complete."
-        ]
-      },
-      {
-        slug: "video-search",
-        name: "Video Search",
-        endpoint: "POST /api/ai/video-search",
-        calls: [
-          { type: "embedding", endpoint: "POST /v1/embeddings", optional: false, role: "Embeds query and transcript chunks for semantic ranking." },
-          { type: "audio", endpoint: "POST /v1/audio/transcriptions", optional: true, role: "Optional ingestion/transcription for videos missing transcripts." },
-          { type: "prompt", promptId: "video-search.recovery", optional: true, role: "Recovery strategy prompt when result set is sparse." },
-          { type: "prompt", promptId: "video-search.guidance", optional: false, role: "Generates watch-order guidance and suggested follow-up queries." }
-        ],
-        outputUsage: [
-          "Search results include timestamped snippets and direct playback URLs.",
-          "Confidence tier influences caution text and recommendation style.",
-          "Related content and suggested queries power iterative search."
-        ]
-      }
-    ].map((app) => ({
+    {
+      slug: "bible-study",
+      name: "Bible Study Chat",
+      endpoint: "POST /api/ai/bible-study",
+      calls: [
+      { type: "passage", endpoint: "GET https://bible-api.com/{reference}?translation=web", optional: true, role: "Client passage fetch when the input is a Bible reference." },
+      { type: "prompt", promptId: "bible-study.package", optional: false, role: "Primary generation of CLEAR + 10-step package." },
+      { type: "prompt", promptId: "bible-study.refiner", optional: true, role: "Quality-gated refinement pass when first draft is weak." }],
+
+      outputUsage: [
+      "CLEAR cards and step-by-step workflow are rendered in the app UI.",
+      "10-step study method sections are persisted when a project is saved.",
+      "Study output can be handed off to Sermon Preparation."]
+
+    },
+    {
+      slug: "sermon-preparation",
+      name: "Sermon Preparation",
+      endpoint: "POST /api/ai/sermon-preparation",
+      calls: [
+      { type: "passage", endpoint: "GET https://bible-api.com/{reference}?translation=web", optional: true, role: "Client-side passage text retrieval." },
+      { type: "prompt", promptId: "sermon-preparation.plan", optional: false, role: "Primary sermon plan generation." },
+      { type: "prompt", promptId: "sermon-preparation.refiner", optional: true, role: "Refines weak sections and optional tightening pass." }],
+
+      outputUsage: [
+      "Big idea, outline, transitions, and timing are displayed for sermon drafting.",
+      "Boundary diagnostics are used to flag out-of-scope supporting references.",
+      "Plans can be saved and handed off to Sermon Evaluation."]
+
+    },
+    {
+      slug: "teaching-tools",
+      name: "Teaching Tools",
+      endpoint: "POST /api/ai/teaching-tools",
+      calls: [
+      { type: "passage", endpoint: "GET https://bible-api.com/{reference}?translation=web", optional: true, role: "Only used when input is a passage reference." },
+      { type: "prompt", promptId: "teaching-tools.kit", optional: false, role: "Primary lesson kit generation per selected audience." },
+      { type: "prompt", promptId: "teaching-tools.refiner", optional: true, role: "Refinement pass for timeline/question/application quality." }],
+
+      outputUsage: [
+      "Renders full lesson kit cards: objectives, timeline, discussion, illustration, application.",
+      "Export payloads generate handouts and slide outlines.",
+      "If multi-audience mode is selected, comparison cards are generated."]
+
+    },
+    {
+      slug: "research-helper",
+      name: "Sermon Evaluation",
+      endpoint: "POST /api/ai/research-helper",
+      calls: [
+      { type: "prompt", promptId: "research-helper.evaluation", optional: false, role: "Primary manuscript evaluation and scoring." },
+      { type: "prompt", promptId: "research-helper.revision-pack", optional: true, role: "High-impact revision pack when baseline coaching is weak." }],
+
+      outputUsage: [
+      "Renders verdict, scorecards, strengths, gaps, revisions, and tighten-lines.",
+      "Trend data is charted and can be exported to CSV after generation.",
+      "Evaluations can be saved for later revision cycles."]
+
+    },
+    {
+      slug: "sermon-analyzer",
+      name: "Sermon Analyzer",
+      endpoint: "POST /api/ai/sermon-analyzer",
+      calls: [
+      { type: "audio", endpoint: "POST /v1/audio/transcriptions", optional: true, role: "Transcribes uploaded audio when transcript override is not used." },
+      { type: "prompt", promptId: "sermon-analyzer.insights", optional: false, role: "Primary multi-signal synthesis (emotion/content/coaching)." },
+      { type: "prompt", promptId: "sermon-analyzer.coaching-refiner", optional: true, role: "Refines coaching when actionability is weak." }],
+
+      outputUsage: [
+      "Renders transcript table, pacing/vocal/emotional analytics, and coaching cards.",
+      "Drill actions are saved through coach drill completion API.",
+      "Report text can be copied/saved once generation is complete."]
+
+    },
+    {
+      slug: "video-search",
+      name: "Video Search",
+      endpoint: "POST /api/ai/video-search",
+      calls: [
+      { type: "embedding", endpoint: "POST /v1/embeddings", optional: false, role: "Embeds query and transcript chunks for semantic ranking." },
+      { type: "audio", endpoint: "POST /v1/audio/transcriptions", optional: true, role: "Optional ingestion/transcription for videos missing transcripts." },
+      { type: "prompt", promptId: "video-search.recovery", optional: true, role: "Recovery strategy prompt when result set is sparse." },
+      { type: "prompt", promptId: "video-search.guidance", optional: false, role: "Generates watch-order guidance and suggested follow-up queries." }],
+
+      outputUsage: [
+      "Search results include timestamped snippets and direct playback URLs.",
+      "Confidence tier influences caution text and recommendation style.",
+      "Related content and suggested queries power iterative search."]
+
+    }].
+    map((app) => ({
       ...app,
-      promptCalls: app.calls
-        .filter((call) => call.type === "prompt")
-        .map((call) => ({
-          ...call,
-          prompt: promptTemplates[call.promptId] || null
-        }))
+      promptCalls: app.calls.
+      filter((call) => call.type === "prompt").
+      map((call) => ({
+        ...call,
+        prompt: promptTemplates[call.promptId] || null
+      }))
     })),
     promptRegistry: Object.values(PROMPT_REGISTRY).map((prompt) => ({
       id: cleanString(prompt && prompt.id),
@@ -5172,8 +5172,8 @@ function buildPromptTransparencyTemplates() {
       baseline: {
         overallVerdict: "Draft verdict",
         scores: [
-          { label: "Clarity", score: 6.4, rationale: "Transitions are abrupt." }
-        ],
+        { label: "Clarity", score: 6.4, rationale: "Transitions are abrupt." }],
+
         strengths: ["Strong pastoral warmth."],
         gaps: ["Main argument turns are compressed."],
         revisions: ["Clarify movement transitions."],
@@ -5189,9 +5189,9 @@ function buildPromptTransparencyTemplates() {
         score: 68
       },
       topMatches: [
-        { title: "Word Study Basics", timestamp: "03:12", category: "Bible Study", topic: "Word Study", difficulty: "Beginner" },
-        { title: "Advanced Lemma Search", timestamp: "14:05", category: "Bible Study", topic: "Original Languages", difficulty: "Intermediate" }
-      ]
+      { title: "Word Study Basics", timestamp: "03:12", category: "Bible Study", topic: "Word Study", difficulty: "Beginner" },
+      { title: "Advanced Lemma Search", timestamp: "14:05", category: "Bible Study", topic: "Original Languages", difficulty: "Intermediate" }]
+
     }),
     "video-search.recovery": buildVideoSearchRecoveryPrompt({
       query: "How do I learn Greek morphology quickly?",
@@ -5202,8 +5202,8 @@ function buildPromptTransparencyTemplates() {
       },
       currentResultCount: 1,
       topMetadata: [
-        { title: "Original Language Workflow", category: "Bible Study", topic: "Greek", difficulty: "Intermediate", logosVersion: "10" }
-      ]
+      { title: "Original Language Workflow", category: "Bible Study", topic: "Greek", difficulty: "Intermediate", logosVersion: "10" }]
+
     }),
     "sermon-analyzer.insights": buildSermonInsightsPrompt({
       context: "Sunday Main Service",
@@ -5212,9 +5212,9 @@ function buildPromptTransparencyTemplates() {
       transcriptWordCount: 2150,
       transcriptExcerpt: "Church family, today we look at Philippians 2 and the humility of Christ...",
       transcriptBuckets: [
-        { bucketId: 1, start: 0, end: 180, text: "Opening movement..." },
-        { bucketId: 2, start: 180, end: 360, text: "Second movement..." }
-      ],
+      { bucketId: 1, start: 0, end: 180, text: "Opening movement..." },
+      { bucketId: 2, start: 180, end: 360, text: "Second movement..." }],
+
       regexReferences: ["Philippians 2:1-11"],
       pacingAnalysis: {
         avgWpm: 151,
@@ -5290,9 +5290,9 @@ function buildPromptTransparencyTemplates() {
 
 function buildPromptTemplateEntry(promptId, builtPrompt) {
   const meta = PROMPT_REGISTRY[promptId] || {};
-  const outputSchema = meta && meta.outputSchema && typeof meta.outputSchema === "object"
-    ? meta.outputSchema
-    : {};
+  const outputSchema = meta && meta.outputSchema && typeof meta.outputSchema === "object" ?
+  meta.outputSchema :
+  {};
   const override = getPromptOverrideInfo(promptId);
   return {
     id: cleanString(promptId),
@@ -5374,12 +5374,12 @@ function createHttpError(status, message) {
 
 function normalizeSocialProofPayload(value, { strict = false } = {}) {
   const payload = value && typeof value === "object" ? value : {};
-  const testimonials = cleanObjectArray(payload.testimonials, 80)
-    .map((row, index) => normalizeTestimonialRow(row, { strict, index }))
-    .filter(Boolean);
-  const caseStudies = cleanObjectArray(payload.caseStudies, 80)
-    .map((row, index) => normalizeCaseStudyRow(row, { strict, index }))
-    .filter(Boolean);
+  const testimonials = cleanObjectArray(payload.testimonials, 80).
+  map((row, index) => normalizeTestimonialRow(row, { strict, index })).
+  filter(Boolean);
+  const caseStudies = cleanObjectArray(payload.caseStudies, 80).
+  map((row, index) => normalizeCaseStudyRow(row, { strict, index })).
+  filter(Boolean);
 
   if (strict && !testimonials.length && !caseStudies.length) {
     throw createBadRequestError("Provide at least one testimonial or case study.");
@@ -5606,9 +5606,9 @@ function asyncHandler(fn) {
             }
           });
         } catch (_) {
+
           // Event failures should never block API responses.
-        }
-      }
+        }}
       res.status(status).json({ error: message });
     });
   };
@@ -5618,9 +5618,9 @@ async function chatJson({ system, user, temperature = 0.3, model = OPENAI_CHAT_M
   const payload = {
     model,
     messages: [
-      { role: "system", content: system },
-      { role: "user", content: user }
-    ],
+    { role: "system", content: system },
+    { role: "user", content: user }],
+
     temperature,
     response_format: { type: "json_object" }
   };
@@ -5629,9 +5629,9 @@ async function chatJson({ system, user, temperature = 0.3, model = OPENAI_CHAT_M
   }
 
   const data = await openAIRequest("/chat/completions", payload);
-  const content = data && data.choices && data.choices[0] && data.choices[0].message
-    ? data.choices[0].message.content
-    : "{}";
+  const content = data && data.choices && data.choices[0] && data.choices[0].message ?
+  data.choices[0].message.content :
+  "{}";
 
   return parseJsonObject(content);
 }
@@ -5665,14 +5665,14 @@ async function fetchEmbeddingsInBatches(texts, batchSize = 64) {
 }
 
 function buildCatalogCacheKey(rows) {
-  return `${OPENAI_EMBED_MODEL}|${rows
-    .map((row) => [
-      cleanString(row.id),
-      Number(row.fileMtimeMs || 0),
-      cleanString(row.transcriptionUpdatedAt),
-      cleanString(row.transcriptStatus)
-    ].join(":"))
-    .join("|")}`;
+  return `${OPENAI_EMBED_MODEL}|${rows.
+  map((row) => [
+  cleanString(row.id),
+  Number(row.fileMtimeMs || 0),
+  cleanString(row.transcriptionUpdatedAt),
+  cleanString(row.transcriptStatus)].
+  join(":")).
+  join("|")}`;
 }
 
 function ensureVideoCatalog(options = {}) {
@@ -5693,10 +5693,10 @@ async function ensureVideoEmbeddings() {
   const key = buildCatalogCacheKey(VIDEO_LIBRARY);
 
   if (
-    videoEmbeddingCache.key === key
-    && Array.isArray(videoEmbeddingCache.vectors)
-    && videoEmbeddingCache.vectors.length === VIDEO_LIBRARY.length
-  ) {
+  videoEmbeddingCache.key === key &&
+  Array.isArray(videoEmbeddingCache.vectors) &&
+  videoEmbeddingCache.vectors.length === VIDEO_LIBRARY.length)
+  {
     return videoEmbeddingCache.vectors;
   }
 
@@ -5736,17 +5736,17 @@ async function transcribeMissingVideosForSearch(videos, options) {
   const mode = cleanString(options.mode, "auto");
   const autoTranscribeMaxMinutes = Number(options.autoTranscribeMaxMinutes || 35);
   const maxAutoTranscribeVideos = Number(options.maxAutoTranscribeVideos || 1);
-  const pending = videos
-    .filter((video) => video.transcriptStatus !== "ready")
-    .filter((video) => video.sourceAvailable !== false);
-  const unavailable = videos
-    .filter((video) => video.transcriptStatus !== "ready")
-    .filter((video) => video.sourceAvailable === false)
-    .map((video) => ({
-      id: video.id,
-      title: video.title,
-      reason: "Source video unavailable on this server."
-    }));
+  const pending = videos.
+  filter((video) => video.transcriptStatus !== "ready").
+  filter((video) => video.sourceAvailable !== false);
+  const unavailable = videos.
+  filter((video) => video.transcriptStatus !== "ready").
+  filter((video) => video.sourceAvailable === false).
+  map((video) => ({
+    id: video.id,
+    title: video.title,
+    reason: "Source video unavailable on this server."
+  }));
   const attempted = [];
   const completed = [];
   const failed = [];
@@ -5767,7 +5767,7 @@ async function transcribeMissingVideosForSearch(videos, options) {
   if (mode === "force") {
     candidates = sortedPending.slice(0, maxAutoTranscribeVideos);
   } else {
-    const shortOnly = sortedPending.filter((video) => (Number(video.durationSeconds || 0) / 60) <= autoTranscribeMaxMinutes);
+    const shortOnly = sortedPending.filter((video) => Number(video.durationSeconds || 0) / 60 <= autoTranscribeMaxMinutes);
     candidates = shortOnly.slice(0, Math.max(1, maxAutoTranscribeVideos));
   }
 
@@ -5918,27 +5918,27 @@ async function transcribeVideoFile(video) {
 
 function extractAudioChunkToMp3(inputPath, outputPath, startSeconds, durationSeconds, bitrateKbps) {
   const args = [
-    "-hide_banner",
-    "-loglevel",
-    "error",
-    "-y",
-    "-ss",
-    Number(startSeconds || 0).toFixed(2),
-    "-t",
-    Number(durationSeconds || 1).toFixed(2),
-    "-i",
-    inputPath,
-    "-vn",
-    "-ac",
-    "1",
-    "-ar",
-    "16000",
-    "-c:a",
-    "libmp3lame",
-    "-b:a",
-    `${Math.max(8, Number(bitrateKbps || 32))}k`,
-    outputPath
-  ];
+  "-hide_banner",
+  "-loglevel",
+  "error",
+  "-y",
+  "-ss",
+  Number(startSeconds || 0).toFixed(2),
+  "-t",
+  Number(durationSeconds || 1).toFixed(2),
+  "-i",
+  inputPath,
+  "-vn",
+  "-ac",
+  "1",
+  "-ar",
+  "16000",
+  "-c:a",
+  "libmp3lame",
+  "-b:a",
+  `${Math.max(8, Number(bitrateKbps || 32))}k`,
+  outputPath];
+
 
   const result = spawnSync("ffmpeg", args, { encoding: "utf8" });
   if (result.status !== 0 || !fs.existsSync(outputPath)) {
@@ -5951,14 +5951,14 @@ function probeDurationSeconds(filePath) {
   const result = spawnSync(
     "ffprobe",
     [
-      "-v",
-      "error",
-      "-show_entries",
-      "format=duration",
-      "-of",
-      "default=noprint_wrappers=1:nokey=1",
-      filePath
-    ],
+    "-v",
+    "error",
+    "-show_entries",
+    "format=duration",
+    "-of",
+    "default=noprint_wrappers=1:nokey=1",
+    filePath],
+
     { encoding: "utf8" }
   );
   if (result.status !== 0) {
@@ -6012,7 +6012,7 @@ function buildVideoSearchChunks(video, maxChunksPerVideo = 24) {
     const span = Math.max(0, end - chunkStart);
     const segmentWords = tokenize(text).length;
     const segmentChars = text.length;
-    const overSize = span >= 55 || (wordCount + segmentWords) >= 165 || (charCount + segmentChars) >= 750;
+    const overSize = span >= 55 || wordCount + segmentWords >= 165 || charCount + segmentChars >= 750;
 
     if (currentText.length && overSize) {
       flush();
@@ -6030,11 +6030,11 @@ function buildVideoSearchChunks(video, maxChunksPerVideo = 24) {
 }
 
 function buildChunkKey(videoId, start, end, text) {
-  const hash = crypto
-    .createHash("sha1")
-    .update(`${cleanString(videoId)}|${Number(start || 0).toFixed(2)}|${Number(end || 0).toFixed(2)}|${cleanString(text).slice(0, 700)}`)
-    .digest("hex")
-    .slice(0, 18);
+  const hash = crypto.
+  createHash("sha1").
+  update(`${cleanString(videoId)}|${Number(start || 0).toFixed(2)}|${Number(end || 0).toFixed(2)}|${cleanString(text).slice(0, 700)}`).
+  digest("hex").
+  slice(0, 18);
   return `${OPENAI_EMBED_MODEL}:${hash}`;
 }
 
@@ -6107,10 +6107,10 @@ function buildTranscriptionFormData(file) {
 
 function transcriptFromManualText(text, durationSeconds) {
   const cleanText = cleanString(text);
-  const sentenceParts = cleanText
-    .split(/(?<=[.!?])\s+/)
-    .map((part) => part.trim())
-    .filter(Boolean);
+  const sentenceParts = cleanText.
+  split(/(?<=[.!?])\s+/).
+  map((part) => part.trim()).
+  filter(Boolean);
   const segmentCount = Math.max(sentenceParts.length, 1);
   const totalDuration = Math.max(Number(durationSeconds) || segmentCount * 8, segmentCount * 5);
   const perSegment = totalDuration / segmentCount;
@@ -6130,13 +6130,13 @@ function transcriptFromManualText(text, durationSeconds) {
 }
 
 function normalizeTranscriptionSegments(rawSegments, fallbackText) {
-  const segments = cleanObjectArray(rawSegments, 500)
-    .map((segment) => ({
-      start: Number(segment.start || 0),
-      end: Number(segment.end || 0),
-      text: cleanString(segment.text)
-    }))
-    .filter((segment) => segment.text);
+  const segments = cleanObjectArray(rawSegments, 500).
+  map((segment) => ({
+    start: Number(segment.start || 0),
+    end: Number(segment.end || 0),
+    text: cleanString(segment.text)
+  })).
+  filter((segment) => segment.text);
 
   if (segments.length) {
     return segments;
@@ -6157,11 +6157,11 @@ function detectScriptureReferences(text) {
 }
 
 function normalizeBookKey(value) {
-  return cleanString(value)
-    .toLowerCase()
-    .replace(/\./g, "")
-    .replace(/\s+/g, " ")
-    .trim();
+  return cleanString(value).
+  toLowerCase().
+  replace(/\./g, "").
+  replace(/\s+/g, " ").
+  trim();
 }
 
 function parsePrimaryPassageBounds(reference) {
@@ -6296,14 +6296,14 @@ function computePacingAnalysis(transcript, localAnalysis, metricProvenance) {
   const segments = cleanObjectArray(transcript.segments, 600);
   const durationSeconds = Math.max(Number(transcript.durationSeconds || 0), 1);
   const wordCount = tokenize(transcriptText).length;
-  const avgWpm = Number(((wordCount / durationSeconds) * 60).toFixed(1));
+  const avgWpm = Number((wordCount / durationSeconds * 60).toFixed(1));
 
   const sectionWpm = segments.slice(0, 120).map((segment) => {
     const start = Number(segment.start || 0);
     const end = Number(segment.end || start + 1);
     const span = Math.max(end - start, 0.8);
     const words = tokenize(segment.text).length;
-    const wpm = Number(((words / span) * 60).toFixed(1));
+    const wpm = Number((words / span * 60).toFixed(1));
     return {
       start,
       end,
@@ -6320,7 +6320,7 @@ function computePacingAnalysis(transcript, localAnalysis, metricProvenance) {
 
   const paceCloseness = Math.max(0, 1 - Math.abs(avgWpm - 130) / 85);
   const pauseBalance = Math.max(0, 1 - Math.abs(pauseRatio - 0.17) / 0.2);
-  const rhythmScore = Number((Math.max(0, Math.min(1, (paceCloseness * 0.7) + (pauseBalance * 0.3))) * 100).toFixed(1));
+  const rhythmScore = Number((Math.max(0, Math.min(1, paceCloseness * 0.7 + pauseBalance * 0.3)) * 100).toFixed(1));
 
   return {
     source: cleanString(metricProvenance && metricProvenance.pacing && metricProvenance.pacing.source, "transcript_estimate"),
@@ -6339,18 +6339,18 @@ function computePacingAnalysis(transcript, localAnalysis, metricProvenance) {
 function computeVocalDynamics(localAnalysis, metricProvenance) {
   const acoustic = localAnalysis && typeof localAnalysis.acoustic === "object" ? localAnalysis.acoustic : {};
   const pitch = localAnalysis && typeof localAnalysis.pitch === "object" ? localAnalysis.pitch : {};
-  const monotoneSections = cleanObjectArray(localAnalysis.monotoneSections, 40)
-    .map((section) => ({
-      start: Number(section.start || 0),
-      end: Number(section.end || 0),
-      duration: Number(section.duration || 0)
-    }))
-    .filter((section) => section.duration > 0);
+  const monotoneSections = cleanObjectArray(localAnalysis.monotoneSections, 40).
+  map((section) => ({
+    start: Number(section.start || 0),
+    end: Number(section.end || 0),
+    duration: Number(section.duration || 0)
+  })).
+  filter((section) => section.duration > 0);
 
-  const hasAcousticSignal = [acoustic.avgDb, acoustic.peakDb, acoustic.dynamicRangeDb, acoustic.volumeStdDb]
-    .some((value) => Number.isFinite(Number(value)) && Number(value) !== 0);
-  const hasPitchSignal = [pitch.meanHz, pitch.stdHz, pitch.rangeHz, pitch.varietyScore]
-    .some((value) => Number.isFinite(Number(value)) && Number(value) !== 0);
+  const hasAcousticSignal = [acoustic.avgDb, acoustic.peakDb, acoustic.dynamicRangeDb, acoustic.volumeStdDb].
+  some((value) => Number.isFinite(Number(value)) && Number(value) !== 0);
+  const hasPitchSignal = [pitch.meanHz, pitch.stdHz, pitch.rangeHz, pitch.varietyScore].
+  some((value) => Number.isFinite(Number(value)) && Number(value) !== 0);
   const hasVocalSignal = hasAcousticSignal || hasPitchSignal || monotoneSections.length > 0;
   const source = cleanString(metricProvenance && metricProvenance.vocalDynamics && metricProvenance.vocalDynamics.source, "unavailable");
   const sourceNote = cleanString(metricProvenance && metricProvenance.vocalDynamics && metricProvenance.vocalDynamics.note);
@@ -6411,34 +6411,34 @@ function resolveAnalyzerMetricProvenance({ file, transcript, localAnalysis }) {
   const acoustic = localAnalysis && typeof localAnalysis.acoustic === "object" ? localAnalysis.acoustic : {};
   const pitch = localAnalysis && typeof localAnalysis.pitch === "object" ? localAnalysis.pitch : {};
 
-  const hasAcousticSignal = [acoustic.avgDb, acoustic.peakDb, acoustic.dynamicRangeDb, acoustic.volumeStdDb]
-    .some((value) => Number.isFinite(Number(value)) && Number(value) !== 0);
-  const hasPitchSignal = [pitch.meanHz, pitch.stdHz, pitch.rangeHz, pitch.varietyScore]
-    .some((value) => Number.isFinite(Number(value)) && Number(value) !== 0);
+  const hasAcousticSignal = [acoustic.avgDb, acoustic.peakDb, acoustic.dynamicRangeDb, acoustic.volumeStdDb].
+  some((value) => Number.isFinite(Number(value)) && Number(value) !== 0);
+  const hasPitchSignal = [pitch.meanHz, pitch.stdHz, pitch.rangeHz, pitch.varietyScore].
+  some((value) => Number.isFinite(Number(value)) && Number(value) !== 0);
 
-  const pacingSource = hasTranscript
-    ? (hasAudioFile ? "audio" : "transcript_estimate")
-    : "unavailable";
-  const vocalSource = (hasAcousticSignal || hasPitchSignal)
-    ? "audio"
-    : hasAudioFile
-      ? "unavailable"
-      : "unavailable";
+  const pacingSource = hasTranscript ?
+  hasAudioFile ? "audio" : "transcript_estimate" :
+  "unavailable";
+  const vocalSource = hasAcousticSignal || hasPitchSignal ?
+  "audio" :
+  hasAudioFile ?
+  "unavailable" :
+  "unavailable";
 
   return {
     pacing: {
       source: pacingSource,
-      note: hasAudioFile
-        ? "Pacing derived from transcript segmentation of uploaded audio."
-        : "Pacing estimated from transcript text and timing buckets; treat as directional."
+      note: hasAudioFile ?
+      "Pacing derived from transcript segmentation of uploaded audio." :
+      "Pacing estimated from transcript text and timing buckets; treat as directional."
     },
     vocalDynamics: {
       source: vocalSource,
-      note: (hasAcousticSignal || hasPitchSignal)
-        ? "Vocal metrics derived from local acoustic analysis."
-        : hasAudioFile
-          ? "No reliable acoustic metrics were available from the uploaded file."
-          : "No uploaded audio waveform was provided, so acoustic vocal metrics are unavailable."
+      note: hasAcousticSignal || hasPitchSignal ?
+      "Vocal metrics derived from local acoustic analysis." :
+      hasAudioFile ?
+      "No reliable acoustic metrics were available from the uploaded file." :
+      "No uploaded audio waveform was provided, so acoustic vocal metrics are unavailable."
     },
     pauseSignals: {
       source: pauses.length ? "audio_or_local_analysis" : "unavailable",
@@ -6529,17 +6529,17 @@ async function sermonInsightsAgent(input) {
         vocalDynamics: vocalForPrompt,
         baseline: {
           emotionalArcSummary: cleanString(ai && ai.emotionalArc && ai.emotionalArc.summary),
-          contentAnalysis: ai && ai.contentAnalysis && typeof ai.contentAnalysis === "object"
-            ? {
-                summary: cleanString(ai.contentAnalysis.summary),
-                keyThemes: cleanArray(ai.contentAnalysis.keyThemes, 10),
-                structureMovements: cleanArray(ai.contentAnalysis.structureMovements, 10),
-                callsToAction: cleanArray(ai.contentAnalysis.callsToAction, 10)
-              }
-            : {},
-          coachingFeedback: ai && ai.coachingFeedback && typeof ai.coachingFeedback === "object"
-            ? ai.coachingFeedback
-            : {}
+          contentAnalysis: ai && ai.contentAnalysis && typeof ai.contentAnalysis === "object" ?
+          {
+            summary: cleanString(ai.contentAnalysis.summary),
+            keyThemes: cleanArray(ai.contentAnalysis.keyThemes, 10),
+            structureMovements: cleanArray(ai.contentAnalysis.structureMovements, 10),
+            callsToAction: cleanArray(ai.contentAnalysis.callsToAction, 10)
+          } :
+          {},
+          coachingFeedback: ai && ai.coachingFeedback && typeof ai.coachingFeedback === "object" ?
+          ai.coachingFeedback :
+          {}
         },
         qualitySignals: coachingQuality.signals
       });
@@ -6550,41 +6550,41 @@ async function sermonInsightsAgent(input) {
         maxTokens: 900
       });
       if (
-        refined
-        && typeof refined === "object"
-        && refined.coachingFeedback
-        && typeof refined.coachingFeedback === "object"
-      ) {
+      refined &&
+      typeof refined === "object" &&
+      refined.coachingFeedback &&
+      typeof refined.coachingFeedback === "object")
+      {
         ai = { ...ai, coachingFeedback: refined.coachingFeedback };
       }
     } catch (_) {
+
       // Keep first-pass coaching feedback if optional refinement fails.
-    }
-  }
+    }}
 
   const emotionRaw = ai && ai.emotionalArc && typeof ai.emotionalArc === "object" ? ai.emotionalArc : {};
   const contentRaw = ai && ai.contentAnalysis && typeof ai.contentAnalysis === "object" ? ai.contentAnalysis : {};
   const coachingRaw = ai && ai.coachingFeedback && typeof ai.coachingFeedback === "object" ? ai.coachingFeedback : {};
   const pointRows = cleanObjectArray(emotionRaw.arc, 20);
-  const points = buckets.length
-    ? buckets.map((bucket, idx) => {
-      const row = pointRows.find((item) => Number(item.bucketId) === bucket.id) || pointRows[idx] || {};
-      return {
-        bucketId: bucket.id,
-        start: bucket.start,
-        end: bucket.end,
-        timeSec: Number(((bucket.start + bucket.end) / 2).toFixed(2)),
-        label: cleanString(row.label, "Neutral"),
-        intensity: clampNumber(Number(row.intensity), 0, 100, 50),
-        valence: clampNumber(Number(row.valence), -100, 100, 0),
-        note: cleanString(row.note)
-      };
-    })
-    : emotionalFallback.points;
+  const points = buckets.length ?
+  buckets.map((bucket, idx) => {
+    const row = pointRows.find((item) => Number(item.bucketId) === bucket.id) || pointRows[idx] || {};
+    return {
+      bucketId: bucket.id,
+      start: bucket.start,
+      end: bucket.end,
+      timeSec: Number(((bucket.start + bucket.end) / 2).toFixed(2)),
+      label: cleanString(row.label, "Neutral"),
+      intensity: clampNumber(Number(row.intensity), 0, 100, 50),
+      valence: clampNumber(Number(row.valence), -100, 100, 0),
+      note: cleanString(row.note)
+    };
+  }) :
+  emotionalFallback.points;
   const mergedReferences = Array.from(new Set([
-    ...regexReferences,
-    ...cleanArray(contentRaw.scriptureReferences, 30)
-  ])).slice(0, 30);
+  ...regexReferences,
+  ...cleanArray(contentRaw.scriptureReferences, 30)]
+  )).slice(0, 30);
 
   const coachingReport = ensureAnalyzerCoachingReport({
     executiveSummary: cleanString(coachingRaw.executiveSummary),
@@ -6708,15 +6708,15 @@ function evaluateTeachingKitDraft(rawDraft, requestedLength) {
   const lessonPlan = draft.lessonPlan && typeof draft.lessonPlan === "object" ? draft.lessonPlan : {};
   const sessionTimeline = cleanObjectArray(lessonPlan.sessionTimeline, 10);
   const objectives = cleanArray(lessonPlan.objectives, 10);
-  const discussion = draft.discussionQuestions && typeof draft.discussionQuestions === "object"
-    ? draft.discussionQuestions
-    : {};
+  const discussion = draft.discussionQuestions && typeof draft.discussionQuestions === "object" ?
+  draft.discussionQuestions :
+  {};
   const illustrationIdeas = cleanObjectArray(draft.illustrationIdeas, 10);
   const visualsAndMedia = cleanArray(draft.visualsAndMedia, 12);
   const leaderCoaching = cleanArray(draft.leaderCoaching, 12);
-  const applicationPathways = draft.applicationPathways && typeof draft.applicationPathways === "object"
-    ? draft.applicationPathways
-    : {};
+  const applicationPathways = draft.applicationPathways && typeof draft.applicationPathways === "object" ?
+  draft.applicationPathways :
+  {};
   const printableHandout = cleanArray(draft.printableHandout, 12);
 
   if (overview.length < 45) {
@@ -6748,12 +6748,12 @@ function evaluateTeachingKitDraft(rawDraft, requestedLength) {
   }
 
   const questionBuckets = [
-    cleanArray(discussion.icebreakers, 6),
-    cleanArray(discussion.observation, 6),
-    cleanArray(discussion.interpretation, 6),
-    cleanArray(discussion.application, 6),
-    cleanArray(discussion.challenge, 6)
-  ];
+  cleanArray(discussion.icebreakers, 6),
+  cleanArray(discussion.observation, 6),
+  cleanArray(discussion.interpretation, 6),
+  cleanArray(discussion.application, 6),
+  cleanArray(discussion.challenge, 6)];
+
   const sparseBuckets = questionBuckets.filter((bucket) => bucket.length < 2).length;
   if (sparseBuckets >= 2) {
     signals.push("Discussion questions need broader coverage.");
@@ -6786,35 +6786,35 @@ function normalizeCoachingListItems(value, max = 8) {
     return [];
   }
 
-  return value
-    .map((item) => {
-      if (typeof item === "string") {
-        return cleanString(item);
-      }
-      if (!item || typeof item !== "object" || Array.isArray(item)) {
-        return "";
-      }
-      const action = cleanString(item.action || item.title || item.target || item.focus);
-      const rationale = cleanString(item.rationale || item.why);
-      const metric = cleanString(item.metric || item.measure);
-      const priority = cleanString(item.priority);
-      const pieces = [];
-      if (action) {
-        pieces.push(action);
-      }
-      if (rationale) {
-        pieces.push(`Why: ${rationale}`);
-      }
-      if (metric) {
-        pieces.push(`Metric: ${metric}`);
-      }
-      if (priority) {
-        pieces.push(`Priority: ${priority}`);
-      }
-      return cleanString(pieces.join(" | "));
-    })
-    .filter(Boolean)
-    .slice(0, max);
+  return value.
+  map((item) => {
+    if (typeof item === "string") {
+      return cleanString(item);
+    }
+    if (!item || typeof item !== "object" || Array.isArray(item)) {
+      return "";
+    }
+    const action = cleanString(item.action || item.title || item.target || item.focus);
+    const rationale = cleanString(item.rationale || item.why);
+    const metric = cleanString(item.metric || item.measure);
+    const priority = cleanString(item.priority);
+    const pieces = [];
+    if (action) {
+      pieces.push(action);
+    }
+    if (rationale) {
+      pieces.push(`Why: ${rationale}`);
+    }
+    if (metric) {
+      pieces.push(`Metric: ${metric}`);
+    }
+    if (priority) {
+      pieces.push(`Priority: ${priority}`);
+    }
+    return cleanString(pieces.join(" | "));
+  }).
+  filter(Boolean).
+  slice(0, max);
 }
 
 function mergeUniqueLines(lines, max = 8) {
@@ -6844,42 +6844,42 @@ function buildAnalyzerFallbackActionList(context, kind = "priority") {
 
   if (kind === "drill") {
     return [
-      likelyFast
-        ? `Run a 5-minute segment at 132-142 wpm with a timer; repeat 3 rounds and keep each round within 10 words of target pace.`
-        : `Run a 5-minute segment at 128-140 wpm with a timer; repeat 3 rounds and keep transitions crisp.`,
-      `Practice three transition sentences out loud, pausing 0.7-1.2 seconds before each main movement.`,
-      monotoneRisk >= 55
-        ? `Do two 4-minute vocal-contrast drills: mark one hope phrase and one warning phrase per movement and deliver them with clear volume/pitch contrast.`
-        : `Do two 4-minute emphasis drills: mark one key phrase per movement and emphasize it with intentional pause plus vocal lift.`,
-      `Record a 90-second opening, then replay once and rewrite one sentence for clearer gospel focus tied to ${goal}.`,
-      transcriptWordCount >= 900
-        ? `Trim one paragraph per movement to reduce total manuscript length by at least 8%, then rehearse the tighter version once.`
-        : `Add one concrete illustration and one concrete application sentence per movement, then rehearse once without notes.`
-    ];
+    likelyFast ?
+    `Run a 5-minute segment at 132-142 wpm with a timer; repeat 3 rounds and keep each round within 10 words of target pace.` :
+    `Run a 5-minute segment at 128-140 wpm with a timer; repeat 3 rounds and keep transitions crisp.`,
+    `Practice three transition sentences out loud, pausing 0.7-1.2 seconds before each main movement.`,
+    monotoneRisk >= 55 ?
+    `Do two 4-minute vocal-contrast drills: mark one hope phrase and one warning phrase per movement and deliver them with clear volume/pitch contrast.` :
+    `Do two 4-minute emphasis drills: mark one key phrase per movement and emphasize it with intentional pause plus vocal lift.`,
+    `Record a 90-second opening, then replay once and rewrite one sentence for clearer gospel focus tied to ${goal}.`,
+    transcriptWordCount >= 900 ?
+    `Trim one paragraph per movement to reduce total manuscript length by at least 8%, then rehearse the tighter version once.` :
+    `Add one concrete illustration and one concrete application sentence per movement, then rehearse once without notes.`];
+
   }
 
   return [
-    likelyFast
-      ? `Slow average pace from ~${Math.round(pacingWpm)} wpm toward 130-145 wpm by inserting intentional pauses at transitions and after key claims.`
-      : `Maintain a steady 125-145 wpm pace and add intentional pauses so listeners can process key claims.`,
-    `Strengthen transitions: write one bridge sentence between each movement so the message flow is explicit and not abrupt.`,
-    monotoneRisk >= 55
-      ? `Reduce monotone risk by varying tone and volume in each movement, especially at warnings, promises, and calls to response.`
-      : `Increase vocal variety around key text phrases so emphasis matches theological weight.`,
-    `Clarify the response moment: end with one concrete call to action listeners can complete within 24 hours.`,
-    `Align the opening and conclusion around the same burden sentence to reinforce ${goal}.`
-  ];
+  likelyFast ?
+  `Slow average pace from ~${Math.round(pacingWpm)} wpm toward 130-145 wpm by inserting intentional pauses at transitions and after key claims.` :
+  `Maintain a steady 125-145 wpm pace and add intentional pauses so listeners can process key claims.`,
+  `Strengthen transitions: write one bridge sentence between each movement so the message flow is explicit and not abrupt.`,
+  monotoneRisk >= 55 ?
+  `Reduce monotone risk by varying tone and volume in each movement, especially at warnings, promises, and calls to response.` :
+  `Increase vocal variety around key text phrases so emphasis matches theological weight.`,
+  `Clarify the response moment: end with one concrete call to action listeners can complete within 24 hours.`,
+  `Align the opening and conclusion around the same burden sentence to reinforce ${goal}.`];
+
 }
 
 function buildAnalyzerFallbackNextWeekPlan(context) {
   const goal = cleanString(context && context.goal, "clarity and faithful delivery");
   return [
-    `Day 1: Review transcript and mark 3 places where the argument became hard to follow; rewrite those transitions.`,
-    `Day 2: Rehearse opening + first movement for 10 minutes with a pace target and pause markers.`,
-    `Day 3: Run one vocal-contrast drill (warnings vs promises) and re-record a 3-minute segment.`,
-    `Day 4: Tighten one section by removing repeated sentences that do not serve ${goal}.`,
-    `Day 5: Perform a full run-through and note one measurable improvement to carry into next sermon week.`
-  ];
+  `Day 1: Review transcript and mark 3 places where the argument became hard to follow; rewrite those transitions.`,
+  `Day 2: Rehearse opening + first movement for 10 minutes with a pace target and pause markers.`,
+  `Day 3: Run one vocal-contrast drill (warnings vs promises) and re-record a 3-minute segment.`,
+  `Day 4: Tighten one section by removing repeated sentences that do not serve ${goal}.`,
+  `Day 5: Perform a full run-through and note one measurable improvement to carry into next sermon week.`];
+
 }
 
 function ensureAnalyzerCoachingReport(report, context = {}) {
@@ -6892,31 +6892,31 @@ function ensureAnalyzerCoachingReport(report, context = {}) {
   const fallbackWeekPlan = buildAnalyzerFallbackNextWeekPlan(context);
 
   normalized.priorityActions = mergeUniqueLines([
-    ...cleanArray(normalized.priorityActions, 12),
-    ...fallbackActions
-  ], 8);
+  ...cleanArray(normalized.priorityActions, 12),
+  ...fallbackActions],
+  8);
   normalized.practiceDrills = mergeUniqueLines([
-    ...cleanArray(normalized.practiceDrills, 14),
-    ...fallbackDrills
-  ], 10);
+  ...cleanArray(normalized.practiceDrills, 14),
+  ...fallbackDrills],
+  10);
   normalized.nextWeekPlan = mergeUniqueLines([
-    ...cleanArray(normalized.nextWeekPlan, 14),
-    ...fallbackWeekPlan
-  ], 10);
+  ...cleanArray(normalized.nextWeekPlan, 14),
+  ...fallbackWeekPlan],
+  10);
 
   normalized.strengths = mergeUniqueLines([
-    ...cleanArray(normalized.strengths, 8),
-    "Clear scriptural focus can be heard in major movement transitions.",
-    "Message burden is present and can be sharpened with pacing discipline.",
-    "The sermon already carries practical application momentum."
-  ], 8).slice(0, 6);
+  ...cleanArray(normalized.strengths, 8),
+  "Clear scriptural focus can be heard in major movement transitions.",
+  "Message burden is present and can be sharpened with pacing discipline.",
+  "The sermon already carries practical application momentum."],
+  8).slice(0, 6);
 
   normalized.risks = mergeUniqueLines([
-    ...cleanArray(normalized.risks, 8),
-    "Fast transitions can reduce listener comprehension in dense sections.",
-    "Key applications can blur together without clear movement markers.",
-    "Calls to response may feel generic if not tied to one concrete next step."
-  ], 8).slice(0, 6);
+  ...cleanArray(normalized.risks, 8),
+  "Fast transitions can reduce listener comprehension in dense sections.",
+  "Key applications can blur together without clear movement markers.",
+  "Calls to response may feel generic if not tied to one concrete next step."],
+  8).slice(0, 6);
 
   if (!cleanString(normalized.executiveSummary)) {
     normalized.executiveSummary = `Primary coaching focus for ${contextLabel}: improve ${goal} through clearer transitions, measurable pacing discipline, and concrete response language.`;
@@ -6945,9 +6945,9 @@ function ensureAnalyzerCoachingReport(report, context = {}) {
 
 function evaluateSermonCoachingDraft(rawDraft) {
   const draft = rawDraft && typeof rawDraft === "object" ? rawDraft : {};
-  const coaching = draft.coachingFeedback && typeof draft.coachingFeedback === "object"
-    ? draft.coachingFeedback
-    : {};
+  const coaching = draft.coachingFeedback && typeof draft.coachingFeedback === "object" ?
+  draft.coachingFeedback :
+  {};
   const signals = [];
   const executiveSummary = cleanString(coaching.executiveSummary);
   const strengths = cleanArray(coaching.strengths, 12);
@@ -7003,7 +7003,7 @@ async function verifyGoogleIdToken(idToken, expectedAudience) {
   if (!token) {
     throw new Error("Google token is required.");
   }
-  const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(token)}`);
+  const response = await templeModelControl.fetch("server", `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(token)}`);
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
     throw new Error(cleanString(payload.error_description, "Google token verification failed."));
@@ -7071,7 +7071,7 @@ async function sendMagicLinkEmail({ toEmail, magicLinkUrl, expiresInMinutes }) {
   }
 
   const minutes = clampNumber(Number(expiresInMinutes || 15), 1, 60, 15);
-  const response = await fetch("https://api.resend.com/emails", {
+  const response = await templeModelControl.fetch("server", "https://api.resend.com/emails", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -7109,9 +7109,9 @@ async function sendMagicLinkEmail({ toEmail, magicLinkUrl, expiresInMinutes }) {
 
 async function openAIMultipartRequest(endpoint, formDataOrFactory) {
   return openAIRequestWithRetry(endpoint, async () => {
-    const requestBody = typeof formDataOrFactory === "function"
-      ? formDataOrFactory()
-      : formDataOrFactory;
+    const requestBody = typeof formDataOrFactory === "function" ?
+    formDataOrFactory() :
+    formDataOrFactory;
 
     const response = await fetchWithTimeout(`${OPENAI_BASE_URL}${endpoint}`, {
       method: "POST",
@@ -7126,14 +7126,14 @@ async function openAIMultipartRequest(endpoint, formDataOrFactory) {
 }
 
 async function openAIRequestWithRetry(endpoint, requestFn) {
-  const maxAttempts = IS_SERVERLESS_RUNTIME
-    ? 1
-    : clampNumber(
-      Number(OPENAI_RETRY_ATTEMPTS),
-      1,
-      8,
-      4
-    );
+  const maxAttempts = IS_SERVERLESS_RUNTIME ?
+  1 :
+  clampNumber(
+    Number(OPENAI_RETRY_ATTEMPTS),
+    1,
+    8,
+    4
+  );
   const baseDelayMs = clampNumber(
     Number(OPENAI_RETRY_BASE_MS),
     100,
@@ -7153,7 +7153,7 @@ async function openAIRequestWithRetry(endpoint, requestFn) {
       }
 
       const jitterMs = Math.floor(Math.random() * 120);
-      const delayMs = Math.min(8000, baseDelayMs * (2 ** (attempt - 1))) + jitterMs;
+      const delayMs = Math.min(8000, baseDelayMs * 2 ** (attempt - 1)) + jitterMs;
       await sleep(delayMs);
     }
   }
@@ -7184,7 +7184,7 @@ async function fetchWithTimeout(url, options, timeoutMs) {
 
   try {
     const requestOptions = options && typeof options === "object" ? { ...options } : {};
-    return await fetch(url, {
+    return await templeModelControl.fetch("server", url, {
       ...requestOptions,
       signal: controller.signal
     });
@@ -7214,8 +7214,8 @@ async function parseOpenAIResponse(response, fallbackPrefix) {
 
   if (!response.ok) {
     const err = new Error(
-      (data && data.error && data.error.message)
-      || `${fallbackPrefix} with status ${response.status}`
+      data && data.error && data.error.message ||
+      `${fallbackPrefix} with status ${response.status}`
     );
     err.status = response.status;
     throw err;
@@ -7232,16 +7232,16 @@ function normalizeOpenAINetworkError(error, endpoint) {
   }
 
   const code = cleanString(
-    (error && error.code)
-    || (error && error.cause && error.cause.code)
+    error && error.code ||
+    error && error.cause && error.cause.code
   );
   if (code && !error.code) {
     error.code = code;
   }
 
   const normalizedCode = cleanString(
-    error.code
-    || (error && error.cause && error.cause.code)
+    error.code ||
+    error && error.cause && error.cause.code
   ).toUpperCase();
   if (!Number.isFinite(Number(error.status)) && (normalizedCode === "ETIMEDOUT" || normalizedCode === "ABORT_ERR")) {
     error.status = 504;
@@ -7264,8 +7264,8 @@ function isRetryableOpenAIError(error) {
   }
 
   const code = cleanString(
-    (error && error.code)
-    || (error && error.cause && error.cause.code)
+    error && error.code ||
+    error && error.cause && error.cause.code
   ).toUpperCase();
   if (["ECONNRESET", "ETIMEDOUT", "ECONNREFUSED", "EAI_AGAIN", "UND_ERR_CONNECT_TIMEOUT"].includes(code)) {
     return true;
@@ -7273,13 +7273,13 @@ function isRetryableOpenAIError(error) {
 
   const message = cleanString(error && error.message).toLowerCase();
   return (
-    message.includes("fetch failed")
-    || message.includes("socket hang up")
-    || message.includes("timed out")
-    || message.includes("temporar")
-    || message.includes("rate limit")
-    || message.includes("try again")
-  );
+    message.includes("fetch failed") ||
+    message.includes("socket hang up") ||
+    message.includes("timed out") ||
+    message.includes("temporar") ||
+    message.includes("rate limit") ||
+    message.includes("try again"));
+
 }
 
 function sleep(ms) {
@@ -7323,18 +7323,18 @@ function cleanString(value, fallback = "") {
 }
 
 function escapeHtml(value) {
-  return String(value || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+  return String(value || "").
+  replace(/&/g, "&amp;").
+  replace(/</g, "&lt;").
+  replace(/>/g, "&gt;").
+  replace(/"/g, "&quot;").
+  replace(/'/g, "&#39;");
 }
 
 function sanitizeBrandingText(value) {
-  return String(value || "")
-    .replace(/learnlogos\.com/gi, "Bible AI Hub")
-    .replace(/\blearnlogos\b/gi, "Bible AI Hub");
+  return String(value || "").
+  replace(/learnlogos\.com/gi, "Bible AI Hub").
+  replace(/\blearnlogos\b/gi, "Bible AI Hub");
 }
 
 function cleanArray(value, max = 6) {
@@ -7342,10 +7342,10 @@ function cleanArray(value, max = 6) {
     return [];
   }
 
-  return value
-    .map((item) => cleanString(item))
-    .filter(Boolean)
-    .slice(0, max);
+  return value.
+  map((item) => cleanString(item)).
+  filter(Boolean).
+  slice(0, max);
 }
 
 function cleanObjectArray(value, max = 6) {
@@ -7353,9 +7353,9 @@ function cleanObjectArray(value, max = 6) {
     return [];
   }
 
-  return value
-    .filter((item) => item && typeof item === "object" && !Array.isArray(item))
-    .slice(0, max);
+  return value.
+  filter((item) => item && typeof item === "object" && !Array.isArray(item)).
+  slice(0, max);
 }
 
 function clampNumber(value, min, max, fallback) {
@@ -7366,12 +7366,12 @@ function clampNumber(value, min, max, fallback) {
 }
 
 function tokenize(text) {
-  return cleanString(text)
-    .toLowerCase()
-    .replace(/[^a-z0-9\s']/g, " ")
-    .split(/\s+/)
-    .map((token) => token.trim())
-    .filter((token) => token.length > 1);
+  return cleanString(text).
+  toLowerCase().
+  replace(/[^a-z0-9\s']/g, " ").
+  split(/\s+/).
+  map((token) => token.trim()).
+  filter((token) => token.length > 1);
 }
 
 function lexicalScoreVideo(video, terms) {
@@ -7427,9 +7427,9 @@ function resolveVideoPlaybackBaseUrl(video) {
     return "";
   }
 
-  return cleanString(video.hostedUrl)
-    || cleanString(video.playbackUrl)
-    || cleanString(video.publicUrl);
+  return cleanString(video.hostedUrl) ||
+  cleanString(video.playbackUrl) ||
+  cleanString(video.publicUrl);
 }
 
 function buildTimestampedPlaybackUrl(baseUrl, seconds) {
@@ -7461,9 +7461,9 @@ function appendOrReplaceQueryParam(urlValue, key, value) {
   const base = hashIdx >= 0 ? cleanUrl.slice(0, hashIdx) : cleanUrl;
   const separator = base.includes("?") ? "&" : "?";
   const pattern = new RegExp(`([?&])${key}=[^&#]*`, "i");
-  const nextBase = pattern.test(base)
-    ? base.replace(pattern, `$1${key}=${encodeURIComponent(value)}`)
-    : `${base}${separator}${key}=${encodeURIComponent(value)}`;
+  const nextBase = pattern.test(base) ?
+  base.replace(pattern, `$1${key}=${encodeURIComponent(value)}`) :
+  `${base}${separator}${key}=${encodeURIComponent(value)}`;
 
   return `${nextBase}${hash}`;
 }
@@ -7499,7 +7499,7 @@ function buildRelatedContent(scoredRows, excludeIds, queryTerms) {
 
     const tagText = cleanArray(row.tags, 12).join(" ").toLowerCase();
     const overlap = queryTerms.filter((term) => tagText.includes(term)).length;
-    const score = (Number(row.score || 0) * 0.8) + (overlap * 0.06);
+    const score = Number(row.score || 0) * 0.8 + overlap * 0.06;
     const playbackBaseUrl = resolveVideoPlaybackBaseUrl(row);
 
     related.push({
@@ -7530,7 +7530,7 @@ function formatMediaTimestamp(seconds) {
   const safe = Math.max(0, Number(seconds || 0));
   const rounded = Math.floor(safe);
   const hours = Math.floor(rounded / 3600);
-  const minutes = Math.floor((rounded % 3600) / 60);
+  const minutes = Math.floor(rounded % 3600 / 60);
   const secs = Math.floor(rounded % 60);
 
   if (hours > 0) {
@@ -7563,9 +7563,9 @@ function buildGuidanceFallback(query, results) {
     return `No strong matches yet for "${query}". Try broadening your terms and enabling auto-transcription.`;
   }
 
-  const steps = top
-    .map((item, idx) => `${idx + 1}) ${item.title} at ${item.timestamp}`)
-    .join("  ");
+  const steps = top.
+  map((item, idx) => `${idx + 1}) ${item.title} at ${item.timestamp}`).
+  join("  ");
   return `Start with these timestamped clips: ${steps}`;
 }
 
@@ -7591,9 +7591,9 @@ function buildRecoveryResultsFromAltQueries({ videos, altQueries, existingResult
   const rows = Array.isArray(videos) ? videos : [];
   const queries = cleanArray(altQueries, 6);
   const existingVideoIds = new Set(
-    (Array.isArray(existingResults) ? existingResults : [])
-      .map((row) => cleanString(row.videoId))
-      .filter(Boolean)
+    (Array.isArray(existingResults) ? existingResults : []).
+    map((row) => cleanString(row.videoId)).
+    filter(Boolean)
   );
   const recovered = [];
 
@@ -7603,13 +7603,13 @@ function buildRecoveryResultsFromAltQueries({ videos, altQueries, existingResult
       continue;
     }
 
-    const candidate = rows
-      .map((video) => ({
-        video,
-        lexical: lexicalScoreVideo(video, terms)
-      }))
-      .sort((a, b) => b.lexical - a.lexical)
-      .find((row) => row.lexical >= 0.16 && !existingVideoIds.has(cleanString(row.video.id)));
+    const candidate = rows.
+    map((video) => ({
+      video,
+      lexical: lexicalScoreVideo(video, terms)
+    })).
+    sort((a, b) => b.lexical - a.lexical).
+    find((row) => row.lexical >= 0.16 && !existingVideoIds.has(cleanString(row.video.id)));
 
     if (!candidate) {
       continue;
